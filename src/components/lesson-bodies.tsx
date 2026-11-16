@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { BloodVesselLab, CabgLab, CardiacCycleLab, LungsLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, LungsLab } from './lesson-labs'
 
 /* ------------------------------------------------------------------ */
 /* Complete lesson bodies: Lab → Reading chapter → Check yourself.     */
@@ -459,6 +459,119 @@ export function CabgLessonBody() {
           The whole operation is one sentence long: find the muscle that is starving, and sew it a
           new supply line past the blockage. Everything else — graft choice, pump or no pump, one
           graft or four — is engineering in service of that sentence.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------- Operation case 1: appendicectomy ------------------- */
+
+export function AppendectomyCaseBody() {
+  return (
+    <BodyShell
+      lab={<AppendectomyCaseLab />}
+      chapterTitle="The Pain That Moved"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Every operation begins as a story, and appendicitis tells one of the most reliable
+              stories in surgery. It usually starts with a blockage: a small hardened lump of faeces
+              (an <strong>appendicolith</strong>) or swollen lymphoid tissue plugs the narrow lumen
+              of the appendix. Bacteria multiply behind the blockage, the wall swells, and the organ
+              begins to starve and inflame — <strong>acute appendicitis</strong>.
+            </p>
+            <p>
+              The famous moving pain is physiology, not drama. Early on, the stretching appendix is
+              served by <em>visceral</em> nerves that report vaguely to the midline — so the patient
+              points at the umbilicus. Hours later the inflammation reaches the{' '}
+              <em>parietal peritoneum</em>, the lining of the abdominal wall, which has precise
+              localising nerves. Now the pain is sharp, and it sits exactly over the appendix, most
+              often at <strong>McBurney’s point</strong>. When a patient describes pain that started
+              in the middle and moved to the right lower quadrant, surgeons listen very carefully.
+            </p>
+            <p>
+              The <strong>Alvarado score</strong> turns the story into arithmetic: points for
+              migrating pain, nausea, tenderness, rebound, fever, and raised white cells. A score of
+              7 or more makes appendicitis probable. The operation that answers it —{' '}
+              <strong>appendicectomy</strong> (appendectomy in American spelling) — is usually
+              laparoscopic: control the mesoappendix and its artery, tie the base, remove the organ,
+              and send it to pathology. It is classified as an easy case not because it is trivial,
+              but because the decision is clear and the steps are standard. The danger is never the
+              operation; it is delay. A perforated appendix turns this tidy case into peritonitis —
+              the same operation, a much sicker patient, and a far longer recovery.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Alvarado feature', 'Finding in this case', 'Points']}
+              rows={[
+                ['Migration of pain', 'Umbilicus → right lower quadrant', '1'],
+                ['Anorexia / nausea', 'Nausea, one vomit, no appetite', '1'],
+                ['Tenderness (right lower quadrant)', 'Present, with guarding', '2'],
+                ['Rebound tenderness', 'Present', '1'],
+                ['Fever', '37.9 °C', '1'],
+                ['Raised white cells', 'WBC 14.2 with neutrophilia', '2'],
+                ['Total', 'Probable appendicitis → theatre', '8 / 10'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <Callout kind="warning" title="Scope of this case">
+              This is a teaching case with a fictional patient, written to explain how surgeons
+              reason and operate. Real abdominal pain has many causes and always needs assessment
+              by a clinician in person — a wiki score is never a diagnosis.
+            </Callout>
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'McBurney’s point', latin: 'punctum McBurney', back: 'The surface landmark of the appendix base: one third of the way from the anterior superior iliac spine to the umbilicus. Maximal tenderness here is a classic sign of appendicitis.' },
+        { term: 'Appendicolith', latin: 'appendicolithus', back: 'A small hardened stone of faecal material lodged in the appendix lumen. It blocks drainage, drives the inflammation, and predicts a higher risk of perforation.' },
+        { term: 'Mesoappendix', latin: 'mesoappendix', back: 'The small fold of peritoneum that suspends the appendix and carries the appendicular artery. In the operation it is sealed and divided before the appendix base is tied.' },
+        { term: 'Peritonitis', latin: 'peritonitis', back: 'Inflammation of the peritoneum, the lining of the abdominal cavity — what happens if an inflamed appendix perforates and spills its contents. The complication this case was raced against.' },
+      ]}
+      questions={[
+        {
+          q: 'Why does appendicitis pain move from the umbilicus to the right lower quadrant?',
+          options: [
+            'The appendix physically slides across the abdomen',
+            'Early visceral pain is vague and midline; later the inflamed organ irritates the parietal peritoneum, which localises precisely',
+            'Gas builds up and pushes the pain downward',
+            'The patient only notices the real pain later',
+          ],
+          answer: 1,
+          why: 'Two different nerve systems report in sequence: visceral afferents first (dull, central), then the parietal peritoneum (sharp, localised over the appendix).',
+        },
+        {
+          q: 'An Alvarado score of 8 means…',
+          options: [
+            'Appendicitis is ruled out',
+            'Observe for a week and rescan',
+            'Appendicitis is probable — proceed toward surgery',
+            'The appendix has already perforated',
+          ],
+          answer: 2,
+          why: 'Scores of 7–10 are the “probable” band. Perforation is a separate finding (imaging, theatre, pathology) — the score itself never states it.',
+        },
+        {
+          q: 'In the operation, why is the mesoappendix divided before the appendix base is tied?',
+          options: [
+            'It is only a ritual step',
+            'It carries the appendicular artery — controlling it first frees the appendix and prevents bleeding',
+            'It makes the specimen smaller',
+            'It is where the appendicolith sits',
+          ],
+          answer: 1,
+          why: 'The mesoappendix is the appendix’s supply line. Seal and divide it, and the organ is mobile with its blood supply already controlled.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The whole case is one chain: blockage → inflammation → a pain that moves → a score that
+          convinces → a short operation that removes the problem. Learn to hear the story early,
+          because in appendicitis the clock — not the surgery — is the dangerous part.
         </Callout>
       }
     />

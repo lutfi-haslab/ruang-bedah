@@ -170,3 +170,21 @@ halaman overflow horizontal di ponsel. Semua halaman wajib lolos cek screenshot
 4. Disclaimer medis tidak boleh dihapus dari footer; klaim klinis penting memakai `Callout kind="warning"`.
 5. Nama situs saat ini **nama kerja** ("Ruang Bedah") — menggantinya cukup di
    `index.html`, `layout.tsx`, dan file ini.
+
+## v0.6 — Operation Case Studies (2026-11-16)
+
+Atas permintaan Lutfi, subject **Cases** mendapat topik **Operation Case Studies**:
+studi kasus operasi berjenjang kesulitan — Easy → Medium → Hard. Lesson pertama yang
+jadi: **Appendicectomy: The Easy Case** (6 dari 29 lesson tersedia).
+
+Format case study (berlaku untuk semua kasus operasi berikutnya):
+
+- **Lab = case runner interaktif.** Timeline kasus per tahap (kedatangan → pemeriksaan
+  → investigasi → keputusan → operasi → pemulihan) sebagai stepper; diagram anatomi
+  berubah mengikuti tahap. Wajib ada **satu titik keputusan interaktif** (pilihan
+  tindakan dengan feedback benar/salah) dan **stepper langkah operasi** di tahap theatre.
+- **Reading chapter** menjelaskan mekanisme di balik cerita (kenapa gejalanya begitu,
+  skor/tabel klinis sebagai `SpecTable`, risiko bila terlambat) + `Callout kind="warning"`
+  bahwa kasus ini fiktif/edukatif.
+- **Check** seperti lesson lain: flashcards istilah kunci kasus + kuis 3 soal.
+- Kasus berikutnya sudah di-slot: Cholecystectomy (Medium), Coronary Bypass (Hard).

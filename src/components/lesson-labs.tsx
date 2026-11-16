@@ -860,3 +860,303 @@ export function CabgLab() {
     />
   )
 }
+
+/* ====================== Operation case: appendicectomy ====================== */
+
+type CaseStage = { time: string; title: string; text: string }
+
+const CASE_STAGES: CaseStage[] = [
+  {
+    time: '02:10',
+    title: 'The patient arrives',
+    text: 'A 19-year-old student walks into the emergency department holding his right side. The pain began eight hours ago as a dull ache around his belly button, with nausea and one vomit. In the last two hours it has moved — and sharpened.',
+  },
+  {
+    time: '02:40',
+    title: 'Hands on the abdomen',
+    text: 'The pain now sits in the right lower quadrant. Pressing at McBurney’s point — a third of the way from the hip bone to the umbilicus — makes him wince, and letting go suddenly hurts more (rebound tenderness). Pressing the left side makes the right side hurt: Rovsing’s sign. The abdominal wall guards itself rigid over the spot.',
+  },
+  {
+    time: '03:30',
+    title: 'Tests come back',
+    text: 'Bloods show a white cell count of 14.2 and a CRP of 86 — an inflammatory response in full swing. Ultrasound finds a swollen, non-compressible tube 9 mm wide in the right lower quadrant with a small bright stone inside it: an appendicolith. Add the findings up and the Alvarado score is 8 of 10.',
+  },
+  {
+    time: '04:00',
+    title: 'The decision',
+    text: 'An Alvarado score of 8 means appendicitis is probable, and an inflamed appendix does not get better on its own — left alone it can perforate and spill gut contents into the abdomen (peritonitis). The call is yours:',
+  },
+  {
+    time: '05:15',
+    title: 'In theatre: appendicectomy',
+    text: 'Under general anaesthesia, the surgeon works through three small laparoscopic ports. Step through the operation:',
+  },
+  {
+    time: 'Day 2',
+    title: 'Recovery',
+    text: 'He eats breakfast the next morning and goes home on day two with three small dressings. Pathology confirms acute appendicitis — the removed organ really was the culprit. Back at lectures within the week. This is why appendicectomy is the classic easy case: a clear story, a clear decision, and a short, standard operation — as long as it is caught before the appendix bursts.',
+  },
+]
+
+const OP_STEPS: { title: string; text: string }[] = [
+  { title: 'Ports in', text: 'Three small incisions: a camera port at the umbilicus and two working ports. The abdomen is gently inflated with CO₂ so the surgeon can see and move.' },
+  { title: 'Find and lift the appendix', text: 'The caecum — the pouch where the large intestine begins — is found in the right lower quadrant, and the inflamed appendix is lifted clear of the surrounding bowel.' },
+  { title: 'Divide the mesoappendix', text: 'The appendix hangs from a small fold, the mesoappendix, which carries the appendicular artery. It is sealed and divided first, so the appendix is free and its blood supply is controlled.' },
+  { title: 'Tie the base, remove the appendix', text: 'The base of the appendix is ligated (tied off) where it meets the caecum, divided, and the appendix is taken out through a port in a retrieval bag. It goes to pathology as the specimen.' },
+  { title: 'Wash, check, close', text: 'The area is washed, the stump and the divided vessels are checked for bleeding, the gas is released, and the small incisions are closed.' },
+]
+
+const DECISIONS: { label: string; ok: boolean; feedback: string }[] = [
+  {
+    label: 'Send him home with painkillers',
+    ok: false,
+    feedback: 'Dangerous. The story, the signs, and the bloods all point the same way. At home the appendix can perforate — turning a one-hour operation into peritonitis, an abscess, and a much sicker patient.',
+  },
+  {
+    label: 'Antibiotics and wait until morning',
+    ok: false,
+    feedback: 'Antibiotics alone are sometimes studied for uncomplicated cases, but with an appendicolith on ultrasound and a score of 8, the standard, definitive treatment is surgery. Waiting raises the perforation risk with every hour.',
+  },
+  {
+    label: 'Consent, theatre, appendicectomy',
+    ok: true,
+    feedback: 'Correct. IV fluids and antibiotics first, informed consent, then to theatre. Removing the appendix removes the problem — and the specimen goes to pathology to prove it.',
+  },
+]
+
+export function AppendectomyCaseLab() {
+  const [stage, setStage] = useState(0)
+  const [opStep, setOpStep] = useState(0)
+  const [decision, setDecision] = useState<number | null>(null)
+
+  const inTheatre = stage === 4
+  const removed = stage === 5 || (inTheatre && opStep >= 3)
+  const lifted = inTheatre && opStep >= 1 && !removed
+  const clipped = inTheatre && opStep >= 2 && !removed
+
+  const appendixStroke = stage <= 0 ? '#E08A80' : stage === 1 ? '#D95F52' : '#C22F27'
+  const appendixWidth = stage <= 1 ? 15 : 20
+
+  const painAt = stage === 0 ? { x: 500, y: 262 } : { x: 415, y: 332 }
+
+  return (
+    <LabShell
+      diagram={
+        <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Case diagram of an abdomen with an inflamed appendix in the right lower quadrant">
+          {/* Abdomen */}
+          <path
+            d="M500 40 C660 40 742 150 742 285 C742 420 652 522 500 522 C348 522 258 420 258 285 C258 150 340 40 500 40 Z"
+            fill="#F3D9C8"
+            stroke="#D9AE94"
+            strokeWidth={3}
+          />
+          {/* Intestine hints */}
+          <path d="M330 210 C400 180 470 214 540 190 C610 166 660 200 676 240" fill="none" stroke="#E3B7A6" strokeWidth={17} strokeLinecap="round" opacity={0.8} />
+          <path d="M322 300 C390 276 470 306 545 284 C612 264 656 292 672 322" fill="none" stroke="#E3B7A6" strokeWidth={17} strokeLinecap="round" opacity={0.7} />
+          <path d="M340 452 C420 428 520 452 600 430" fill="none" stroke="#E3B7A6" strokeWidth={17} strokeLinecap="round" opacity={0.6} />
+
+          {/* Umbilicus */}
+          <circle cx={500} cy={262} r={9} fill="#D9AE94" />
+          <text x={524} y={256} fontSize={16} fontWeight={700} fill="#8A6A54">Umbilicus</text>
+
+          {/* Caecum */}
+          <ellipse cx={392} cy={398} rx={52} ry={42} fill="#DFA08F" stroke="#B0574F" strokeWidth={3} />
+          <text x={238} y={368} fontSize={17} fontWeight={700} fill="#8A4A3D">Caecum</text>
+          <path d="M300 376 C322 384 340 390 356 394" stroke="#8A4A3D" strokeWidth={2.5} fill="none" />
+
+          {/* Mesoappendix + appendicular artery */}
+          {!removed && (
+            <g opacity={clipped ? 0.35 : 1} style={{ transition: 'opacity 0.6s ease' }}>
+              <path d="M398 416 C424 430 436 452 440 480 L404 470 C398 450 396 432 398 416 Z" fill="#EFC3B4" stroke="#C08A76" strokeWidth={2} />
+              <path d="M402 420 C420 436 430 456 434 478" fill="none" stroke="#C22F27" strokeWidth={4} strokeLinecap="round" strokeDasharray={clipped ? '3 7' : undefined} />
+              {clipped && (
+                <>
+                  <rect x={410} y={438} width={16} height={8} rx={2} fill="#43536A" transform="rotate(58 418 442)" />
+                  <rect x={420} y={456} width={16} height={8} rx={2} fill="#43536A" transform="rotate(58 428 460)" />
+                </>
+              )}
+            </g>
+          )}
+
+          {/* Appendix */}
+          {!removed && (
+            <g transform={lifted ? 'translate(-14 -26) rotate(-7 400 420)' : undefined} style={{ transition: 'transform 0.7s ease' }}>
+              <path
+                d="M392 412 C382 448 398 480 428 496"
+                fill="none"
+                stroke={appendixStroke}
+                strokeWidth={appendixWidth}
+                strokeLinecap="round"
+                style={{ transition: 'stroke 0.6s ease' }}
+              />
+              {stage >= 2 && <circle cx={404} cy={446} r={6.5} fill="#F6E3C5" stroke="#B45309" strokeWidth={2} />}
+            </g>
+          )}
+          {removed && (
+            <>
+              {/* Stump with ligature */}
+              <circle cx={392} cy={414} r={10} fill="#DFA08F" stroke="#43536A" strokeWidth={4} />
+              <text x={238} y={452} fontSize={16} fontWeight={700} fill="#43536A">Base tied off</text>
+              {/* Specimen tray */}
+              <g>
+                <rect x={676} y={420} width={236} height={96} rx={14} fill="#E8EDF2" stroke="#B9C4CF" strokeWidth={2.5} />
+                <path d="M716 470 C760 448 812 486 862 458" fill="none" stroke="#C22F27" strokeWidth={15} strokeLinecap="round" />
+                <text x={794} y={446} textAnchor="middle" fontSize={16} fontWeight={700} fill="#43536A">Specimen → pathology</text>
+              </g>
+            </>
+          )}
+          {!removed && (
+            <>
+              <text x={470} y={512} fontSize={17} fontWeight={700} fill="#8A4A3D">Appendix</text>
+              <path d="M466 500 C452 496 442 494 432 494" stroke="#8A4A3D" strokeWidth={2.5} fill="none" />
+            </>
+          )}
+
+          {/* Pain marker */}
+          {stage <= 2 && (
+            <g>
+              <circle cx={painAt.x} cy={painAt.y} r={15} fill="none" stroke="#C22F27" strokeWidth={3} className="ping-ring" />
+              <circle cx={painAt.x} cy={painAt.y} r={6} fill="#C22F27" />
+              <text x={stage === 0 ? 560 : 452} y={stage === 0 ? 300 : 322} fontSize={16} fontWeight={700} fill="#C22F27">
+                {stage === 0 ? 'Pain starts here…' : '…and settles here'}
+              </text>
+            </g>
+          )}
+          {stage === 1 && (
+            <text x={330} y={300} fontSize={15} fontWeight={700} fill="#43536A">McBurney’s point</text>
+          )}
+
+          {/* Laparoscopic ports */}
+          {inTheatre && (
+            <g opacity={opStep >= 4 ? 0 : 1} style={{ transition: 'opacity 0.6s ease' }}>
+              <circle cx={500} cy={262} r={11} fill="#43536A" stroke="#fff" strokeWidth={3} />
+              <circle cx={512} cy={446} r={11} fill="#43536A" stroke="#fff" strokeWidth={3} />
+              <circle cx={648} cy={352} r={11} fill="#43536A" stroke="#fff" strokeWidth={3} />
+              <text x={676} y={330} fontSize={16} fontWeight={700} fill="#43536A">Ports</text>
+            </g>
+          )}
+          {inTheatre && opStep >= 4 && (
+            <g>
+              <rect x={486} y={248} width={28} height={28} rx={6} fill="#FFF7E8" stroke="#D9AE94" strokeWidth={2} />
+              <rect x={498} y={432} width={28} height={28} rx={6} fill="#FFF7E8" stroke="#D9AE94" strokeWidth={2} />
+              <rect x={634} y={338} width={28} height={28} rx={6} fill="#FFF7E8" stroke="#D9AE94" strokeWidth={2} />
+            </g>
+          )}
+
+          {/* Stage caption */}
+          <text x={500} y={548} textAnchor="middle" fontSize={16} fill="#5A6B80">
+            {stage === 0 && 'Dull, central pain — the appendix is stretching, but the brain cannot localise it yet'}
+            {stage === 1 && 'Localised pain: the inflamed appendix now irritates the abdominal wall itself'}
+            {stage === 2 && 'A swollen 9 mm appendix with an appendicolith — the lumen is blocked'}
+            {stage === 3 && 'Alvarado 8 of 10: appendicitis is probable — delay raises the perforation risk'}
+            {stage === 4 && OP_STEPS[opStep].title}
+            {stage === 5 && 'Appendix removed, problem solved — home on day two'}
+          </text>
+        </svg>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">
+            Case 01 · Easy · Emergency department → theatre
+          </p>
+
+          <div className="mt-4 grid gap-2">
+            {CASE_STAGES.map((s, i) => (
+              <button
+                key={s.title}
+                onClick={() => setStage(i)}
+                aria-pressed={stage === i}
+                className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                  stage === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="font-display text-[0.95rem] font-bold text-ink-950">
+                  <span className="mr-2 font-mono text-sm text-arterial-500">{s.time}</span>
+                  {s.title}
+                </span>
+                {stage === i && <span className="mt-1 block text-sm leading-relaxed text-ink-700">{s.text}</span>}
+              </button>
+            ))}
+          </div>
+
+          {stage === 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Chip>Temp 37.9 °C</Chip>
+              <Chip>HR 104</Chip>
+              <Chip>BP 118/72</Chip>
+              <Chip>RR 16</Chip>
+              <Chip>SpO₂ 99%</Chip>
+            </div>
+          )}
+
+          {stage === 2 && (
+            <div className="mt-5">
+              <Meter label="Alvarado score" value={80} tone="bg-amber-500" />
+              <p className="mt-2 text-sm text-ink-500">8 of 10 — at 7 or above, appendicitis is probable and surgery is the standard path.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Chip tone="closed">WBC 14.2 ↑</Chip>
+                <Chip tone="closed">CRP 86 ↑</Chip>
+                <Chip>US: 9 mm, appendicolith</Chip>
+              </div>
+            </div>
+          )}
+
+          {stage === 3 && (
+            <div className="mt-5 grid gap-2">
+              {DECISIONS.map((d, i) => (
+                <button
+                  key={d.label}
+                  onClick={() => setDecision(i)}
+                  aria-pressed={decision === i}
+                  className={`rounded-xl border px-4 py-3 text-left font-display text-[0.92rem] font-bold transition-colors ${
+                    decision === i
+                      ? d.ok
+                        ? 'border-success-500 bg-success-50 text-success-600'
+                        : 'border-arterial-500 bg-arterial-50 text-arterial-600'
+                      : 'border-line bg-surface text-ink-800 hover:border-primary-600/40'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+              {decision !== null && (
+                <p className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${DECISIONS[decision].ok ? 'bg-success-50 text-ink-800' : 'bg-arterial-50 text-ink-800'}`}>
+                  {DECISIONS[decision].feedback}
+                </p>
+              )}
+            </div>
+          )}
+
+          {inTheatre && (
+            <div className="mt-5 grid gap-2">
+              {OP_STEPS.map((s, i) => (
+                <button
+                  key={s.title}
+                  onClick={() => setOpStep(i)}
+                  aria-pressed={opStep === i}
+                  className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                    opStep === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                  }`}
+                >
+                  <span className="font-display text-[0.92rem] font-bold text-ink-950">
+                    <span className="mr-2 font-mono text-sm text-arterial-500">{i + 1}</span>
+                    {s.title}
+                  </span>
+                  {opStep === i && <span className="mt-1 block text-sm leading-relaxed text-ink-700">{s.text}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {stage === 5 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Chip tone="open">Eating: day 1</Chip>
+              <Chip tone="open">Home: day 2</Chip>
+              <Chip tone="open">Pathology: acute appendicitis ✓</Chip>
+            </div>
+          )}
+        </div>
+      }
+    />
+  )
+}

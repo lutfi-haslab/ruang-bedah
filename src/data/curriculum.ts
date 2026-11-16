@@ -141,6 +141,14 @@ export const CURRICULUM: Subject[] = [
     blurb: 'Clinical stories that connect the anatomy to a real patient on a real table.',
     topics: [
       {
+        title: 'Operation Case Studies',
+        lessons: [
+          L('Appendicectomy: The Easy Case', 'Case study + interactive lab', 12, 'available', '/lesson/appendicectomy-the-easy-case'),
+          L('Cholecystectomy: The Medium Case', 'Case study', 12),
+          L('Coronary Bypass: The Hard Case', 'Case study', 14),
+        ],
+      },
+      {
         title: 'Case Files',
         lessons: [
           L('The Chest Pain at 3 A.M.', 'Case study', 10),
