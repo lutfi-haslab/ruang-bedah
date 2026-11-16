@@ -43,7 +43,7 @@ export const CURRICULUM: Subject[] = [
         lessons: [
           L('The Heart: Chambers, Valves, and Vessels', 'Interactive lab + reading', 12, 'available', '/lesson/the-heart-chambers-valves-and-vessels'),
           L('Arteries, Veins, and Capillaries', 'Interactive lab + reading', 9, 'available', '/lesson/arteries-veins-and-capillaries'),
-          L("The Conduction System: The Heart's Wiring", 'Reading + diagram', 7),
+          L("The Conduction System: The Heart's Wiring", 'Interactive lab + reading', 7, 'available', '/lesson/the-conduction-system-the-hearts-wiring'),
         ],
       },
       {

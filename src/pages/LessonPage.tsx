@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Badge, Button } from '../components/primitives'
 import { Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import InteractiveHeart from '../components/interactive-heart'
-import { AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
+import { AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
 import { EkgDivider, FlashCards, Quiz } from '../components/study-tools'
 import { Breadcrumb, badgeFor } from '../components/syllabus'
 import { getLessonBySlug, lessonNeighbors, subjectSlug } from '../data/curriculum'
@@ -117,6 +117,8 @@ function lessonBodyFor(slug: string) {
       return <LungsLessonBody />
     case 'the-cardiac-cycle-systole-and-diastole':
       return <CardiacCycleLessonBody />
+    case 'the-conduction-system-the-hearts-wiring':
+      return <ConductionLessonBody />
     case 'coronary-bypass-cabg-building-the-detour':
       return <CabgLessonBody />
     case 'appendicectomy-the-easy-case':

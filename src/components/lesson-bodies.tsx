@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, LungsLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, LungsLab } from './lesson-labs'
 
 /* ------------------------------------------------------------------ */
 /* Complete lesson bodies: Lab → Reading chapter → Check yourself.     */
@@ -572,6 +572,134 @@ export function AppendectomyCaseBody() {
           The whole case is one chain: blockage → inflammation → a pain that moves → a score that
           convinces → a short operation that removes the problem. Learn to hear the story early,
           because in appendicitis the clock — not the surgery — is the dangerous part.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* --------------------------- Conduction system --------------------------- */
+
+export function ConductionLessonBody() {
+  return (
+    <BodyShell
+      lab={<ConductionLab />}
+      chapterTitle="A Heart That Beats Itself"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              The heart does not wait for orders from the brain. Scattered through it are{' '}
+              <strong>pacemaker cells</strong> — muscle cells that have traded contraction for
+              rhythm and generate their own electrical impulse, over and over, for a lifetime. The
+              fastest of them, the <strong>sinoatrial (SA) node</strong>, sits in the wall of the{' '}
+              <strong>right atrium</strong> near the entrance of the superior vena cava and fires
+              about 60–100 times a minute at rest. It is the heart&rsquo;s natural pacemaker: every
+              normal heartbeat begins there, as a spark that then has to travel.
+            </p>
+            <p>
+              The route matters as much as the spark. The impulse spreads across both atria — the{' '}
+              <strong>P wave</strong> on an ECG — and then reaches the{' '}
+              <strong>atrioventricular (AV) node</strong>, where it is deliberately held for about{' '}
+              <strong>0.12–0.20 seconds</strong>. That pause, the <strong>PR interval</strong>, is
+              the key piece of engineering in the whole system: it lets the atria finish emptying
+              into the ventricles before the ventricles contract. Without it, atria and ventricles
+              would squeeze at the same moment and the top-up would be wasted. Past the node, the
+              impulse sprints down the <strong>bundle of His</strong> and its branches and sprays
+              out through the <strong>Purkinje fibers</strong>, so both ventricles depolarize — the{' '}
+              <strong>QRS complex</strong> — and contract as one.
+            </p>
+            <p>
+              Notice the wiring is tuned, not just connected. The AV node is slow because a pause
+              is needed there; the His–Purkinje system is fast because synchrony is needed there.
+              And the system has backups: if the SA node fails, the AV node can take over at about
+              40–60 beats a minute, and if the AV node fails too, the ventricles fall back on their
+              own escape rhythm of roughly 20–40. The brain does not keep the beat — the{' '}
+              <strong>autonomic nervous system</strong> only adjusts the tempo, sympathetic speeding
+              the SA node up, parasympathetic (vagus) slowing it down.
+            </p>
+            <p>
+              When the wiring breaks, the ECG shows it. In <strong>heart block</strong>, the signal
+              is delayed or stopped at the AV node: a first-degree block stretches the PR interval,
+              while a complete (third-degree) block disconnects the two halves of the heart entirely
+              — the atria keep their own rhythm and the ventricles escape slowly on their own. That
+              is the failure the AV block demo in the lab above lets you play with.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Station', 'Where it sits', 'Speed / job']}
+              rows={[
+                ['SA node', 'Right atrium, near the SVC', '≈ 60–100/min — sets the pace'],
+                ['Atrial muscle', 'Both atria', '≈ 1 m/s — spreads the spark (P wave)'],
+                ['AV node', 'Floor of the right atrium, by the septum', '≈ 0.05 m/s — the deliberate delay'],
+                ['Bundle of His', 'Down the septum', '≈ 2–4 m/s — the expressway'],
+                ['Purkinje fibers', 'Through both ventricles', '≈ 2–4 m/s — both ventricles at once'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="PR interval" latin="intervallum PR">
+              The time from the start of the P wave to the start of the QRS complex on an ECG —
+              normally 0.12–0.20 seconds. It measures the AV nodal delay: the pause that lets the
+              ventricles finish filling before they contract.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <Callout kind="warning" title="Scope of this lesson">
+              This lesson describes normal conduction and one common failure pattern as concepts. A
+              real ECG — its intervals, blocks, and what to do about them — is read by clinicians,
+              not by a wiki.
+            </Callout>
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'SA node', latin: 'nodus sinuatrialis', back: 'The heart’s natural pacemaker: a cluster of cells in the right atrium that fires on its own, 60–100 times a minute at rest.' },
+        { term: 'AV node', latin: 'nodus atrioventricularis', back: 'The gatekeeper between atria and ventricles. It delays the impulse by about 0.12–0.20 seconds so the ventricles finish filling first.' },
+        { term: 'Bundle of His', latin: 'fasciculus atrioventricularis', back: 'The fast conducting bundle that carries the impulse from the AV node down the septum, then splits into right and left branches.' },
+        { term: 'Purkinje fibers', latin: 'fibrae Purkinje', back: 'The fast distribution network that sprays the impulse through both ventricles, so they contract together in one coordinated squeeze.' },
+      ]}
+      questions={[
+        {
+          q: 'Where does a normal heartbeat begin?',
+          options: [
+            'The AV node',
+            'The SA node in the right atrium',
+            'The bundle of His',
+            'The left ventricle',
+          ],
+          answer: 1,
+          why: 'The sinoatrial node fires on its own, 60–100 times a minute at rest — it is the heart’s natural pacemaker.',
+        },
+        {
+          q: 'Why does the AV node delay the impulse?',
+          options: [
+            'To let the ventricles finish filling before they contract',
+            'To save energy between beats',
+            'To let the SA node rest',
+            'To slow the blood down',
+          ],
+          answer: 0,
+          why: 'The ~0.12–0.20 s delay (the PR interval) lets the atria finish their top-up. Without it, atria and ventricles would squeeze at once.',
+        },
+        {
+          q: 'Which part of the conduction system carries the impulse fastest?',
+          options: [
+            'Atrial muscle',
+            'The AV node',
+            'The bundle of His and the Purkinje fibers',
+            'Ventricular muscle',
+          ],
+          answer: 2,
+          why: 'The His–Purkinje system conducts at 2–4 m/s — the expressway that lets both ventricles fire together.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The heart&rsquo;s wiring is tuned, not just connected: slow where a pause is needed (the
+          AV node), fast where synchrony matters (the His–Purkinje system). Rhythm is not speed —
+          it is timing.
         </Callout>
       }
     />

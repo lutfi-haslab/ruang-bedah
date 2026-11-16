@@ -1160,3 +1160,301 @@ export function AppendectomyCaseLab() {
     />
   )
 }
+
+/* ========================= Conduction system ========================= */
+
+type ConductionStage = {
+  name: string
+  short: string
+  ecg: string
+  speed: number
+  speedLabel: string
+  text: string
+}
+
+const CONDUCTION_STAGES: ConductionStage[] = [
+  {
+    name: 'SA node fires — the spark',
+    short: 'SA node fires',
+    ecg: 'Just before the P wave',
+    speed: 2,
+    speedLabel: '≈ 0.05 m/s — the spark is born slow',
+    text: 'The sinoatrial node, a cluster of pacemaker cells in the wall of the right atrium, fires on its own — about 60–100 times a minute at rest. No nerve tells it to start; the rhythm is built into the cells.',
+  },
+  {
+    name: 'Atria depolarize — the P wave',
+    short: 'Atria spread',
+    ecg: 'P wave',
+    speed: 25,
+    speedLabel: '≈ 1 m/s across atrial muscle',
+    text: 'The impulse spreads cell to cell across both atria, and they contract together, topping up the ventricles. On an ECG this spread is the P wave — small, because the atria are thin-walled.',
+  },
+  {
+    name: 'AV node delay — the pause that fills',
+    short: 'AV node holds',
+    ecg: 'PR segment — a flat line',
+    speed: 2,
+    speedLabel: '≈ 0.05 m/s — the slowest stretch, on purpose',
+    text: 'At the atrioventricular node the impulse is deliberately held for about 0.12–0.20 seconds. That pause is the whole point of the node: it gives the ventricles time to finish filling before they contract.',
+  },
+  {
+    name: 'His–Purkinje expressway',
+    short: 'Fast down the septum',
+    ecg: 'Start of the QRS complex',
+    speed: 88,
+    speedLabel: '≈ 2–4 m/s — the fastest road in the heart',
+    text: 'Past the node, the impulse races down the bundle of His and splits into the right and left bundle branches. Wide, fast-conducting fibres exist so the signal reaches both ventricles at nearly the same instant.',
+  },
+  {
+    name: 'Ventricles contract — together',
+    short: 'Ventricles squeeze',
+    ecg: 'QRS complex',
+    speed: 12,
+    speedLabel: '≈ 0.5 m/s through ventricular muscle',
+    text: 'The Purkinje network sprays the impulse through the ventricular walls, and both ventricles contract as one coordinated squeeze. On the ECG this is the tall, sharp QRS complex.',
+  },
+]
+
+const ATRIAL_PATH = 'M385 130 C460 112 555 116 635 148 C665 160 682 172 692 188'
+const HIS_PATH = 'M500 282 V356'
+const BRANCH_R_PATH = 'M500 356 C472 380 452 400 436 424'
+const BRANCH_L_PATH = 'M500 356 C528 380 548 400 564 424'
+const PURKINJE_PATHS = [
+  'M436 424 L388 462',
+  'M436 424 L420 472',
+  'M436 424 L462 478',
+  'M564 424 L612 462',
+  'M564 424 L580 472',
+  'M564 424 L538 478',
+]
+const ECG_PATH =
+  'M70 530 H186 q10 -16 26 0 H382 l6 8 l8 -44 l12 56 l10 -20 H470 q12 -14 28 0 H930'
+const ECG_HIGHLIGHTS = [
+  { x: 140, w: 46 },
+  { x: 182, w: 34 },
+  { x: 216, w: 166 },
+  { x: 382, w: 40 },
+  { x: 382, w: 118 },
+]
+
+export function ConductionLab() {
+  const [stage, setStage] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const [pace, setPace] = useState<'rest' | 'exercise'>('rest')
+  const [mode, setMode] = useState<'normal' | 'avblock'>('normal')
+  const [escapeBeat, setEscapeBeat] = useState(false)
+  const blocked = mode === 'avblock'
+  const maxStage = blocked ? 2 : 4
+  const info = CONDUCTION_STAGES[stage]
+  const stepMs = pace === 'rest' ? 2000 : 1200
+  const bpm = pace === 'rest' ? 60 : 110
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStage((s) => (s >= maxStage ? 0 : s + 1)), stepMs)
+    return () => clearInterval(t)
+  }, [playing, stepMs, maxStage])
+
+  useEffect(() => {
+    if (!blocked) return
+    const t = setInterval(() => setEscapeBeat((b) => !b), 1200)
+    return () => clearInterval(t)
+  }, [blocked])
+
+  const pickMode = (m: 'normal' | 'avblock') => {
+    setMode(m)
+    setStage(0)
+  }
+
+  const signalDot = (path: string, begin: number) => (
+    <circle r={9} fill="#F2C14E" stroke="#fff" strokeWidth={2.5}>
+      {playing && <animateMotion dur="1.6s" begin={`${begin}s`} repeatCount="indefinite" path={path} />}
+    </circle>
+  )
+
+  const ventScale = stage === 4 || (blocked && escapeBeat) ? 0.94 : 1
+  const lit = (on: boolean) => (on ? '#0E7C86' : '#C9C2AE')
+  const progress = blocked ? Math.round((stage / 2) * 100) : Math.round((stage / 4) * 100)
+
+  return (
+    <LabShell
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 600" className="w-full" role="img" aria-label="Animated diagram of the heart's electrical conduction system, from the SA node to the ventricles">
+            {/* Superior vena cava entering the right atrium */}
+            <rect x={288} y={28} width={64} height={96} rx={28} fill="#A9C3E8" stroke="#4D6EA3" strokeWidth={3} />
+            <text x={320} y={18} textAnchor="middle" fontSize={16} fontWeight={700} fill="#4D6EA3">SVC</text>
+
+            {/* Atria */}
+            <ellipse cx={320} cy={185} rx={100} ry={66} fill="#7E2A33" />
+            <ellipse cx={680} cy={185} rx={100} ry={66} fill="#B03A2E" />
+            <text x={320} y={192} textAnchor="middle" fontSize={18} fontWeight={700} fill="#fff">Right atrium</text>
+            <text x={680} y={192} textAnchor="middle" fontSize={18} fontWeight={700} fill="#fff">Left atrium</text>
+
+            {/* Ventricles — they squeeze on the contraction stage */}
+            <g className="svg-transition" style={{ transform: `scale(${ventScale})` }}>
+              <path d="M250 280 C245 370 310 445 405 462 C445 470 478 448 480 405 L480 280 Z" fill="#93322C" />
+              <path d="M520 280 L520 405 C522 448 555 470 595 462 C690 445 755 370 750 280 Z" fill="#E2604F" />
+            </g>
+            <text x={360} y={385} textAnchor="middle" fontSize={18} fontWeight={700} fill="#fff">Right ventricle</text>
+            <text x={640} y={385} textAnchor="middle" fontSize={18} fontWeight={700} fill="#fff">Left ventricle</text>
+
+            {/* Septum line between the ventricles */}
+            <path d="M500 282 V488" stroke="#F7F4EE" strokeWidth={3} strokeDasharray="8 8" opacity={0.45} />
+
+            {/* Conduction paths — lit as the signal reaches them */}
+            <path d={ATRIAL_PATH} fill="none" stroke={lit(stage >= 1)} strokeWidth={stage >= 1 ? 7 : 4} strokeLinecap="round" className="svg-transition" />
+            <path d={HIS_PATH} fill="none" stroke={lit(stage >= 3)} strokeWidth={stage >= 3 ? 7 : 4} strokeLinecap="round" className="svg-transition" />
+            <path d={BRANCH_R_PATH} fill="none" stroke={lit(stage >= 3)} strokeWidth={stage >= 3 ? 6 : 4} strokeLinecap="round" className="svg-transition" />
+            <path d={BRANCH_L_PATH} fill="none" stroke={lit(stage >= 3)} strokeWidth={stage >= 3 ? 6 : 4} strokeLinecap="round" className="svg-transition" />
+            {PURKINJE_PATHS.map((p) => (
+              <path key={p} d={p} fill="none" stroke={lit(stage >= 4)} strokeWidth={stage >= 4 ? 5 : 3} strokeLinecap="round" className="svg-transition" />
+            ))}
+
+            {/* Signal dots travelling along the active path */}
+            {stage >= 1 && stage < 3 && signalDot(ATRIAL_PATH, -0.2)}
+            {stage >= 1 && stage < 3 && signalDot(ATRIAL_PATH, -0.9)}
+            {stage >= 3 && signalDot(HIS_PATH, -0.2)}
+            {stage >= 3 && signalDot(BRANCH_R_PATH, -0.7)}
+            {stage >= 3 && signalDot(BRANCH_L_PATH, -0.7)}
+
+            {/* SA node */}
+            <text x={385} y={92} textAnchor="middle" fontSize={17} fontWeight={700} fill="#B45309">SA node</text>
+            <path d="M385 98 V112" stroke="#B45309" strokeWidth={2.5} />
+            {stage === 0 && <circle cx={385} cy={130} r={12} fill="none" stroke="#B45309" strokeWidth={2.5} className="ping-ring" />}
+            <circle cx={385} cy={130} r={stage === 0 ? 13 : 10} fill="#F2C14E" stroke="#B45309" strokeWidth={3} />
+
+            {/* AV node */}
+            <text x={560} y={266} fontSize={17} fontWeight={700} fill="#B45309">AV node</text>
+            <path d="M556 262 C540 266 524 270 512 274" stroke="#B45309" strokeWidth={2.5} fill="none" />
+            {stage === 2 && <circle cx={500} cy={282} r={12} fill="none" stroke="#B45309" strokeWidth={2.5} className="ping-ring" />}
+            <circle cx={500} cy={282} r={stage === 2 ? 13 : 10} fill="#F2C14E" stroke="#B45309" strokeWidth={3} />
+            {stage === 2 && (
+              <text x={500} y={322} textAnchor="middle" fontSize={17} fontWeight={800} fill="#B45309">
+                held ≈ 0.16 s
+              </text>
+            )}
+
+            {/* AV-block mode: the signal stops here */}
+            {blocked && (
+              <g>
+                <path d="M500 296 l14 14 M514 296 l-14 14" stroke="#B93327" strokeWidth={5} strokeLinecap="round" />
+                <text x={500} y={352} textAnchor="middle" fontSize={16} fontWeight={700} fill="#B93327">
+                  signal blocked
+                </text>
+              </g>
+            )}
+
+            {/* ECG strip with the current segment highlighted */}
+            <path d={ECG_PATH} fill="none" stroke="#16222E" strokeWidth={3.5} />
+            {!blocked && (
+              <rect
+                x={ECG_HIGHLIGHTS[stage].x}
+                y={488}
+                width={ECG_HIGHLIGHTS[stage].w}
+                height={52}
+                rx={12}
+                fill="none"
+                stroke="#0E7C86"
+                strokeWidth={3}
+              />
+            )}
+            {blocked && (
+              <rect x={182} y={488} width={34} height={52} rx={12} fill="none" stroke="#0E7C86" strokeWidth={3} />
+            )}
+            <text x={70} y={478} fontSize={15} fill="#6B7684">
+              ECG — {blocked ? 'P waves march on, but no QRS follows them' : 'the highlighted segment is this stage'}
+            </text>
+
+            <text x={500} y={590} textAnchor="middle" fontSize={16} fill="#6B7684">
+              {blocked
+                ? 'The atria keep their own rhythm — the ventricles fall back to a slow escape beat'
+                : 'The glowing dot is the impulse. Real life is much faster — one beat takes under a second at rest'}
+            </text>
+          </svg>
+
+          {/* Stage timeline */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {CONDUCTION_STAGES.slice(0, maxStage + 1).map((s, i) => (
+              <button
+                key={s.name}
+                onClick={() => {
+                  setStage(i)
+                  setPlaying(false)
+                }}
+                aria-pressed={stage === i}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  stage === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">Step {i + 1}</span>
+                <span className="mt-0.5 block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{s.short}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-sand p-1" role="tablist" aria-label="Normal rhythm or AV block">
+            <button
+              onClick={() => pickMode('normal')}
+              aria-pressed={!blocked}
+              className={`rounded-full px-3 py-2 font-display text-[0.85rem] font-bold transition-colors ${
+                !blocked ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+              }`}
+            >
+              Normal rhythm
+            </button>
+            <button
+              onClick={() => pickMode('avblock')}
+              aria-pressed={blocked}
+              className={`rounded-full px-3 py-2 font-display text-[0.85rem] font-bold transition-colors ${
+                blocked ? 'bg-arterial-500 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+              }`}
+            >
+              AV block demo
+            </button>
+          </div>
+
+          <p className="mt-6 font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Step {stage + 1} of {maxStage + 1} · ECG: {info.ecg}
+          </p>
+          <h3 className="mt-1.5 font-display text-2xl font-extrabold leading-tight tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.text}</p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>Atria · {bpm}/min</Chip>
+            <Chip tone={blocked ? 'closed' : 'open'}>
+              Ventricles · {blocked ? '≈ 35/min escape' : `${bpm}/min`}
+            </Chip>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Conduction speed at this station" value={info.speed} tone="bg-amber-500" />
+            <Meter label="Signal progress through the heart" value={progress} />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause signal' : '▶ Play signal'}
+              </Button>
+              <Button size="sm" variant={pace === 'rest' ? 'primary' : 'secondary'} onClick={() => setPace('rest')}>
+                Rest · 60/min
+              </Button>
+              <Button size="sm" variant={pace === 'exercise' ? 'primary' : 'secondary'} onClick={() => setPace('exercise')}>
+                Exercise · 110/min
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              {blocked
+                ? 'With the AV node blocked, the signal never reaches the ventricles. They fall back on their own slow escape rhythm — this is why a complete heart block needs a pacemaker.'
+                : 'The pace buttons change the heart rate, but the order never changes: spark, spread, pause, sprint, squeeze. Try the AV block demo to see what happens when the pause becomes a wall.'}
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
