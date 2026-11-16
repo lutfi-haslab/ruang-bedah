@@ -205,3 +205,21 @@ bacaan (`AnatomyFigure`, caption diawali "Real anatomy reference —"). Aturan:
   snapshot push GitHub (text-only), sama seperti `heart-anterior.png`.
 - Lesson baru (termasuk dari cron harian) wajib menyertakan referensi asli
   mengikuti pola ini.
+
+## v0.8 — 3D Explorer (Three.js) (2026-11-16)
+
+Atas permintaan Lutfi ("Coba buatkan 3D pakai ThreeJS?"), lesson The Heart kini
+punya **3D Explorer** (`src/components/HeartModel3D.tsx`, React.lazy agar bundle
+three.js hanya dimuat di lesson ini):
+
+- Model: mesh jantung anatomi asli CC BY 4.0 (neshallads, Wikimedia Commons),
+  dihaluskan (subdivision + smooth normals) → `public/assets/models/heart.glb`
+  (2,1 MB, Pages-only binary; sumber di `public/assets/models/SOURCES.md`).
+- Interaksi: drag rotate / scroll zoom (OrbitControls), auto-rotate, animasi
+  detak ~70 bpm (lub-dub, skala + emissive pulse), label struktur 3D yang
+  terproyeksi ke layar dan memudar saat strukturnya membelakangi kamera,
+  tombol Reset view. Render berhenti saat di luar viewport / tab disembunyikan.
+- Fallback: bila WebGL tidak tersedia, tampilkan pesan + arahkan ke diagram &
+  referensi Gray's di lesson yang sama.
+- Pola ini adalah cetak biru untuk organ lain (paru, dll.) bila model berlisensi
+  terbuka yang bagus tersedia — jangan paksa model jelek hanya demi 3D.

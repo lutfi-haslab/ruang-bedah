@@ -1,4 +1,7 @@
+import { Suspense, lazy } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+
+const HeartModel3D = lazy(() => import('../components/HeartModel3D'))
 import { Badge, Button } from '../components/primitives'
 import { AnatomyFigure, Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import InteractiveHeart from '../components/interactive-heart'
@@ -37,6 +40,20 @@ function HeartLessonBody() {
           <span className="font-mono text-sm font-normal text-arterial-500">A</span> The lab
         </h2>
         <InteractiveHeart />
+        <h3 className="mb-4 mt-10 font-display text-lg font-bold tracking-tight text-ink-950">
+          Now hold it in 3D
+        </h3>
+        <Suspense
+          fallback={
+            <div className="grid h-[340px] place-items-center rounded-[var(--radius-card)] border border-line bg-surface sm:h-[460px]">
+              <p className="animate-pulse font-mono text-xs tracking-widest text-ink-400">
+                LOADING 3D EXPLORER…
+              </p>
+            </div>
+          }
+        >
+          <HeartModel3D />
+        </Suspense>
       </section>
 
       <EkgDivider />
