@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Callout, DefinitionBox, SpecTable } from './wiki'
+import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
 import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, LungsLab } from './lesson-labs'
@@ -116,6 +116,14 @@ export function VesselsLessonBody() {
               may pass between blood and tissue.
             </DefinitionBox>
           </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-vessels-gray448.png"
+              alt="Gray's Anatomy plate 448: transverse section through a small artery and vein under magnification"
+              caption="Real anatomy reference — a small artery and vein cut across and magnified ×350. The artery (left) is almost all wall; the vein is thin-walled with a wide, collapsing lumen — the same contrast the lab above draws as a diagram."
+              credit="Gray's Anatomy (1918), plate 448 · Public domain · via Wikimedia Commons"
+            />
+          </div>
         </>
       }
       cards={[
@@ -213,6 +221,14 @@ export function LungsLessonBody() {
               can peel away and collapse.
             </DefinitionBox>
           </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-lungs-gray962.png"
+              alt="Gray's Anatomy plate 962: the lungs separated and cut away to expose the bronchi and bronchioles"
+              caption="Real anatomy reference — the lungs pulled apart and cut to expose the bronchi and bronchioles inside: the branching air-tubes the breathing lab animates, drawn from a real dissection."
+              credit="Gray's Anatomy (1918), plate 962 · Public domain · via Wikimedia Commons"
+            />
+          </div>
         </>
       }
       cards={[
@@ -307,6 +323,14 @@ export function CardiacCycleLessonBody() {
               Multiply it by heart rate and you get cardiac output, the heart&rsquo;s delivery rate
               per minute.
             </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-cardiac-cycle-openstax.jpg"
+              alt="OpenStax diagram of the phases of the cardiac cycle, showing the heart in atrial systole, ventricular systole, and diastole"
+              caption="Real anatomy reference — the cardiac cycle as drawn in a standard anatomy textbook: the same phases you stepped through in the lab, shown as one continuous loop with valve states and pressures."
+              credit="OpenStax Anatomy & Physiology, fig. 2027 · CC BY 3.0 · via Wikimedia Commons"
+            />
           </div>
         </>
       }
@@ -416,6 +440,14 @@ export function CabgLessonBody() {
               condition, and belongs to a cardiology and cardiac-surgery team, not a wiki.
             </Callout>
           </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-cabg-grafts.jpg"
+              alt="Medical illustration of a heart with three coronary bypass grafts in place: an internal mammary artery graft and two saphenous vein grafts"
+              caption="Real anatomy reference — a heart carrying three bypass grafts: the internal mammary artery swung down from the chest wall, and saphenous vein grafts from the aorta, each sewn in beyond a blockage. This is the detour from the lab, drawn from real surgical anatomy."
+              credit="Patrick J. Lynch, medical illustrator · CC BY 2.5 · via Wikimedia Commons"
+            />
+          </div>
         </>
       }
       cards={[
@@ -523,6 +555,20 @@ export function AppendectomyCaseBody() {
               reason and operate. Real abdominal pain has many causes and always needs assessment
               by a clinician in person — a wiki score is never a diagnosis.
             </Callout>
+          </div>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <AnatomyFigure
+              src="/assets/refs/ref-appendix-gray536.png"
+              alt="Gray's Anatomy plate 536: the caecum and vermiform appendix with their arteries, the appendicular artery labelled"
+              caption="Real anatomy reference — the caecum and vermiform process (appendix) with their blood supply. Trace the appendicular artery into the mesoappendix: that is the vessel the surgeon seals and divides in step 3 of the operation."
+              credit="Gray's Anatomy (1918), plate 536 · Public domain · via Wikimedia Commons"
+            />
+            <AnatomyFigure
+              src="/assets/refs/ref-mcburney.jpg"
+              alt="Photograph of a real abdomen marking McBurney's point between the umbilicus and the anterior superior iliac spine"
+              caption="Real anatomy reference — McBurney's point (1) on a real abdomen: one third of the way from the anterior superior iliac spine (3) toward the umbilicus (2). This is the spot the examining hand presses in stage 2 of the case."
+              credit="Photo: Steven Fruitsmaak · CC BY-SA 3.0 · via Wikimedia Commons"
+            />
           </div>
         </>
       }
@@ -651,6 +697,14 @@ export function ConductionLessonBody() {
               real ECG — its intervals, blocks, and what to do about them — is read by clinicians,
               not by a wiki.
             </Callout>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-conduction-openstax.jpg"
+              alt="OpenStax illustration of the heart's conduction system: SA node, AV node, bundle of His, bundle branches, and Purkinje fibres"
+              caption="Real anatomy reference — the conduction system drawn on the heart itself: SA node, AV node, the bundle of His, both bundle branches, and the Purkinje network — the wiring the lab traces signal by signal."
+              credit="OpenStax Anatomy & Physiology, fig. 2018 · CC BY 3.0 · via Wikimedia Commons"
+            />
           </div>
         </>
       }

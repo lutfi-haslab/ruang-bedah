@@ -188,3 +188,20 @@ Format case study (berlaku untuk semua kasus operasi berikutnya):
   bahwa kasus ini fiktif/edukatif.
 - **Check** seperti lesson lain: flashcards istilah kunci kasus + kuis 3 soal.
 - Kasus berikutnya sudah di-slot: Cholecystectomy (Medium), Coronary Bypass (Hard).
+
+## v0.7 — Real anatomy references (2026-11-16)
+
+Atas kritik Lutfi ("gambar mu jelek gak mirip"), setiap lesson yang tersedia kini
+memasangkan lab skematiknya dengan **satu gambar referensi anatomi asli** di bab
+bacaan (`AnatomyFigure`, caption diawali "Real anatomy reference —"). Aturan:
+
+- Sumber hanya domain publik atau Creative Commons dari Wikimedia Commons
+  (Gray's Anatomy 1918, OpenStax, ilustrator medis berlisensi CC) — **wajib**
+  kredit + lisensi di caption, dan dicatat di `public/assets/refs/SOURCES.md`.
+- Peran gambar dibagi jujur: lab SVG = diagram ajar (disederhanakan, interaktif);
+  referensi = anatomi asli (proporsi & detail nyata). Keduanya saling melengkapi,
+  bukan saling menggantikan.
+- File biner di `public/assets/refs/` ikut ter-deploy ke Pages tetapi tidak masuk
+  snapshot push GitHub (text-only), sama seperti `heart-anterior.png`.
+- Lesson baru (termasuk dari cron harian) wajib menyertakan referensi asli
+  mengikuti pola ini.

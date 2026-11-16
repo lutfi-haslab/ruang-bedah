@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Badge, Button } from '../components/primitives'
-import { Callout, OxygenLegend, SpecTable } from '../components/wiki'
+import { AnatomyFigure, Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import InteractiveHeart from '../components/interactive-heart'
 import { AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
 import { EkgDivider, FlashCards, Quiz } from '../components/study-tools'
@@ -80,6 +80,14 @@ function HeartLessonBody() {
           </div>
           <div className="mt-6">
             <OxygenLegend />
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-heart-gray493.png"
+              alt="Gray's Anatomy plate 493: the heart viewed from the front, opened to show its chambers and valves"
+              caption="Real anatomy reference — the heart from the front, drawn from dissection more than a century ago: the same four chambers and great vessels as the lab above, in real proportions. The schematic simplifies; this is what it simplifies from."
+              credit="Gray's Anatomy (1918), plate 493 · Public domain · via Wikimedia Commons"
+            />
           </div>
         </article>
       </section>
