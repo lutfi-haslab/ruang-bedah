@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, LungsLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab } from './lesson-labs'
+import LungsLabCard from './LungsLabCard'
 
 /* ------------------------------------------------------------------ */
 /* Complete lesson bodies: Lab → Reading chapter → Check yourself.     */
@@ -173,7 +174,7 @@ export function VesselsLessonBody() {
 export function LungsLessonBody() {
   return (
     <BodyShell
-      lab={<LungsLab />}
+      lab={<LungsLabCard />}
       chapterTitle="Two Lungs, One Air Supply"
       chapter={
         <>

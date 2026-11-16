@@ -241,3 +241,20 @@ Also beautify the 2D"), lab jantung digabung:
   drop shadow lembut (feDropShadow), detail arteri koroner halus ter-clip ke
   badan, sheen cahaya di permukaan, latar panggung gradien radial hangat,
   halo pada titik label, dan glow pada sapuan EKG.
+
+## v1.0 — Paru-paru 3D + viewer generik (2026-11-16)
+
+- Viewer 3D di-refactor menjadi generik: `AnatomyModel3D.tsx` (konfigurasi:
+  model, label+jangkar, warna/material, mode gerak `beat`|`breathe`, kamera).
+  `HeartModel3D` dan `LungsModel3D` kini hanya file konfigurasi tipis.
+- Lesson paru memakai pola kartu tab yang sama (`LungsLabCard.tsx`):
+  [2D Breathing lab | 3D Explorer]; `LabShell`/`LungsLab` menerima prop `bare`.
+- Model paru: Visible Human (female) CC BY 4.0 — fragmen <1.500 face dibuang,
+  desimasi 110k, re-weld, Taubin 18 iterasi → `lungs.glb` 2,6 MB. Orientasi
+  diverifikasi visual: kanan anatomi = −X (3 lobus), kiri = +X (cardiac notch).
+  Animasi napas ±13×/menit (inhale 40% / exhale 60%), label: kedua paru +
+  lobus, apex, fisura oblik, basis diafragma, hilum.
+- Catatan verifikasi: screenshot headless pada lebar 390px gagal menampilkan
+  layer WebGL (artefak swiftshader/virtual-time — halaman yang sama tampil
+  benar di 500px & 1280px, dan canvas standalone 356×340 juga benar).
+  Cek tap-test 3D di ponsel tetap milik Lutfi.

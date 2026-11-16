@@ -8,9 +8,23 @@ import { Button } from './primitives'
 /* teaching material here, never decoration.                           */
 /* ------------------------------------------------------------------ */
 
-function LabShell({ diagram, panel }: { diagram: ReactNode; panel: ReactNode }) {
+function LabShell({
+  diagram,
+  panel,
+  bare = false,
+}: {
+  diagram: ReactNode
+  panel: ReactNode
+  bare?: boolean
+}) {
   return (
-    <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]">
+    <div
+      className={
+        bare
+          ? ''
+          : 'overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]'
+      }
+    >
       <div className="grid lg:grid-cols-[1.55fr_1fr]">
         <div className="relative min-w-0 bg-paper p-3 sm:p-5">{diagram}</div>
         <div className="min-w-0 border-t border-line p-6 sm:p-7 lg:border-l lg:border-t-0">{panel}</div>
@@ -294,7 +308,7 @@ const RIGHT_LUNG =
 const LEFT_LUNG =
   'M695 185 C805 205 850 315 828 425 C812 505 728 538 652 518 C595 502 576 432 592 332 C604 252 638 200 695 185 Z'
 
-export function LungsLab() {
+export function LungsLab({ bare = false }: { bare?: boolean }) {
   const [playing, setPlaying] = useState(true)
   const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale')
   const [rate, setRate] = useState(12)
@@ -322,6 +336,7 @@ export function LungsLab() {
 
   return (
     <LabShell
+      bare={bare}
       diagram={
         <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of the lungs breathing in and out">
           {/* Pleura outlines */}
