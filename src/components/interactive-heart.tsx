@@ -144,25 +144,28 @@ const VESSEL_PATHS: Record<string, { d: string; color: string; width: number }> 
 const CHAMBER_PATHS: Record<string, { d: string; fill: string; base: number }> = {
   'right-atrium': {
     d: 'M470,290 C390,300 355,370 350,445 C430,430 500,425 565,428 C560,380 562,330 568,300 C535,292 500,288 470,290 Z',
-    fill: '#7E2A33',
+    fill: 'url(#raGrad)',
     base: 0.38,
   },
   'right-ventricle': {
     d: 'M350,445 C355,560 430,650 520,720 C560,750 610,775 655,788 C620,700 590,560 578,428 C500,425 430,430 350,445 Z',
-    fill: '#7E2A33',
+    fill: 'url(#rvGrad)',
     base: 0.38,
   },
   'left-atrium': {
     d: 'M568,300 C650,290 760,300 810,360 C830,385 842,415 848,450 C760,440 660,432 578,428 C575,385 572,340 568,300 Z',
-    fill: '#B03A2E',
+    fill: 'url(#laGrad)',
     base: 0.3,
   },
   'left-ventricle': {
     d: 'M640,465 C720,450 790,445 848,450 C845,560 800,650 770,730 C755,775 720,800 690,790 C700,690 680,560 640,465 Z',
-    fill: '#E2604F',
+    fill: 'url(#lvGrad)',
     base: 0.5,
   },
 }
+
+const BODY_D =
+  'M470,290 C560,282 700,300 780,345 C860,390 878,480 862,580 C845,680 795,760 748,800 C720,822 690,812 655,788 C560,725 440,640 385,545 C338,465 340,375 390,330 C415,305 440,293 470,290 Z'
 
 const JOURNEY: { title: string; ids: string[]; text: string }[] = [
   {
@@ -215,7 +218,7 @@ const FLOW_RED =
 const ekgSegment = (x: number) => `H${x + 105} l9 -3 l7 -15 l9 27 l7 -13 l3 5`
 const EKG_D = `M0 26 ${[0, 300, 600, 900].map(ekgSegment).join(' ')} H1200`
 
-export default function InteractiveHeart() {
+export default function InteractiveHeart({ bare = false }: { bare?: boolean }) {
   const [mode, setMode] = useState<'explore' | 'journey'>('explore')
   const [selected, setSelected] = useState('left-ventricle')
   const [step, setStep] = useState(0)
@@ -241,12 +244,58 @@ export default function InteractiveHeart() {
   }
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]">
+    <div
+      className={
+        bare
+          ? ''
+          : 'overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]'
+      }
+    >
       <div className="grid lg:grid-cols-[1.55fr_1fr]">
         {/* ------------------------------ Diagram ------------------------------ */}
-        <div className="min-w-0 bg-paper p-3 sm:p-5">
+        <div
+          className="min-w-0 p-3 sm:p-5"
+          style={{
+            background:
+              'radial-gradient(ellipse 105% 90% at 50% 30%, #FBF8F2 0%, #F5EFE3 55%, #EDE3D0 100%)',
+          }}
+        >
           <svg viewBox="0 0 1200 900" className="h-auto w-full select-none" role="img" aria-label="Interactive diagram of the human heart — select a label to explore that structure">
-            <ellipse cx="600" cy="852" rx="290" ry="20" fill="#16222E" opacity="0.08" />
+            <defs>
+              <radialGradient id="bodyGrad" cx="38%" cy="28%" r="85%">
+                <stop offset="0%" stopColor="#E8705C" />
+                <stop offset="55%" stopColor="#CE4238" />
+                <stop offset="100%" stopColor="#A02B24" />
+              </radialGradient>
+              <linearGradient id="raGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#97363F" />
+                <stop offset="100%" stopColor="#6E242E" />
+              </linearGradient>
+              <linearGradient id="rvGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#8D323C" />
+                <stop offset="100%" stopColor="#66222B" />
+              </linearGradient>
+              <linearGradient id="laGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#C24839" />
+                <stop offset="100%" stopColor="#97322A" />
+              </linearGradient>
+              <linearGradient id="lvGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#F07E65" />
+                <stop offset="100%" stopColor="#D5503C" />
+              </linearGradient>
+              <radialGradient id="sheenGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.55" />
+                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+              </radialGradient>
+              <clipPath id="heartClip">
+                <path d={BODY_D} />
+              </clipPath>
+              <filter id="heartShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="14" stdDeviation="14" floodColor="#7A1F1A" floodOpacity="0.35" />
+              </filter>
+            </defs>
+            <ellipse cx="600" cy="852" rx="320" ry="22" fill="#16222E" opacity="0.05" />
+            <ellipse cx="600" cy="850" rx="280" ry="18" fill="#16222E" opacity="0.09" />
 
             {/* vessels behind the heart body */}
             <path d="M560,245 C700,215 800,215 832,222" fill="none" stroke="#5F83C2" strokeWidth="50" strokeLinecap="round" />
@@ -254,18 +303,29 @@ export default function InteractiveHeart() {
             {/* heartbeat group: vessels + body scale together */}
             <g
               className="svg-origin"
+              filter="url(#heartShadow)"
               style={{
                 transform: playing && phase === 'systole' ? 'scale(1.025)' : 'scale(1)',
                 transition: 'transform 320ms ease',
               }}
             >
-              {/* vessel halos + shapes + click targets */}
+              {/* vessel halos + shapes + sheen + click targets */}
               {Object.entries(VESSEL_PATHS).map(([id, v]) => (
                 <g key={id}>
                   {active(id) && (
                     <path d={v.d} fill="none" stroke={v.color} strokeWidth={v.width + 22} strokeLinecap="round" opacity="0.3" pointerEvents="none" />
                   )}
                   <path d={v.d} fill="none" stroke={v.color} strokeWidth={v.width} strokeLinecap="round" />
+                  <path
+                    d={v.d}
+                    fill="none"
+                    stroke="#FFFFFF"
+                    strokeWidth={Math.max(8, v.width * 0.34)}
+                    strokeLinecap="round"
+                    opacity="0.16"
+                    transform="translate(-7 -9)"
+                    pointerEvents="none"
+                  />
                   <path
                     d={v.d}
                     fill="none"
@@ -280,6 +340,7 @@ export default function InteractiveHeart() {
               ))}
               {/* SVC opening + aorta branches */}
               <ellipse cx="520" cy="206" rx="38" ry="13" fill="#4D6EA3" />
+              <ellipse cx="508" cy="202" rx="16" ry="5" fill="#8FB0DC" opacity="0.7" />
               <g stroke="#D64545" strokeWidth="20" strokeLinecap="round">
                 <path d="M655,128 L655,92" />
                 <path d="M608,133 L599,96" />
@@ -287,12 +348,7 @@ export default function InteractiveHeart() {
               </g>
 
               {/* heart body */}
-              <path
-                d="M470,290 C560,282 700,300 780,345 C860,390 878,480 862,580 C845,680 795,760 748,800 C720,822 690,812 655,788 C560,725 440,640 385,545 C338,465 340,375 390,330 C415,305 440,293 470,290 Z"
-                fill="#C93B36"
-                stroke="#8E2A24"
-                strokeWidth="3"
-              />
+              <path d={BODY_D} fill="url(#bodyGrad)" stroke="#8E2A24" strokeWidth="3" />
               {/* chamber overlays (clickable) */}
               {Object.entries(CHAMBER_PATHS).map(([id, c]) => (
                 <path
@@ -308,6 +364,14 @@ export default function InteractiveHeart() {
               <path d="M352,462 C480,432 700,428 858,448" fill="none" stroke="#8E2A24" strokeWidth="3" opacity="0.5" />
               <path d="M600,440 C615,560 650,690 700,792" fill="none" stroke="#8E2A24" strokeWidth="4" opacity="0.55" />
               <path d="M612,470 C625,575 655,690 695,780" fill="none" stroke="#F08374" strokeWidth="5" opacity="0.5" />
+              {/* surface detail: coronary curves + a soft sheen, clipped to the body */}
+              <g clipPath="url(#heartClip)" pointerEvents="none">
+                <path d="M648,468 C640,560 656,662 692,762" fill="none" stroke="#7E211B" strokeWidth="7" opacity="0.28" strokeLinecap="round" />
+                <path d="M650,545 C612,578 578,602 546,618" fill="none" stroke="#7E211B" strokeWidth="5" opacity="0.22" strokeLinecap="round" />
+                <path d="M470,470 C500,540 520,620 522,700" fill="none" stroke="#7E211B" strokeWidth="5" opacity="0.18" strokeLinecap="round" />
+                <ellipse cx="520" cy="385" rx="250" ry="155" fill="url(#sheenGrad)" opacity="0.5" />
+                <ellipse cx="745" cy="690" rx="180" ry="150" fill="#7E211B" opacity="0.10" />
+              </g>
               {/* apex click target */}
               <circle cx="712" cy="802" r="32" fill="transparent" className="cursor-pointer" onClick={() => pick('apex')} onMouseEnter={() => pick('apex')} />
             </g>
@@ -340,6 +404,7 @@ export default function InteractiveHeart() {
                   strokeWidth={active(s.id) ? 3 : 2}
                 />
                 {active(s.id) && <circle cx={s.dot.x} cy={s.dot.y} r="10" fill="none" stroke="#0E7C86" strokeWidth="2.5" className="ping-ring" />}
+                <circle cx={s.dot.x} cy={s.dot.y} r="16" fill={active(s.id) ? '#0E7C86' : '#16222E'} opacity="0.12" pointerEvents="none" />
                 <circle
                   cx={s.dot.x}
                   cy={s.dot.y}
@@ -377,6 +442,7 @@ export default function InteractiveHeart() {
             <span className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">ECG · lead II</span>
             <svg viewBox="0 0 1200 48" preserveAspectRatio="none" className="h-9 min-w-0 flex-1" aria-hidden>
               <path d={EKG_D} fill="none" stroke="#D7DEE8" strokeWidth="2.5" />
+              {playing && <path d={EKG_D} fill="none" stroke="#0E7C86" strokeWidth="8" opacity="0.15" className="ekg-anim" />}
               {playing && <path d={EKG_D} fill="none" stroke="#0E7C86" strokeWidth="3" className="ekg-anim" />}
             </svg>
             <span className="font-mono text-[0.68rem] text-ink-400">{playing ? '±70 bpm' : 'paused'}</span>

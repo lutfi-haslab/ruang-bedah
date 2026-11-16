@@ -25,29 +25,34 @@ const LABELS: { name: string; pos: [number, number, number] }[] = [
 function Toggle({
   on,
   onClick,
+  dark = false,
   children,
 }: {
   on: boolean
   onClick: () => void
+  dark?: boolean
   children: React.ReactNode
 }) {
+  const cls = dark
+    ? on
+      ? 'border-transparent bg-white/90 text-ink-900'
+      : 'border-white/25 bg-black/45 text-[#f5e9e2] backdrop-blur-sm hover:border-white/60'
+    : on
+      ? 'border-primary-600 bg-primary-600 text-white'
+      : 'border-line bg-surface text-ink-500 hover:border-primary-600 hover:text-primary-600'
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={on}
-      className={`rounded-full border px-3.5 py-1.5 font-mono text-xs transition ${
-        on
-          ? 'border-primary-600 bg-primary-600 text-white'
-          : 'border-line bg-surface text-ink-500 hover:border-primary-600 hover:text-primary-600'
-      }`}
+      className={`rounded-full border px-3.5 py-1.5 font-mono text-xs transition ${cls}`}
     >
       {children}
     </button>
   )
 }
 
-export default function HeartModel3D() {
+export default function HeartModel3D({ bare = false }: { bare?: boolean }) {
   const mountRef = useRef<HTMLDivElement>(null)
   const labelLayerRef = useRef<HTMLDivElement>(null)
   const settingsRef = useRef({ beat: true, spin: true, labels: true })
@@ -247,29 +252,47 @@ export default function HeartModel3D() {
     controls.update()
   }
 
+  const controlsRow = (dark: boolean) => (
+    <>
+      <Toggle dark={dark} on={beat} onClick={() => setBeat((v) => !v)}>
+        Heartbeat {beat ? 'on' : 'off'}
+      </Toggle>
+      <Toggle dark={dark} on={spin} onClick={() => setSpin((v) => !v)}>
+        Auto-rotate {spin ? 'on' : 'off'}
+      </Toggle>
+      <Toggle dark={dark} on={labels} onClick={() => setLabels((v) => !v)}>
+        Labels {labels ? 'on' : 'off'}
+      </Toggle>
+      <button
+        type="button"
+        onClick={resetView}
+        className={
+          dark
+            ? 'rounded-full border border-white/25 bg-black/45 px-3.5 py-1.5 font-mono text-xs text-[#f5e9e2] backdrop-blur-sm transition hover:border-white/60'
+            : 'rounded-full border border-line bg-surface px-3.5 py-1.5 font-mono text-xs text-ink-500 transition hover:border-primary-600 hover:text-primary-600'
+        }
+      >
+        Reset view
+      </button>
+    </>
+  )
+
   return (
-    <figure className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]">
-      <div className="flex flex-wrap items-center gap-2 border-b border-line px-5 py-3.5">
-        <p className="mr-auto font-mono text-xs tracking-widest text-ink-400">
-          3D EXPLORER · THREE.JS · DRAG TO ROTATE
-        </p>
-        <Toggle on={beat} onClick={() => setBeat((v) => !v)}>
-          Heartbeat {beat ? 'on' : 'off'}
-        </Toggle>
-        <Toggle on={spin} onClick={() => setSpin((v) => !v)}>
-          Auto-rotate {spin ? 'on' : 'off'}
-        </Toggle>
-        <Toggle on={labels} onClick={() => setLabels((v) => !v)}>
-          Labels {labels ? 'on' : 'off'}
-        </Toggle>
-        <button
-          type="button"
-          onClick={resetView}
-          className="rounded-full border border-line bg-surface px-3.5 py-1.5 font-mono text-xs text-ink-500 transition hover:border-primary-600 hover:text-primary-600"
-        >
-          Reset view
-        </button>
-      </div>
+    <figure
+      className={
+        bare
+          ? ''
+          : 'overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]'
+      }
+    >
+      {!bare && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-line px-5 py-3.5">
+          <p className="mr-auto font-mono text-xs tracking-widest text-ink-400">
+            3D EXPLORER · THREE.JS · DRAG TO ROTATE
+          </p>
+          {controlsRow(false)}
+        </div>
+      )}
       <div
         className="relative h-[340px] sm:h-[460px]"
         style={{
@@ -277,6 +300,11 @@ export default function HeartModel3D() {
             'radial-gradient(ellipse 90% 80% at 50% 38%, #33201b 0%, #1c110d 55%, #100a08 100%)',
         }}
       >
+        {bare && (
+          <div className="absolute right-3 top-3 z-10 flex max-w-[85%] flex-wrap justify-end gap-1.5">
+            {controlsRow(true)}
+          </div>
+        )}
         <div ref={mountRef} className="absolute inset-0" />
         <div ref={labelLayerRef} className="pointer-events-none absolute inset-0 overflow-hidden" />
         {status === 'loading' && (
@@ -297,7 +325,7 @@ export default function HeartModel3D() {
       </div>
       <figcaption className="border-t border-line px-5 py-3.5">
         <p className="text-sm leading-relaxed text-ink-700">
-          The same heart as the diagram above — now as a real anatomical mesh you can hold:
+          The same heart as the 2D diagram — now as a real anatomical mesh you can hold:
           turn it over, find the arch of the aorta, and watch it beat. Labels fade as their
           structure turns away.
         </p>

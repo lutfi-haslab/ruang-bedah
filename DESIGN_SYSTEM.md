@@ -223,3 +223,21 @@ three.js hanya dimuat di lesson ini):
   referensi Gray's di lesson yang sama.
 - Pola ini adalah cetak biru untuk organ lain (paru, dll.) bila model berlisensi
   terbuka yang bagus tersedia — jangan paksa model jelek hanya demi 3D.
+
+## v0.9 — Satu kartu, dua view + 2D dipercantik (2026-11-16)
+
+Atas arahan Lutfi ("card 3D and 2D viewer is in one card, with switcher tab.
+Also beautify the 2D"), lab jantung digabung:
+
+- `HeartLab.tsx`: SATU kartu dengan header tab switcher **[2D Diagram |
+  3D Explorer]** (`?view=3d` membuka langsung tab 3D). Kedua view tetap
+  ter-mount setelah dikunjungi (di-hidden, bukan di-unmount) agar state
+  masing-masing awet; chunk three.js tetap lazy.
+- `InteractiveHeart` dan `HeartModel3D` menerima prop `bare` (tanpa chrome
+  kartu sendiri). Di mode bare, kontrol 3D (heartbeat/rotate/labels/reset)
+  menjadi overlay pill kaca gelap di pojok viewport.
+- 2D dipercantik tanpa mengubah geometri/logika: gradien radial badan jantung
+  + gradien per ruang, highlight sheen pada pembuluh (tabung terasa glossy),
+  drop shadow lembut (feDropShadow), detail arteri koroner halus ter-clip ke
+  badan, sheen cahaya di permukaan, latar panggung gradien radial hangat,
+  halo pada titik label, dan glow pada sapuan EKG.
