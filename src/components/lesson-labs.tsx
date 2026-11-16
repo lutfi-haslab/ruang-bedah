@@ -1,0 +1,862 @@
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { Button } from './primitives'
+
+/* ------------------------------------------------------------------ */
+/* Animated lesson labs. Each lab demonstrates one process: flow,      */
+/* breathing, the cardiac cycle, or a surgical detour. Motion is the   */
+/* teaching material here, never decoration.                           */
+/* ------------------------------------------------------------------ */
+
+function LabShell({ diagram, panel }: { diagram: ReactNode; panel: ReactNode }) {
+  return (
+    <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface shadow-[var(--shadow-card)]">
+      <div className="grid lg:grid-cols-[1.55fr_1fr]">
+        <div className="relative min-w-0 bg-paper p-3 sm:p-5">{diagram}</div>
+        <div className="min-w-0 border-t border-line p-6 sm:p-7 lg:border-l lg:border-t-0">{panel}</div>
+      </div>
+    </div>
+  )
+}
+
+function Meter({ label, value, tone = 'bg-primary-600' }: { label: string; value: number; tone?: string }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between font-mono text-xs text-ink-500">
+        <span>{label}</span>
+        <span>{value}%</span>
+      </div>
+      <span className="mt-1.5 block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden>
+        <span className={`block h-full rounded-full transition-all duration-700 ${tone}`} style={{ width: `${value}%` }} />
+      </span>
+    </div>
+  )
+}
+
+function Chip({ children, tone = 'sand' }: { children: ReactNode; tone?: 'sand' | 'open' | 'closed' }) {
+  const cls =
+    tone === 'open'
+      ? 'bg-success-50 text-success-600 ring-success-500/25'
+      : tone === 'closed'
+        ? 'bg-arterial-50 text-arterial-600 ring-arterial-500/25'
+        : 'bg-sand text-ink-700 ring-line'
+  return (
+    <span className={`inline-flex items-center rounded-full px-3 py-1 font-mono text-xs font-medium ring-1 ring-inset ${cls}`}>
+      {children}
+    </span>
+  )
+}
+
+/* ============================ Blood vessels ============================ */
+
+type VesselId = 'artery' | 'capillary' | 'vein'
+
+const VESSELS: Record<
+  VesselId,
+  { name: string; latin: string; wall: string; lumen: string; pressure: string; valves: string; blurb: string; wallMeter: number; pressureMeter: number }
+> = {
+  artery: {
+    name: 'Artery',
+    latin: 'arteria',
+    wall: 'Thick — elastic fibres and smooth muscle',
+    lumen: 'Relatively narrow',
+    pressure: 'High, pulsing with each heartbeat',
+    valves: 'None',
+    blurb:
+      'Arteries carry blood away from the heart. Their elastic walls stretch as a pulse wave arrives, then recoil to keep the blood moving between beats.',
+    wallMeter: 95,
+    pressureMeter: 90,
+  },
+  capillary: {
+    name: 'Capillary',
+    latin: 'vas capillare',
+    wall: 'One cell thick — endothelium only',
+    lumen: 'About one red blood cell wide',
+    pressure: 'Low, and deliberately slow',
+    valves: 'None',
+    blurb:
+      'Capillaries are where the actual exchange happens. Oxygen and nutrients leave, carbon dioxide and waste enter — the wall is thin because diffusion needs a short road.',
+    wallMeter: 8,
+    pressureMeter: 30,
+  },
+  vein: {
+    name: 'Vein',
+    latin: 'vena',
+    wall: 'Thinner, less muscle than an artery',
+    lumen: 'Wide — veins hold most of the blood volume',
+    pressure: 'Low, no pulse',
+    valves: 'Present in many limb veins',
+    blurb:
+      'Veins return blood to the heart at low pressure. Valves fold shut to stop it slipping backwards, and squeezing leg muscles help push it uphill.',
+    wallMeter: 38,
+    pressureMeter: 14,
+  },
+}
+
+const VESSEL_ORDER: VesselId[] = ['artery', 'capillary', 'vein']
+
+export function BloodVesselLab() {
+  const [selected, setSelected] = useState<VesselId>('capillary')
+  const [playing, setPlaying] = useState(true)
+  const [pace, setPace] = useState<'rest' | 'active'>('rest')
+  const info = VESSELS[selected]
+  const dur = pace === 'rest' ? 7 : 3.8
+
+  const zone = (id: VesselId, x: number, w: number) => (
+    <rect
+      x={x}
+      y={70}
+      width={w}
+      height={390}
+      rx={22}
+      onClick={() => setSelected(id)}
+      className="cursor-pointer"
+      fill={selected === id ? '#0E7C86' : 'transparent'}
+      opacity={selected === id ? 0.07 : 0}
+      stroke={selected === id ? '#0E7C86' : 'transparent'}
+      strokeWidth={2}
+    />
+  )
+
+  const dot = (path: string, begin: number, fill: string, r = 9) => (
+    <circle r={r} fill={fill} stroke="#fff" strokeWidth={2}>
+      {playing && <animateMotion dur={`${dur}s`} begin={`${begin}s`} repeatCount="indefinite" path={path} />}
+    </circle>
+  )
+
+  return (
+    <LabShell
+      diagram={
+        <svg viewBox="0 0 1000 540" className="w-full" role="img" aria-label="Animated diagram of blood flowing from an artery through capillaries into a vein">
+          {zone('artery', 35, 305)}
+          {zone('capillary', 340, 320)}
+          {zone('vein', 660, 305)}
+
+          <text x={185} y={118} textAnchor="middle" fontSize={24} fontWeight={800} fill="#16222E">Artery</text>
+          <text x={500} y={118} textAnchor="middle" fontSize={24} fontWeight={800} fill="#16222E">Capillaries</text>
+          <text x={815} y={118} textAnchor="middle" fontSize={24} fontWeight={800} fill="#16222E">Vein</text>
+          <text x={185} y={146} textAnchor="middle" fontSize={15} fill="#6B7684">thick elastic wall</text>
+          <text x={500} y={146} textAnchor="middle" fontSize={15} fill="#6B7684">exchange happens here</text>
+          <text x={815} y={146} textAnchor="middle" fontSize={15} fill="#6B7684">thin wall · valves</text>
+
+          {/* Artery */}
+          <rect x={70} y={218} width={260} height={104} rx={52} fill="#8E2A25" />
+          <rect x={70} y={247} width={260} height={46} rx={23} fill="#D64545" />
+          {[105, 155, 205, 255, 300].map((x) => (
+            <path key={x} d={`M${x} 224 v92`} stroke="#F0A49C" strokeWidth={5} opacity={0.55} />
+          ))}
+
+          {/* Capillary bed in tissue */}
+          {[
+            [405, 185], [480, 165], [565, 180], [430, 365], [515, 385], [600, 360],
+          ].map(([cx, cy], i) => (
+            <ellipse key={i} cx={cx} cy={cy} rx={34} ry={24} fill="#EFE9DC" stroke="#E0D9C6" />
+          ))}
+          <path d="M330 270 C420 195 520 205 650 270" fill="none" stroke="#C65D68" strokeWidth={17} strokeLinecap="round" />
+          <path d="M330 270 C440 270 540 270 650 270" fill="none" stroke="#C65D68" strokeWidth={15} strokeLinecap="round" />
+          <path d="M330 270 C420 345 520 335 650 270" fill="none" stroke="#C65D68" strokeWidth={17} strokeLinecap="round" />
+          <g className="animate-pulse">
+            <text x={492} y={222} textAnchor="middle" fontSize={19} fontWeight={700} fill="#B93327">O₂ out ↓</text>
+            <text x={492} y={330} textAnchor="middle" fontSize={19} fontWeight={700} fill="#4D6EA3">CO₂ in ↑</text>
+          </g>
+
+          {/* Vein */}
+          <rect x={670} y={205} width={260} height={130} rx={65} fill="#4D6EA3" />
+          <rect x={670} y={238} width={260} height={64} rx={32} fill="#7FA0CF" />
+          <path d="M795 238 l28 32 l-28 32 M851 238 l-28 32 l28 32" fill="none" stroke="#EAF0FA" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" opacity={0.9} />
+          <text x={823} y={382} textAnchor="middle" fontSize={15} fill="#4D6EA3">valve — one way only</text>
+
+          {/* Animated blood cells */}
+          {dot('M88 270 H330', -0.2, '#FFD9D3', 10)}
+          {dot('M88 270 H330', -2.4, '#FFD9D3', 10)}
+          {dot('M88 270 H330', -4.8, '#FFD9D3', 10)}
+          {dot('M330 270 C420 195 520 205 650 270', -1.2, '#E88A7B', 7)}
+          {dot('M330 270 C440 270 540 270 650 270', -3.4, '#D97B8C', 7)}
+          {dot('M330 270 C420 345 520 335 650 270', -5.4, '#B07BA6', 7)}
+          {dot('M650 270 H918', -0.8, '#A9C3E8', 10)}
+          {dot('M650 270 H918', -3.2, '#A9C3E8', 10)}
+          {dot('M650 270 H918', -5.8, '#A9C3E8', 10)}
+
+          <text x={500} y={505} textAnchor="middle" fontSize={16} fill="#6B7684">
+            Watch the colour change: red in the artery → exchanging in the capillaries → blue in the vein
+          </text>
+        </svg>
+      }
+      panel={
+        <div>
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-sand p-1" role="tablist" aria-label="Vessel type">
+            {VESSEL_ORDER.map((id) => (
+              <button
+                key={id}
+                onClick={() => setSelected(id)}
+                aria-pressed={selected === id}
+                className={`rounded-full px-2 py-2 font-display text-[0.82rem] font-bold transition-colors ${
+                  selected === id ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+                }`}
+              >
+                {VESSELS[id].name}
+              </button>
+            ))}
+          </div>
+
+          <p className="mt-6 font-mono text-xs uppercase tracking-[0.14em] text-primary-700">{info.latin}</p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <dl className="mt-5 space-y-2.5 text-sm">
+            {[
+              ['Wall', info.wall],
+              ['Lumen', info.lumen],
+              ['Pressure', info.pressure],
+              ['Valves', info.valves],
+            ].map(([k, v]) => (
+              <div key={k} className="flex gap-3">
+                <dt className="w-20 shrink-0 font-display font-bold text-ink-950">{k}</dt>
+                <dd className="text-ink-700">{v}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Wall thickness" value={info.wallMeter} />
+            <Meter label="Pressure" value={info.pressureMeter} tone="bg-arterial-500" />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause flow' : '▶ Play flow'}
+              </Button>
+              <Button size="sm" variant={pace === 'rest' ? 'primary' : 'secondary'} onClick={() => setPace('rest')}>
+                Resting
+              </Button>
+              <Button size="sm" variant={pace === 'active' ? 'primary' : 'secondary'} onClick={() => setPace('active')}>
+                Exercising
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              Exercising muscles demand more exchange, so the whole circuit speeds up — same vessels, faster traffic.
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+/* =============================== Lungs ================================ */
+
+type LungStructureId = 'trachea' | 'bronchi' | 'lungs' | 'pleura' | 'diaphragm' | 'alveoli'
+
+const LUNG_STRUCTURES: Record<LungStructureId, { name: string; latin: string; blurb: string; dot: { x: number; y: number } }> = {
+  trachea: {
+    name: 'Trachea',
+    latin: 'trachea',
+    blurb: 'The windpipe — a single tube held open by C-shaped cartilage rings, so air can always pass.',
+    dot: { x: 500, y: 108 },
+  },
+  bronchi: {
+    name: 'Bronchi',
+    latin: 'bronchi principales',
+    blurb: 'The trachea splits into two main bronchi, one per lung. The right bronchus is wider and steeper — which is why inhaled objects usually end up on the right.',
+    dot: { x: 500, y: 228 },
+  },
+  lungs: {
+    name: 'Lungs',
+    latin: 'pulmones',
+    blurb: 'Two spongy organs. The right lung has three lobes; the left has two, with a notch that makes room for the heart.',
+    dot: { x: 285, y: 350 },
+  },
+  pleura: {
+    name: 'Pleura',
+    latin: 'pleura',
+    blurb: 'A double membrane: the visceral layer wraps the lung, the parietal layer lines the chest. A film of fluid between them lets the lung slide — and glues it to the chest wall as it moves.',
+    dot: { x: 168, y: 452 },
+  },
+  diaphragm: {
+    name: 'Diaphragm',
+    latin: 'diaphragma',
+    blurb: 'The dome-shaped muscle under the lungs. When it contracts it flattens downward, expanding the chest — that is what pulls air in.',
+    dot: { x: 500, y: 486 },
+  },
+  alveoli: {
+    name: 'Alveoli',
+    latin: 'alveoli pulmonis',
+    blurb: 'Millions of tiny air sacs at the ends of the airways, wrapped in capillaries. Across their one-cell walls, oxygen and carbon dioxide trade places.',
+    dot: { x: 655, y: 408 },
+  },
+}
+
+const LUNG_ORDER: LungStructureId[] = ['trachea', 'bronchi', 'lungs', 'pleura', 'diaphragm', 'alveoli']
+
+const RIGHT_LUNG =
+  'M305 185 C195 205 150 315 172 425 C188 505 272 538 348 518 C405 502 424 432 408 332 C396 252 362 200 305 185 Z'
+const LEFT_LUNG =
+  'M695 185 C805 205 850 315 828 425 C812 505 728 538 652 518 C595 502 576 432 592 332 C604 252 638 200 695 185 Z'
+
+export function LungsLab() {
+  const [playing, setPlaying] = useState(true)
+  const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale')
+  const [rate, setRate] = useState(12)
+  const [selected, setSelected] = useState<LungStructureId>('lungs')
+  const info = LUNG_STRUCTURES[selected]
+  const halfCycleMs = 30000 / rate
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setPhase((p) => (p === 'inhale' ? 'exhale' : 'inhale')), halfCycleMs)
+    return () => clearInterval(t)
+  }, [playing, halfCycleMs])
+
+  const airDot = (path: string, begin: number) => (
+    <circle r={8} fill="#0E7C86" stroke="#fff" strokeWidth={2} opacity={0.9}>
+      {playing && (
+        <animateMotion dur={`${halfCycleMs / 1000}s`} begin={`${begin}s`} repeatCount="indefinite" path={path} />
+      )}
+    </circle>
+  )
+  const inhalePathR = 'M500 30 V180 C465 225 410 252 352 282'
+  const inhalePathL = 'M500 30 V180 C535 225 590 252 648 282'
+  const exhalePathR = 'M352 282 C410 252 465 225 500 180 V30'
+  const exhalePathL = 'M648 282 C590 252 535 225 500 180 V30'
+
+  return (
+    <LabShell
+      diagram={
+        <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of the lungs breathing in and out">
+          {/* Pleura outlines */}
+          <path d={RIGHT_LUNG} transform="translate(287 350) scale(1.07) translate(-287 -350)" fill="none" stroke="#5F83C2" strokeWidth={3} strokeDasharray="9 8" opacity={0.75} />
+          <path d={LEFT_LUNG} transform="translate(713 350) scale(1.07) translate(-713 -350)" fill="none" stroke="#5F83C2" strokeWidth={3} strokeDasharray="9 8" opacity={0.75} />
+
+          {/* Trachea and bronchi */}
+          <rect x={464} y={42} width={72} height={150} rx={30} fill="#B9D6D8" stroke="#0E7C86" strokeWidth={3} />
+          {[72, 102, 132, 162].map((y) => (
+            <path key={y} d={`M470 ${y} h60`} stroke="#0E7C86" strokeWidth={4} opacity={0.5} />
+          ))}
+          <path d="M500 185 C460 228 408 252 350 282" fill="none" stroke="#A9C7C9" strokeWidth={40} strokeLinecap="round" />
+          <path d="M500 185 C540 228 592 252 650 282" fill="none" stroke="#A9C7C9" strokeWidth={40} strokeLinecap="round" />
+
+          {/* Lungs — they scale with the breath */}
+          <g className="svg-transition" style={{ transform: phase === 'inhale' ? 'scale(1.04)' : 'scale(0.982)' }}>
+            <path d={RIGHT_LUNG} fill="#E58A7B" stroke="#B6544A" strokeWidth={4} />
+          </g>
+          <g className="svg-transition" style={{ transform: phase === 'inhale' ? 'scale(1.04)' : 'scale(0.982)' }}>
+            <path d={LEFT_LUNG} fill="#E58A7B" stroke="#B6544A" strokeWidth={4} />
+          </g>
+
+          {/* Alveoli clusters */}
+          {[
+            [330, 395], [368, 425], [300, 448], [655, 408], [690, 438], [622, 452],
+          ].map(([cx, cy], i) => (
+            <g key={i} opacity={0.85}>
+              <circle cx={cx} cy={cy} r={13} fill="#F6C6BB" stroke="#B6544A" strokeWidth={2} />
+              <circle cx={cx + 15} cy={cy + 8} r={9} fill="#F6C6BB" stroke="#B6544A" strokeWidth={2} />
+            </g>
+          ))}
+
+          {/* Airflow particles — direction follows the phase */}
+          {airDot(phase === 'inhale' ? inhalePathR : exhalePathR, -0.3)}
+          {airDot(phase === 'inhale' ? inhalePathL : exhalePathL, -1.1)}
+          {airDot(phase === 'inhale' ? inhalePathR : exhalePathR, -1.9)}
+
+          {/* Diaphragm — flattens down on inhale */}
+          <g className="svg-transition" style={{ transform: `translateY(${phase === 'inhale' ? 13 : -3}px)` }}>
+            <path d="M165 492 C340 430 660 430 835 492" fill="none" stroke="#43536A" strokeWidth={15} strokeLinecap="round" />
+            <path d="M430 462 h140" stroke="#43536A" strokeWidth={10} strokeLinecap="round" opacity={0.6} />
+          </g>
+
+          {/* Structure hotspots */}
+          {LUNG_ORDER.map((id) => {
+            const s = LUNG_STRUCTURES[id]
+            const isActive = selected === id
+            return (
+              <g key={id} onClick={() => setSelected(id)} className="cursor-pointer">
+                {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={13} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+              </g>
+            )
+          })}
+
+        </svg>
+      }
+      panel={
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+                {playing ? 'Breathing' : 'Paused'}
+              </p>
+              <h3 className="mt-1 font-display text-3xl font-extrabold capitalize tracking-tight text-ink-950">{phase}</h3>
+            </div>
+            <span className={`font-display text-lg font-extrabold ${phase === 'inhale' ? 'text-primary-700' : 'text-venous-600'}`}>
+              {phase === 'inhale' ? '▼ air in' : '▲ air out'}
+            </span>
+          </div>
+
+          <div className="mt-4">
+            <Meter label="Lung volume" value={phase === 'inhale' ? 88 : 46} tone={phase === 'inhale' ? 'bg-primary-600' : 'bg-venous-500'} />
+          </div>
+
+          <div className="mt-5">
+            <label htmlFor="breath-rate" className="flex items-baseline justify-between font-mono text-xs text-ink-500">
+              <span>Breathing rate</span>
+              <span>{rate} breaths / min</span>
+            </label>
+            <input
+              id="breath-rate"
+              type="range"
+              min={8}
+              max={24}
+              step={1}
+              value={rate}
+              onChange={(e) => setRate(e.currentTarget.valueAsNumber)}
+              className="mt-2 w-full accent-[#0E7C86]"
+            />
+            <p className="mt-1.5 text-sm text-ink-500">Resting adults breathe about 12–20 times a minute. Try 20 and watch the pace.</p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+              {playing ? '❚❚ Pause breath' : '▶ Play breath'}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setPlaying(false)
+                setPhase('inhale')
+              }}
+            >
+              Hold inhale
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setPlaying(false)
+                setPhase('exhale')
+              }}
+            >
+              Hold exhale
+            </Button>
+          </div>
+
+          <div className="mt-6 border-t border-line pt-5">
+            <div className="flex flex-wrap gap-1.5">
+              {LUNG_ORDER.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => setSelected(id)}
+                  aria-pressed={selected === id}
+                  className={`rounded-full px-3 py-1.5 font-display text-[0.8rem] font-bold ring-1 ring-inset transition-colors ${
+                    selected === id ? 'bg-primary-600 text-white ring-primary-600' : 'bg-surface text-ink-700 ring-line hover:text-ink-950'
+                  }`}
+                >
+                  {LUNG_STRUCTURES[id].name}
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 font-serif text-sm italic text-ink-500">{info.latin}</p>
+            <p className="mt-1 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+/* ============================ Cardiac cycle =========================== */
+
+type CyclePhase = {
+  name: string
+  short: string
+  ecg: string
+  sound: string
+  av: 'Open' | 'Closed'
+  semilunar: 'Open' | 'Closed'
+  pressure: number
+  volume: number
+  squeeze: 'atria' | 'ventricles' | 'none'
+  flow: 'fill' | 'eject' | 'none'
+  text: string
+}
+
+const CYCLE_PHASES: CyclePhase[] = [
+  {
+    name: 'Atrial systole — the top-up',
+    short: 'Atria squeeze',
+    ecg: 'P wave',
+    sound: '—',
+    av: 'Open',
+    semilunar: 'Closed',
+    pressure: 12,
+    volume: 96,
+    squeeze: 'atria',
+    flow: 'fill',
+    text: 'The atria contract together and top the ventricles up with a final squeeze of blood. Most filling already happened passively — this is the finishing push.',
+  },
+  {
+    name: 'Ventricular systole — ejection',
+    short: 'Ventricles eject',
+    ecg: 'QRS complex, then T wave begins',
+    sound: 'S1 · “lub” — AV valves close',
+    av: 'Closed',
+    semilunar: 'Open',
+    pressure: 92,
+    volume: 38,
+    squeeze: 'ventricles',
+    flow: 'eject',
+    text: 'The ventricles contract hard. Pressure slams the AV valves shut (that is the first heart sound) and forces the semilunar valves open, ejecting blood into the aorta and pulmonary artery.',
+  },
+  {
+    name: 'Early diastole — relaxation',
+    short: 'Everything relaxes',
+    ecg: 'T wave ends',
+    sound: 'S2 · “dub” — semilunar valves close',
+    av: 'Closed',
+    semilunar: 'Closed',
+    pressure: 30,
+    volume: 34,
+    squeeze: 'none',
+    flow: 'none',
+    text: 'The ventricles relax and pressure falls. The semilunar valves snap shut to stop blood falling back — the second heart sound. For a brief moment, every valve is closed.',
+  },
+  {
+    name: 'Filling — the quiet majority',
+    short: 'Passive filling',
+    ecg: 'Flat baseline, drifting to the next P wave',
+    sound: '—',
+    av: 'Open',
+    semilunar: 'Closed',
+    pressure: 10,
+    volume: 82,
+    squeeze: 'none',
+    flow: 'fill',
+    text: 'Ventricular pressure drops below atrial pressure, the AV valves open, and blood flows in on its own. Most of the filling happens here, with no contraction at all — then the cycle repeats.',
+  },
+]
+
+export function CardiacCycleLab() {
+  const [step, setStep] = useState(1)
+  const [playing, setPlaying] = useState(true)
+  const phase = CYCLE_PHASES[step]
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStep((s) => (s + 1) % CYCLE_PHASES.length), 2100)
+    return () => clearInterval(t)
+  }, [playing])
+
+  const atriaScale = phase.squeeze === 'atria' ? 0.93 : 1
+  const ventScale = phase.squeeze === 'ventricles' ? 0.92 : phase.flow === 'fill' ? 1.02 : 1
+
+  return (
+    <LabShell
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 520" className="w-full" role="img" aria-label="Animated schematic of the cardiac cycle phases">
+            {/* Outflow vessels */}
+            <path d="M500 148 C500 96 545 66 600 70 C650 74 672 112 660 150" fill="none" stroke="#D64545" strokeWidth={40} strokeLinecap="round" />
+            <path d="M500 148 C470 108 420 92 380 108" fill="none" stroke="#5F83C2" strokeWidth={34} strokeLinecap="round" />
+            <text x={668} y={92} fontSize={17} fontWeight={700} fill="#B93327">Aorta</text>
+            <text x={238} y={96} fontSize={17} fontWeight={700} fill="#4D6EA3">Pulmonary artery</text>
+
+            {/* Atria */}
+            <g className="svg-transition" style={{ transform: `scale(${atriaScale})` }}>
+              <ellipse cx={352} cy={185} rx={108} ry={72} fill="#7E2A33" />
+              <ellipse cx={648} cy={185} rx={108} ry={72} fill="#B03A2E" />
+            </g>
+            <text x={352} y={192} textAnchor="middle" fontSize={19} fontWeight={700} fill="#fff">Right atrium</text>
+            <text x={648} y={192} textAnchor="middle" fontSize={19} fontWeight={700} fill="#fff">Left atrium</text>
+
+            {/* Ventricles */}
+            <g className="svg-transition" style={{ transform: `scale(${ventScale})` }}>
+              <path d="M258 268 C250 360 320 438 420 462 C462 472 492 448 494 402 L494 268 Z" fill="#93322C" />
+              <path d="M506 268 L506 402 C508 448 538 472 580 462 C680 438 750 360 742 268 Z" fill="#E2604F" />
+            </g>
+            <text x={372} y={372} textAnchor="middle" fontSize={19} fontWeight={700} fill="#fff">Right ventricle</text>
+            <text x={628} y={372} textAnchor="middle" fontSize={19} fontWeight={700} fill="#fff">Left ventricle</text>
+
+            {/* Valve indicators */}
+            <circle cx={500} cy={262} r={15} fill={phase.av === 'Open' ? '#2F9E6E' : '#B93327'} stroke="#fff" strokeWidth={3} />
+            <text x={500} y={300} textAnchor="middle" fontSize={15} fontWeight={700} fill="#43536A">AV valves {phase.av.toLowerCase()}</text>
+            <circle cx={500} cy={150} r={15} fill={phase.semilunar === 'Open' ? '#2F9E6E' : '#B93327'} stroke="#fff" strokeWidth={3} />
+
+            {/* Flow arrows */}
+            {phase.flow === 'fill' && (
+              <g stroke="#0E7C86" strokeWidth={7} strokeLinecap="round" fill="none" className="flow-line">
+                <path d="M352 262 v52" />
+                <path d="M648 262 v52" />
+              </g>
+            )}
+            {phase.flow === 'eject' && (
+              <g stroke="#D64545" strokeWidth={7} strokeLinecap="round" fill="none" className="flow-line">
+                <path d="M500 132 V78" />
+                <path d="M420 300 C460 240 480 210 492 168" />
+                <path d="M580 300 C540 240 520 210 508 168" />
+              </g>
+            )}
+            {phase.flow === 'none' && (
+              <text x={500} y={352} textAnchor="middle" fontSize={20} fontWeight={800} fill="#43536A">all valves closed — a held breath</text>
+            )}
+
+            {/* ECG strip with the current segment highlighted */}
+            <path
+              d="M70 494 H210 l10 -4 l8 -14 l10 24 l8 -10 H420 l12 -6 l16 -34 l18 52 l14 -18 H640 l14 -4 c18 -22 42 -22 60 0 l10 4 H930"
+              fill="none"
+              stroke="#16222E"
+              strokeWidth={3.5}
+            />
+            <rect
+              x={[198, 420, 628, 742][step]}
+              y={472}
+              width={[76, 130, 128, 172][step]}
+              height={42}
+              rx={12}
+              fill="none"
+              stroke="#0E7C86"
+              strokeWidth={3}
+            />
+            <text x={70} y={462} fontSize={15} fill="#6B7684">ECG — the highlighted segment is this phase</text>
+          </svg>
+
+          {/* Phase timeline */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {CYCLE_PHASES.map((p, i) => (
+              <button
+                key={p.name}
+                onClick={() => {
+                  setStep(i)
+                  setPlaying(false)
+                }}
+                aria-pressed={step === i}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  step === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">Phase {i + 1}</span>
+                <span className="mt-0.5 block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{p.short}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Phase {step + 1} of 4 · ECG: {phase.ecg}
+          </p>
+          <h3 className="mt-1.5 font-display text-2xl font-extrabold leading-tight tracking-tight text-ink-950">{phase.name}</h3>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{phase.text}</p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip tone={phase.av === 'Open' ? 'open' : 'closed'}>AV valves · {phase.av}</Chip>
+            <Chip tone={phase.semilunar === 'Open' ? 'open' : 'closed'}>Semilunar · {phase.semilunar}</Chip>
+            <Chip>Sound · {phase.sound}</Chip>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Ventricular pressure" value={phase.pressure} tone="bg-arterial-500" />
+            <Meter label="Ventricular volume" value={phase.volume} />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+              {playing ? '❚❚ Pause cycle' : '▶ Play cycle'}
+            </Button>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              One full cycle at rest takes about 0.8 seconds. Notice the valves never “decide” anything —
+              pressure differences push them open and shut.
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+/* ================================ CABG ================================ */
+
+const CABG_STEPS = [
+  {
+    title: 'Map the blockage',
+    text: 'Imaging shows a coronary artery narrowed by plaque. Beyond the narrowing, heart muscle is starved of oxygen — that starved territory is what the operation must re-supply.',
+  },
+  {
+    title: 'Prepare the graft',
+    text: 'The surgeon takes a spare vessel — often the internal thoracic artery from inside the chest wall, or a vein from the leg — to serve as the new pipe.',
+  },
+  {
+    title: 'Attach beyond the blockage',
+    text: 'One end of the graft is sewn into the aorta (or left connected at its origin), the other end into the coronary artery past the narrowing. Blood now flows around the blockage — a detour, not a repair of the original road.',
+  },
+]
+
+const GRAFT_PATH = 'M648 118 C795 158 828 302 705 388 C615 450 508 458 430 430'
+const NATIVE_PATH = 'M520 205 C472 248 424 266 398 306'
+
+export function CabgLab() {
+  const [mode, setMode] = useState<'blocked' | 'bypass'>('bypass')
+  const [step, setStep] = useState(2)
+  const [playing, setPlaying] = useState(true)
+  const bypass = mode === 'bypass'
+  const flow = bypass ? 92 : 34
+
+  const pickStep = (i: number) => {
+    setStep(i)
+    if (i === 0) setMode('blocked')
+    if (i === 2) setMode('bypass')
+  }
+
+  const graftDot = (begin: number) => (
+    <circle r={10} fill="#FFD9D3" stroke="#fff" strokeWidth={2}>
+      {playing && <animateMotion dur="4.2s" begin={`${begin}s`} repeatCount="indefinite" path={GRAFT_PATH} />}
+    </circle>
+  )
+  const nativeDot = (begin: number) => (
+    <circle r={9} fill="#FFD9D3" stroke="#fff" strokeWidth={2}>
+      {playing && <animateMotion dur="3s" begin={`${begin}s`} repeatCount="indefinite" path={NATIVE_PATH} />}
+    </circle>
+  )
+
+  return (
+    <LabShell
+      diagram={
+        <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of a coronary artery bypass graft routing blood around a blockage">
+          {/* Aorta */}
+          <path d="M520 178 C516 92 590 48 668 78 C730 102 738 168 692 206" fill="none" stroke="#D64545" strokeWidth={46} strokeLinecap="round" />
+          <text x={742} y={86} fontSize={19} fontWeight={700} fill="#B93327">Aorta</text>
+
+          {/* Heart */}
+          <path
+            d="M500 516 C362 434 288 334 300 228 C312 138 418 104 500 182 C582 104 688 138 700 228 C712 334 638 434 500 516 Z"
+            fill="#C7433B"
+          />
+          <path d="M500 182 C440 140 350 150 322 225 C300 285 340 380 430 450 C380 350 372 250 430 190 C452 168 478 172 500 182 Z" fill="#B03A2E" opacity={0.65} />
+
+          {/* Coronary artery across the front */}
+          <path d={NATIVE_PATH} fill="none" stroke="#7E1F1A" strokeWidth={24} strokeLinecap="round" />
+          <path d={NATIVE_PATH} fill="none" stroke="#E2604F" strokeWidth={13} strokeLinecap="round" />
+          <path
+            d="M398 306 C372 348 380 402 424 438 C452 460 492 462 520 446"
+            fill="none"
+            stroke="#7E1F1A"
+            strokeWidth={24}
+            strokeLinecap="round"
+            opacity={bypass ? 1 : 0.45}
+          />
+          <path
+            d="M398 306 C372 348 380 402 424 438 C452 460 492 462 520 446"
+            fill="none"
+            stroke="#E2604F"
+            strokeWidth={13}
+            strokeLinecap="round"
+            opacity={bypass ? 1 : 0.45}
+          />
+          <path d="M520 205 C585 238 628 256 652 302" fill="none" stroke="#E2604F" strokeWidth={12} strokeLinecap="round" />
+
+          {/* Plaque / blockage */}
+          <g transform="rotate(-38 398 306)">
+            <ellipse cx={398} cy={306} rx={34} ry={19} fill="#F2C14E" stroke="#B45309" strokeWidth={3} />
+            <ellipse cx={398} cy={306} rx={13} ry={7} fill="#7E1F1A" />
+          </g>
+          {step === 0 && <circle cx={398} cy={306} r={16} fill="none" stroke="#B45309" strokeWidth={3} className="ping-ring" />}
+          <text x={118} y={272} fontSize={18} fontWeight={700} fill="#B45309">Blockage (plaque)</text>
+          <path d="M292 278 C330 288 362 296 384 302" stroke="#B45309" strokeWidth={2.5} fill="none" />
+
+          {/* Bypass graft */}
+          <g opacity={bypass ? 1 : step === 1 ? 0.55 : 0.12} style={{ transition: 'opacity 0.7s ease' }}>
+            <path d={GRAFT_PATH} fill="none" stroke="#8E2A25" strokeWidth={31} strokeLinecap="round" strokeDasharray={bypass ? undefined : '14 10'} />
+            <path d={GRAFT_PATH} fill="none" stroke="#E8A19A" strokeWidth={17} strokeLinecap="round" strokeDasharray={bypass ? undefined : '14 10'} />
+            <circle cx={648} cy={118} r={13} fill="#8E2A25" stroke="#fff" strokeWidth={3} />
+            <circle cx={430} cy={430} r={13} fill="#8E2A25" stroke="#fff" strokeWidth={3} />
+          </g>
+          {(bypass || step === 1) && (
+            <>
+              <text x={842} y={286} fontSize={18} fontWeight={700} fill="#8E2A25">Bypass graft</text>
+              <path d="M838 292 C800 300 762 322 724 352" stroke="#8E2A25" strokeWidth={2.5} fill="none" />
+            </>
+          )}
+
+          {/* Flow */}
+          {nativeDot(-0.4)}
+          {nativeDot(-1.8)}
+          {bypass && graftDot(-0.5)}
+          {bypass && graftDot(-2.1)}
+          {bypass && graftDot(-3.6)}
+          {!bypass && (
+            <text x={520} y={540} textAnchor="middle" fontSize={16} fill="#B45309">
+              Flow stalls at the plaque — the muscle beyond it runs on fumes
+            </text>
+          )}
+          {bypass && (
+            <text x={520} y={540} textAnchor="middle" fontSize={16} fill="#23805A">
+              Blood takes the graft and re-enters the artery beyond the blockage
+            </text>
+          )}
+
+          <text x={118} y={448} fontSize={18} fontWeight={700} fill="#7E1F1A">Coronary artery</text>
+          <text x={742} y={470} fontSize={18} fontWeight={700} fill="#43536A">Heart muscle</text>
+        </svg>
+      }
+      panel={
+        <div>
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-sand p-1" role="tablist" aria-label="Before or after bypass">
+            <button
+              onClick={() => setMode('blocked')}
+              aria-pressed={!bypass}
+              className={`rounded-full px-3 py-2 font-display text-[0.85rem] font-bold transition-colors ${
+                !bypass ? 'bg-arterial-500 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+              }`}
+            >
+              Blocked artery
+            </button>
+            <button
+              onClick={() => setMode('bypass')}
+              aria-pressed={bypass}
+              className={`rounded-full px-3 py-2 font-display text-[0.85rem] font-bold transition-colors ${
+                bypass ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+              }`}
+            >
+              After bypass
+            </button>
+          </div>
+
+          <div className="mt-6">
+            <Meter label="Blood flow to the muscle beyond the blockage" value={flow} tone={bypass ? 'bg-success-500' : 'bg-amber-500'} />
+            <p className="mt-2 text-sm text-ink-500">
+              {bypass
+                ? 'The detour restores supply. The original blockage is still there — the graft routes around it.'
+                : 'A severe narrowing can leave the downstream muscle short of oxygen, especially when demand rises.'}
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-2">
+            {CABG_STEPS.map((s, i) => (
+              <button
+                key={s.title}
+                onClick={() => pickStep(i)}
+                aria-pressed={step === i}
+                className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                  step === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="font-display text-[0.95rem] font-bold text-ink-950">
+                  <span className="mr-2 font-mono text-sm text-arterial-500">{i + 1}</span>
+                  {s.title}
+                </span>
+                {step === i && <span className="mt-1 block text-sm leading-relaxed text-ink-700">{s.text}</span>}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-5">
+            <Button size="sm" variant="secondary" onClick={() => setPlaying((p) => !p)}>
+              {playing ? '❚❚ Pause flow' : '▶ Play flow'}
+            </Button>
+          </div>
+        </div>
+      }
+    />
+  )
+}

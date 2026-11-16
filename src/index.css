@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+/*
+  RUANG BEDAH — Design Tokens
+  Clinical precision: warm paper, deep ink, surgical teal,
+  arterial red / venous blue borrowed from the anatomy illustrations.
+*/
+@theme {
+  /* Surfaces */
+  --color-paper: #f7f4ee;
+  --color-surface: #ffffff;
+  --color-sand: #efe9dc;
+  --color-line: #e0d9c6;
+
+  /* Ink */
+  --color-ink-950: #16222e;
+  --color-ink-900: #22303c;
+  --color-ink-700: #43536a;
+  --color-ink-500: #6b7684;
+  --color-ink-400: #93a0b4;
+  --color-ink-100: #d7dee8;
+
+  /* Primary — surgical teal */
+  --color-primary-700: #0a5f66;
+  --color-primary-600: #0e7c86;
+  --color-primary-100: #cdebec;
+  --color-primary-50: #e6f4f5;
+
+  /* Arterial — oxygenated accent */
+  --color-arterial-600: #b93327;
+  --color-arterial-500: #d64545;
+  --color-arterial-50: #fcecea;
+
+  /* Venous — deoxygenated accent */
+  --color-venous-600: #4d6ea3;
+  --color-venous-500: #5f83c2;
+  --color-venous-50: #eaf0fa;
+
+  /* Signals */
+  --color-amber-600: #b45309;
+  --color-amber-500: #d97706;
+  --color-amber-50: #fdf3e3;
+  --color-success-600: #23805a;
+  --color-success-500: #2f9e6e;
+  --color-success-50: #e7f5ee;
+
+  /* Type */
+  --font-display: "Archivo", "Inter", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Shape */
+  --radius-card: 1rem;
+  --shadow-card: 0 1px 2px rgb(22 34 46 / 0.05), 0 8px 24px -12px rgb(22 34 46 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(22 34 46 / 0.06), 0 16px 40px -16px rgb(22 34 46 / 0.28);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-paper text-ink-900 font-sans antialiased;
+}
+
+/* Long-form article prose (wiki articles) */
+.prose-wiki {
+  @apply font-serif text-[1.075rem] leading-[1.85] text-ink-900;
+}
+.prose-wiki p + p {
+  margin-top: 1.1em;
+}
+.prose-wiki strong {
+  @apply font-semibold text-ink-950;
+}
+.prose-wiki em.latin {
+  @apply text-ink-700;
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion & interactivity (design system v0.2)                         */
+/* Motion must demonstrate a process — flow, contraction, a signal —   */
+/* never decoration for its own sake.                                  */
+/* ------------------------------------------------------------------ */
+
+/* SVG groups that scale around their own centre (heartbeat) */
+.svg-origin {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Hotspot ping ring on the active diagram marker (animates r) */
+@keyframes ping-ring {
+  0% {
+    r: 10;
+    opacity: 0.65;
+  }
+  100% {
+    r: 30;
+    opacity: 0;
+  }
+}
+.ping-ring {
+  animation: ping-ring 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Small beating heart motif (chapter cards, hero) */
+@keyframes heart-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.14);
+  }
+  24% {
+    transform: scale(1);
+  }
+  36% {
+    transform: scale(1.1);
+  }
+  52% {
+    transform: scale(1);
+  }
+}
+.heart-beat {
+  animation: heart-beat 1.7s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* EKG trace sweep */
+.ekg-anim {
+  stroke-dasharray: 260 1500;
+  animation: ekg-sweep 3.4s linear infinite;
+}
+@keyframes ekg-sweep {
+  to {
+    stroke-dashoffset: -1760;
+  }
+}
+
+/* Animated flow along an SVG vessel path */
+.flow-line {
+  stroke-dasharray: 12 16;
+  animation: dash-flow 1.1s linear infinite;
+}
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+/* Smooth transforms for SVG organ groups (breathing, pumping) */
+.svg-transition {
+  transition: transform 1.25s cubic-bezier(0.45, 0, 0.2, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* 3D flip cards (flashcards) */
+.flip-scene {
+  perspective: 1200px;
+}
+.flip-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.flip-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart-beat,
+  .ping-ring,
+  .ekg-anim,
+  .flow-line {
+    animation: none;
+  }
+  .svg-transition {
+    transition: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .flip-inner {
+    transition: none;
+  }
+}
