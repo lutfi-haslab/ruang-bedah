@@ -1555,7 +1555,7 @@ const MOUTH_IN_L = 'M655 128 C600 140 550 155 500 170 V230 V345 C520 385 580 410
 const MOUTH_OUT_R = 'M288 492 C305 468 330 448 360 435 C420 410 480 385 500 345 V230 V170 C550 155 600 140 655 128'
 const MOUTH_OUT_L = 'M712 492 C695 468 670 448 640 435 C580 410 520 385 500 345 V230 V170 C550 155 600 140 655 128'
 
-export function AirwayLab() {
+export function AirwayLab({ bare = false }: { bare?: boolean }) {
   const [station, setStation] = useState(0)
   const [playing, setPlaying] = useState(true)
   const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale')
@@ -1590,6 +1590,7 @@ export function AirwayLab() {
 
   return (
     <LabShell
+      bare={bare}
       diagram={
         <div>
           <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of air travelling from the nose through the pharynx, larynx, trachea and bronchi to the alveoli">

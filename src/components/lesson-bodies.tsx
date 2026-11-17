@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AirwayLab, AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab } from './lesson-labs'
+import AirwayLabCard from './AirwayLabCard'
 import LungsLabCard from './LungsLabCard'
 
 /* ------------------------------------------------------------------ */
@@ -766,7 +767,7 @@ export function ConductionLessonBody() {
 export function AirwayLessonBody() {
   return (
     <BodyShell
-      lab={<AirwayLab />}
+      lab={<AirwayLabCard />}
       chapterTitle="One Road In, Millions of Roads Out"
       chapter={
         <>
