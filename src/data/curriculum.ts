@@ -105,6 +105,7 @@ export const CURRICULUM: Subject[] = [
       {
         title: 'Surgical Foundations',
         lessons: [
+          L('Surgical Instruments: The Tools of the Operation', 'Interactive lab + reading', 10, 'available', '/lesson/surgical-instruments-the-tools-of-the-operation'),
           L('The Operating Room and Sterile Technique', 'Reading', 8),
           L('Incisions, Sutures, and Stitches', 'Reading + motion graphic', 9),
           L('Anaesthesia: Putting Physiology to Sleep', 'Reading', 9),

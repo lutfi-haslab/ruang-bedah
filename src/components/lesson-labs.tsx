@@ -1772,3 +1772,421 @@ export function AirwayLab({ bare = false }: { bare?: boolean }) {
     />
   )
 }
+
+/* ======================= Surgical instruments ======================= */
+
+type InstrumentId =
+  | 'scalpel'
+  | 'scissors'
+  | 'hemostat'
+  | 'needle-holder'
+  | 'forceps'
+  | 'allis'
+  | 'retractor'
+  | 'sponge'
+
+const INSTRUMENTS: Record<
+  InstrumentId,
+  { name: string; category: string; job: string; held: string; blurb: string }
+> = {
+  scalpel: {
+    name: 'Scalpel',
+    category: 'Cutting',
+    job: 'Makes the incision — the first cut through skin',
+    held: 'Like a pen, or flat in the palm for long cuts',
+    blurb:
+      'A handle and a disposable blade. It cuts with the belly of the blade in one smooth stroke — never sawing, never with the tip. The No. 10 blade handles most skin incisions.',
+  },
+  scissors: {
+    name: 'Mayo Scissors',
+    category: 'Cutting',
+    job: 'Cuts tissue, and (the heavy pair) sutures and dressings',
+    held: 'Thumb and ring finger in the rings, index finger guiding',
+    blurb:
+      'Scissors come in families: stout Mayo scissors for tough tissue and cutting sutures, delicate Metzenbaum scissors for fine structures. Using the wrong pair dulls them — and dull scissors tear instead of cut.',
+  },
+  hemostat: {
+    name: 'Haemostat',
+    category: 'Clamping',
+    job: 'Clamps blood vessels shut to stop bleeding',
+    held: 'Like scissors — and it locks with a ratchet click',
+    blurb:
+      'Also called an artery forceps or Kelly clamp. Its ratchet locks the jaws so the grip holds without squeezing. It crushes whatever it holds, so it belongs on vessels, never on tissue that must survive.',
+  },
+  'needle-holder': {
+    name: 'Needle Holder',
+    category: 'Suturing',
+    job: 'Grips the curved needle and drives it through tissue',
+    held: 'Like scissors; the needle is held two-thirds along its curve',
+    blurb:
+      'Looks like a haemostat, but its jaws are short, blunt, and cross-hatched to stop the needle rotating. Driving a needle with a haemostat instead damages both tools — the classic beginner mix-up.',
+  },
+  forceps: {
+    name: 'Tissue Forceps',
+    category: 'Grasping',
+    job: 'Picks up and steadies tissue while other tools work',
+    held: 'Like a pen, between thumb and two fingers — no lock',
+    blurb:
+      'Adson forceps are tweezers with tiny teeth at the tip that grip skin securely with minimal crush. Because they never lock, the grip is exactly as gentle as the hand holding them.',
+  },
+  allis: {
+    name: 'Allis Forceps',
+    category: 'Grasping',
+    job: 'Grips firm tissue that is being removed or held hard',
+    held: 'Like scissors, locking with a ratchet',
+    blurb:
+      'A locking clamp whose wide jaws end in sharp little teeth. It holds bowel, fascia, or a lump being excised with a grip that never slips — and never lets go kindly, so it stays off anything delicate.',
+  },
+  retractor: {
+    name: 'Retractor',
+    category: 'Exposing',
+    job: 'Holds the wound open so the surgeon can see and work',
+    held: 'By the assistant, or self-retaining with a frame',
+    blurb:
+      'Surgery happens in a hole, and retractors hold the hole open. The handheld Richardson retractor has a right-angled blade that hooks tissue aside; larger operations use self-retaining frames.',
+  },
+  sponge: {
+    name: 'Sponge Forceps',
+    category: 'Exposing',
+    job: 'Holds gauze sponges to mop blood and prep skin',
+    held: 'Like scissors, long enough to keep hands out of the field',
+    blurb:
+      'Long forceps ending in oval loops that grip a folded gauze sponge. The sponge does the touching — mopping blood, dabbing antiseptic — while fingers stay well away from the sterile field.',
+  },
+}
+
+const INSTRUMENT_ORDER: InstrumentId[] = [
+  'scalpel',
+  'scissors',
+  'hemostat',
+  'needle-holder',
+  'forceps',
+  'allis',
+  'retractor',
+  'sponge',
+]
+
+/** One instrument, drawn in local coords: handle left, tip right, ~200 x 90. */
+function InstrumentArt({ id }: { id: InstrumentId }) {
+  const steel = '#D9DEE4'
+  const edge = '#5A6B7C'
+  const sw = 6
+  const ringPair = (jaw: ReactNode) => (
+    <>
+      <ellipse cx={-80} cy={-23} rx={17} ry={11} transform="rotate(-18 -80 -23)" fill="none" stroke={edge} strokeWidth={sw} />
+      <ellipse cx={-80} cy={23} rx={17} ry={11} transform="rotate(18 -80 23)" fill="none" stroke={edge} strokeWidth={sw} />
+      <path d="M-66 -15 L6 -1" stroke={edge} strokeWidth={sw} strokeLinecap="round" />
+      <path d="M-66 15 L6 1" stroke={edge} strokeWidth={sw} strokeLinecap="round" />
+      <circle cx={8} cy={0} r={5.5} fill={edge} />
+      {jaw}
+    </>
+  )
+  switch (id) {
+    case 'scalpel':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          <rect x={-102} y={-8} width={120} height={16} rx={8} fill="#C3CAD1" stroke={edge} strokeWidth={4} />
+          <path d="M-72 -6 v12 M-58 -6 v12 M-44 -6 v12" stroke={edge} strokeWidth={3.5} />
+          <path d="M18 -6 L72 -14 C92 -7 92 7 72 14 L18 7 Z" fill="#EDF1F4" stroke={edge} strokeWidth={4} />
+        </g>
+      )
+    case 'scissors':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          {ringPair(
+            <>
+              <path d="M8 -1 L98 -9 L98 2 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M8 1 L98 9 L98 -2 Z" fill={steel} stroke={edge} strokeWidth={4} />
+            </>,
+          )}
+        </g>
+      )
+    case 'hemostat':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          {ringPair(
+            <>
+              <path d="M8 -1 L102 -4 L102 2 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M8 1 L102 4 L102 -2 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M68 -4 v7 M80 -4 v7 M92 -3 v6" stroke={edge} strokeWidth={3} />
+            </>,
+          )}
+          <path d="M-40 -9 l7 6 l-7 6 l7 6" fill="none" stroke={edge} strokeWidth={4} />
+        </g>
+      )
+    case 'needle-holder':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          {ringPair(
+            <>
+              <path d="M8 -2 L54 -6 L54 3 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M8 2 L54 6 L54 -3 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M24 -4 l10 7 M36 -5 l10 7" stroke={edge} strokeWidth={3} />
+            </>,
+          )}
+          <path d="M54 -3 C78 -32 106 -28 114 0" fill="none" stroke="#8A94A0" strokeWidth={4.5} />
+          <path d="M114 0 C126 18 118 27 100 27" fill="none" stroke="#0E7C86" strokeWidth={3} strokeDasharray="7 6" />
+        </g>
+      )
+    case 'forceps':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          <path d="M-100 -15 L94 -3 L94 2 L-100 -4 Z" fill={steel} stroke={edge} strokeWidth={4} />
+          <path d="M-100 15 L94 3 L94 -2 L-100 4 Z" fill={steel} stroke={edge} strokeWidth={4} />
+          <path d="M94 -3 L108 0 L94 3 Z" fill={steel} stroke={edge} strokeWidth={4} />
+          <path d="M-72 -11 v20 M-59 -10 v19 M-46 -9 v17" stroke={edge} strokeWidth={3.5} />
+        </g>
+      )
+    case 'allis':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          {ringPair(
+            <>
+              <path d="M8 -2 L66 -15 L100 -15 L100 -3 L66 3 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M8 2 L66 15 L100 15 L100 3 L66 -3 Z" fill={steel} stroke={edge} strokeWidth={4} />
+              <path d="M84 -15 v8 M93 -15 v8 M84 15 v-8 M93 15 v-8" stroke={edge} strokeWidth={3.5} />
+            </>,
+          )}
+        </g>
+      )
+    case 'retractor':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          <rect x={-102} y={-11} width={124} height={22} rx={10} fill="#C3CAD1" stroke={edge} strokeWidth={4} />
+          <path d="M-76 -6 v12 M-60 -6 v12 M-44 -6 v12" stroke={edge} strokeWidth={3.5} />
+          <path d="M22 -11 L56 -11 L56 42 L38 42 L38 5 L22 5 Z" fill={steel} stroke={edge} strokeWidth={4} />
+        </g>
+      )
+    case 'sponge':
+      return (
+        <g strokeLinejoin="round" strokeLinecap="round">
+          {ringPair(
+            <>
+              <ellipse cx={98} cy={-8} rx={16} ry={7.5} transform="rotate(-8 98 -8)" fill="none" stroke={edge} strokeWidth={5} />
+              <ellipse cx={98} cy={8} rx={16} ry={7.5} transform="rotate(8 98 8)" fill="none" stroke={edge} strokeWidth={5} />
+              <path d="M8 -1 L84 -6 M8 1 L84 6" stroke={edge} strokeWidth={5} />
+            </>,
+          )}
+        </g>
+      )
+  }
+}
+
+const SEQ_STEPS = [
+  {
+    title: 'Incise',
+    tool: 'Scalpel',
+    text: 'The operation opens with the scalpel: one smooth stroke with the belly of the blade, and the skin parts along a clean line.',
+  },
+  {
+    title: 'Clamp',
+    tool: 'Haemostat',
+    text: 'Cut vessels bleed. The haemostat snaps onto each one and its ratchet clicks shut — the vessel is held closed until it can be tied off.',
+  },
+  {
+    title: 'Retract',
+    tool: 'Retractor',
+    text: 'The wound is a hole that wants to close. The retractor hooks the edges apart and holds them, opening a window to work through.',
+  },
+  {
+    title: 'Suture',
+    tool: 'Needle holder',
+    text: 'At the end, the needle holder drives a curved needle through the tissue edges in an arc, and stitch by stitch the wound is closed.',
+  },
+]
+
+export function InstrumentsLab() {
+  const [mode, setMode] = useState<'explore' | 'sequence'>('explore')
+  const [selected, setSelected] = useState<InstrumentId>('scalpel')
+  const [step, setStep] = useState(0)
+  const [playing, setPlaying] = useState(true)
+
+  useEffect(() => {
+    if (mode !== 'sequence' || !playing) return
+    const t = setInterval(() => setStep((s) => (s + 1) % SEQ_STEPS.length), 2600)
+    return () => clearInterval(t)
+  }, [mode, playing])
+
+  const inst = INSTRUMENTS[selected]
+
+  const tray = (
+    <svg viewBox="0 0 1000 640" className="w-full" role="img" aria-label="A surgical instrument tray with eight instruments laid out on a green cloth">
+      <rect x={0} y={0} width={1000} height={640} rx={24} fill="#D8E4DA" />
+      <rect x={38} y={34} width={924} height={572} rx={18} fill="#EDF0F2" stroke="#B9C0C7" strokeWidth={3} />
+      <text x={500} y={78} textAnchor="middle" fontSize={19} fontWeight={700} fill="#6B7684" letterSpacing={3}>
+        THE INSTRUMENT TRAY — TAP A TOOL
+      </text>
+      {INSTRUMENT_ORDER.map((id, i) => {
+        const cx = 155 + (i % 4) * 230
+        const cy = 218 + Math.floor(i / 4) * 252
+        const isSel = selected === id
+        return (
+          <g key={id} onClick={() => setSelected(id)} className="cursor-pointer">
+            <rect x={cx - 112} y={cy - 92} width={224} height={184} rx={16} fill="transparent" />
+            {isSel && (
+              <rect x={cx - 112} y={cy - 92} width={224} height={184} rx={16} fill="#0E7C86" opacity={0.1} stroke="#0E7C86" strokeWidth={2.5} />
+            )}
+            <g transform={`translate(${cx} ${cy - 16})`}>
+              <g className="svg-transition" style={{ transform: `translateY(${isSel ? -7 : 0}px)` }}>
+                <InstrumentArt id={id} />
+              </g>
+            </g>
+            <text x={cx} y={cy + 62} textAnchor="middle" fontSize={21} fontWeight={700} fill={isSel ? '#0A5F66' : '#43536A'}>
+              {INSTRUMENTS[id].name}
+            </text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+
+  const sequence = (
+    <svg viewBox="0 0 1000 640" className="w-full" role="img" aria-label="Animated sequence of four instruments at work: scalpel incising, haemostat clamping, retractor holding the wound open, needle holder suturing">
+      <rect x={0} y={0} width={1000} height={640} rx={24} fill="#F3EDE2" />
+      {/* tissue block */}
+      <g className="svg-transition" style={{ transform: `translateX(${step >= 2 ? -46 : 0}px)` }}>
+        <rect x={130} y={252} width={360} height={150} rx={64} fill="#EFC39B" />
+      </g>
+      <g className="svg-transition" style={{ transform: `translateX(${step >= 2 ? 46 : 0}px)` }}>
+        <rect x={510} y={252} width={360} height={150} rx={64} fill="#EFC39B" />
+      </g>
+      {step >= 2 && <rect x={452} y={268} width={96} height={118} rx={20} fill="#C4553B" />}
+      {/* incision line */}
+      {step === 0 ? (
+        <path d="M215 327 H785" stroke="#B93327" strokeWidth={6} strokeLinecap="round" strokeDasharray="16 12" className="flow-line" fill="none" />
+      ) : (
+        <path d="M215 327 H785" stroke="#8F2B20" strokeWidth={6} strokeLinecap="round" fill="none" />
+      )}
+      {/* a vessel to clamp */}
+      <circle cx={500} cy={327} r={17} fill="#D64545" stroke="#8F2B20" strokeWidth={4} />
+      {/* stitches */}
+      {step >= 3 && (
+        <g stroke="#43536A" strokeWidth={5} strokeLinecap="round">
+          <path d="M330 306 l26 42 M356 306 l-26 42" />
+          <path d="M640 306 l26 42 M666 306 l-26 42" />
+        </g>
+      )}
+      {/* the tool at work */}
+      {step === 0 && (
+        <g transform="translate(300 218) rotate(-16)">
+          <InstrumentArt id="scalpel" />
+        </g>
+      )}
+      {step === 1 && (
+        <g transform="translate(500 205)">
+          <g className="svg-transition" style={{ transform: 'rotate(-4deg)', transformOrigin: 'center' }}>
+            <InstrumentArt id="hemostat" />
+          </g>
+        </g>
+      )}
+      {step === 2 && (
+        <g transform="translate(742 218)">
+          <InstrumentArt id="retractor" />
+        </g>
+      )}
+      {step === 3 && (
+        <g transform="translate(618 208) rotate(-8)">
+          <InstrumentArt id="needle-holder" />
+        </g>
+      )}
+      <text x={500} y={500} textAnchor="middle" fontSize={22} fontWeight={700} fill="#43536A">
+        Step {step + 1} of 4 — {SEQ_STEPS[step].title}: the {SEQ_STEPS[step].tool.toLowerCase()} at work
+      </text>
+      <text x={500} y={540} textAnchor="middle" fontSize={17} fill="#6B7684">
+        The same four verbs run almost every operation: cut, clamp, hold, sew.
+      </text>
+    </svg>
+  )
+
+  return (
+    <LabShell
+      diagram={mode === 'explore' ? tray : sequence}
+      panel={
+        <div>
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-sand p-1" role="tablist" aria-label="Lab mode">
+            {(
+              [
+                ['explore', 'Explore the tray'],
+                ['sequence', 'Watch them work'],
+              ] as const
+            ).map(([m, label]) => (
+              <button
+                key={m}
+                role="tab"
+                aria-selected={mode === m}
+                onClick={() => setMode(m)}
+                className={`rounded-full px-3 py-2 font-display text-sm font-bold transition-colors ${
+                  mode === m ? 'bg-primary-600 text-white shadow' : 'text-ink-700 hover:text-ink-950'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {mode === 'explore' ? (
+            <div className="mt-6">
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary-700">{inst.category}</p>
+              <h3 className="mt-1 font-display text-[1.65rem] font-extrabold tracking-tight text-ink-950">{inst.name}</h3>
+              <p className="mt-3 text-[0.98rem] leading-relaxed text-ink-700">{inst.blurb}</p>
+              <dl className="mt-5 space-y-3 text-sm">
+                <div className="grid grid-cols-[86px_1fr] gap-3">
+                  <dt className="font-display font-bold text-ink-950">Job</dt>
+                  <dd className="text-ink-700">{inst.job}</dd>
+                </div>
+                <div className="grid grid-cols-[86px_1fr] gap-3">
+                  <dt className="font-display font-bold text-ink-950">Held</dt>
+                  <dd className="text-ink-700">{inst.held}</dd>
+                </div>
+              </dl>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {INSTRUMENT_ORDER.map((id) => (
+                  <Chip key={id} tone={id === selected ? 'open' : 'sand'}>
+                    {INSTRUMENTS[id].name}
+                  </Chip>
+                ))}
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-ink-500">
+                Eight instruments, four verbs: cutting, clamping, grasping, exposing — plus the
+                one tool whose only job is sewing.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary-700">
+                Step {step + 1} of 4 · {SEQ_STEPS[step].tool}
+              </p>
+              <h3 className="mt-1 font-display text-[1.65rem] font-extrabold tracking-tight text-ink-950">{SEQ_STEPS[step].title}</h3>
+              <p className="mt-3 text-[0.98rem] leading-relaxed text-ink-700">{SEQ_STEPS[step].text}</p>
+              <div className="mt-5 grid gap-2">
+                {SEQ_STEPS.map((s, i) => (
+                  <button
+                    key={s.title}
+                    onClick={() => {
+                      setStep(i)
+                      setPlaying(false)
+                    }}
+                    className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                      i === step ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/50'
+                    }`}
+                  >
+                    <span className="font-display text-sm font-bold text-ink-950">
+                      <span className="mr-2 font-mono text-xs text-arterial-500">{i + 1}</span>
+                      {s.title}
+                      <span className="ml-2 font-sans text-xs font-medium text-ink-500">{s.tool}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-5">
+                <Button variant="secondary" size="sm" onClick={() => setPlaying((p) => !p)}>
+                  {playing ? '❚❚ Pause sequence' : '▶ Play sequence'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      }
+    />
+  )
+}

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, InstrumentsLab } from './lesson-labs'
 import AirwayLabCard from './AirwayLabCard'
 import LungsLabCard from './LungsLabCard'
 
@@ -893,6 +893,156 @@ export function AirwayLessonBody() {
           The airway is a filter, a heater, and a humidifier before it is a pipe — and a branching
           tree before it is a destination. Only at the very end, in the alveoli, does the air
           finally meet the blood.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------- Surgical instruments ------------------- */
+
+export function InstrumentsLessonBody() {
+  return (
+    <BodyShell
+      lab={<InstrumentsLab />}
+      chapterTitle="Eight Tools That Do Almost Everything"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Walk into any operating room in the world and the scene on the tray is recognisable:
+              a few dozen steel instruments, laid out in order on a green cloth. There are thousands
+              of specialised instruments in the catalogues, but almost every operation is performed
+              with a small cast of generalists — and they sort neatly by verb. Some{' '}
+              <strong>cut</strong>, some <strong>clamp</strong>, some <strong>grasp</strong>, some{' '}
+              <strong>hold the wound open</strong>, and one exists purely to <strong>sew</strong>.
+              Learn the verbs and the tray stops being a pile of metal and becomes a sentence you
+              can read.
+            </p>
+            <p>
+              The cutting pair is the <strong>scalpel</strong> and the <strong>scissors</strong>. The
+              scalpel — a handle with a disposable blade — makes the incision, cutting with the
+              belly of the blade in a single stroke. Scissors continue the work inside: stout{' '}
+              <strong>Mayo scissors</strong> for tough tissue, fine <strong>Metzenbaum scissors</strong>{' '}
+              for delicate structures. Every cut creates the next problem, though: cut vessels
+              bleed, and the wound keeps trying to close.
+            </p>
+            <p>
+              Bleeding is answered by the <strong>haemostat</strong>, a clamp whose jaws lock with a
+              ratchet — click, and the vessel stays shut without anyone squeezing. Holding tissue is
+              the forceps family&rsquo;s work, and the family splits by temperament.{' '}
+              <strong>Tissue forceps</strong> are tweezers held like a pen: no lock, no crush, just
+              the surgeon&rsquo;s own pressure. The <strong>Allis forceps</strong> is the opposite —
+              a locking clamp with teeth, built for a grip that never slips on tissue that is being
+              removed anyway. Between them sits the golden rule of grasping: the gentler the tissue&rsquo;s
+              future, the gentler the tool allowed to touch it.
+            </p>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-instruments-tray.jpg"
+              alt="A real set of surgical instruments — scalpel, scissors, forceps, clamps, and a probe — laid out on green surgical cloth in a steel tray"
+              caption="Real instruments reference — a basic surgical set laid out on the green cloth, exactly as the scrub nurse arranges it: scalpel, scissors, forceps, and clamps in working order (a circumcision set — the same general instruments used across surgery)."
+              credit="Photo by Dan Bollinger · CC BY-SA 4.0 · via Wikimedia Commons"
+            />
+          </div>
+          <div className="prose-wiki mt-6 max-w-3xl">
+            <p>
+              Seeing is the <strong>retractor</strong>&rsquo;s department: its right-angled blade
+              hooks the wound edges apart and holds them, turning a slit into a workspace. Beside
+              it, <strong>sponge forceps</strong> grip folded gauze so the sponge — never a finger —
+              mops blood and paints antiseptic inside the sterile field. And when the work is done,
+              the <strong>needle holder</strong> closes the story: short, cross-hatched jaws built
+              to drive a curved needle through tissue in an arc, stitch by stitch.
+            </p>
+            <p>
+              One ritual guards the whole cast: <strong>the count</strong>. Before the operation,
+              before closing, and at the end, the scrub nurse and circulating nurse count
+              instruments, sponges, and sharps aloud, together, against the number recorded at the
+              start. If the count is wrong, the wound is not closed until the missing item is
+              found. Steel is easy to leave behind in a body cavity, and a retained sponge or
+              instrument is one of surgery&rsquo;s classic never-events — prevented not by memory,
+              but by arithmetic spoken out loud.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Instrument', 'Family', 'Defining job']}
+              rows={[
+                ['Scalpel', 'Cutting', 'Makes the incision with the belly of the blade'],
+                ['Mayo scissors', 'Cutting', 'Cuts tough tissue, sutures, and dressings'],
+                ['Haemostat', 'Clamping', 'Locks onto vessels to stop bleeding'],
+                ['Tissue forceps', 'Grasping', 'Steadies tissue gently, held like a pen'],
+                ['Allis forceps', 'Grasping', 'Toothed locking grip on tissue being removed'],
+                ['Retractor', 'Exposing', 'Holds the wound open to create a workspace'],
+                ['Sponge forceps', 'Exposing', 'Grips gauze to mop and prep inside the field'],
+                ['Needle holder', 'Suturing', 'Drives the curved needle, stitch by stitch'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Mayo stand">
+              The height-adjustable tray table that stands over the patient, holding the
+              instruments currently in use within the surgeon&rsquo;s reach. Everything on it is
+              inside the sterile field — one touch from unsterile hands and the field is broken.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <Callout kind="info">
+              Many instruments carry the names of the surgeons who designed them — Kelly, Mayo,
+              Allis, Adson. In theatre, tools are asked for by name, often by a silent open hand
+              alone: the scrub nurse reads the hand, and the right instrument lands in it, handle
+              first, ready to use.
+            </Callout>
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Scalpel', latin: 'scalpellum', back: 'The cutting tool: a handle plus a disposable blade. It cuts with the belly of the blade in one smooth stroke — the No. 10 blade makes most skin incisions.' },
+        { term: 'Haemostat', latin: 'forceps haemostatica', back: 'A locking clamp for blood vessels. Its ratchet clicks shut and holds without squeezing. It crushes what it grips, so it never holds a needle and never clamps tissue that must survive.' },
+        { term: 'Needle holder', latin: 'porta acus', back: 'Short, blunt, cross-hatched jaws made to grip a curved suture needle without it rotating. Driving a needle with a haemostat instead is the classic beginner mix-up — it damages both instruments.' },
+        { term: 'The count', latin: 'numeratio instrumentorum', back: 'Instruments, sponges, and sharps are counted aloud before the operation, before closing, and at the end. A wrong count stops the closing until the missing item is found.' },
+      ]}
+      questions={[
+        {
+          q: 'A small vessel starts bleeding in the wound. Which instrument stops it precisely?',
+          options: [
+            'The Allis forceps',
+            'The haemostat',
+            'The sponge forceps',
+            'The retractor',
+          ],
+          answer: 1,
+          why: 'The haemostat is the locking clamp: it snaps onto the vessel and its ratchet holds it shut until the vessel can be tied off. The Allis would shred it, and the sponge forceps only mops.',
+        },
+        {
+          q: 'Why must a suture needle be driven with a needle holder rather than a haemostat?',
+          options: [
+            'The needle holder is longer, so it reaches deeper',
+            'Its short, cross-hatched jaws grip the needle without rotating or damaging it',
+            'Haemostats are never sterile enough for sutures',
+            'The needle holder cuts the thread afterwards',
+          ],
+          answer: 1,
+          why: 'A needle holder is built for exactly one grip: short blunt jaws with a cross-hatched face that stop the curved needle twisting mid-stitch. A haemostat\'s fine jaws and ratchet are damaged by the needle — and the needle by them.',
+        },
+        {
+          q: 'During the closing count, one sponge is missing. What happens next?',
+          options: [
+            'The wound is closed anyway; sponges dissolve',
+            'It is noted in the chart and the operation continues',
+            'The wound stays open while the team recounts and searches the field',
+            'The anaesthetist is asked to check the chart',
+          ],
+          answer: 2,
+          why: 'A retained sponge is a never-event. The count is repeated and the field, drapes, and floor are searched; the wound is not closed until the sponge is found or imaging proves it is not inside the patient.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The tray looks like a hundred tools, but it speaks four verbs — cut, clamp, hold, sew.
+          Master those, plus the arithmetic of the count, and you can follow almost any operation
+          ever performed.
         </Callout>
       }
     />
