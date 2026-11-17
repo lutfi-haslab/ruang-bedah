@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab } from './lesson-labs'
+import { AirwayLab, AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab } from './lesson-labs'
 import LungsLabCard from './LungsLabCard'
 
 /* ------------------------------------------------------------------ */
@@ -755,6 +755,143 @@ export function ConductionLessonBody() {
           The heart&rsquo;s wiring is tuned, not just connected: slow where a pause is needed (the
           AV node), fast where synchrony matters (the His–Purkinje system). Rhythm is not speed —
           it is timing.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ----------------------- The airway: nose to alveoli ----------------------- */
+
+export function AirwayLessonBody() {
+  return (
+    <BodyShell
+      lab={<AirwayLab />}
+      chapterTitle="One Road In, Millions of Roads Out"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Before a single molecule of oxygen reaches your blood, the air you breathe travels
+              through about <strong>23 generations of branching tubes</strong> — from one nose to
+              roughly 300 million alveoli. Almost all of that journey is preparation, not exchange:
+              everything from the nose to the terminal bronchioles is the{' '}
+              <strong>conducting zone</strong>, a road whose job is to deliver air in the right
+              condition. Only the last stretch, the <strong>respiratory zone</strong>, actually
+              trades gases with the blood.
+            </p>
+            <p>
+              The nose does the conditioning. Its <strong>conchae</strong> — three scroll-shaped
+              shelves of bone on each side — force incoming air through narrow, winding passages
+              lined with warm, wet mucosa, so the air is heated to near body temperature and
+              humidified on the way in. The same mucosa is sticky with mucus, which traps dust,
+              pollen, and microbes; <strong>cilia</strong>, tiny beating hairs, then sweep the loaded
+              mucus steadily toward the pharynx to be swallowed — the{' '}
+              <strong>mucociliary escalator</strong>. Breathe through your mouth and all of this is
+              skipped: the air arrives colder, drier, and dirtier, which is why a blocked nose
+              leaves your throat raw by morning.
+            </p>
+            <p>
+              The <strong>pharynx</strong> is the crossroads where air and food share one tube, and
+              the <strong>larynx</strong> is the guard posted at the fork. When you swallow, the{' '}
+              <strong>epiglottis</strong> — a flap of elastic cartilage — folds down over the larynx
+              and the vocal folds close, so food is steered into the esophagus instead of the
+              airway. The larynx earns its other name, the voice box, because those same folds
+              vibrate as air passes, turning breath into sound. Below it, the{' '}
+              <strong>trachea</strong> keeps the road open with its C-shaped cartilage rings, and at
+              the <strong>carina</strong> the road forks into the two main bronchi — the right one
+              wider, shorter, and steeper, which is why inhaled objects almost always land on the
+              right.
+            </p>
+            <p>
+              Then the tree takes over. Each bronchus divides again and again, the tubes getting
+              narrower while their <em>total</em> cross-section grows — so the air slows down, the
+              way a river slows as it spreads into a delta. That slowness matters: by the time air
+              reaches the alveoli it is barely moving, which gives diffusion time to work. The
+              alveoli themselves are the payoff — about 300 million sacs, each about 0.2–0.3 mm
+              across, with a combined surface of roughly 70 square metres, wrapped in capillaries.
+              Across walls one cell thick, oxygen slips into the blood and carbon dioxide slips out.
+              A film of <strong>surfactant</strong> keeps the sacs from sticking shut at the end of
+              each breath out.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Station', 'Size', 'Job']}
+              rows={[
+                ['Nasal cavity', 'a few mm between the conchae', 'Warm, moisten, and filter the air'],
+                ['Pharynx', '≈ 12 cm long', 'Shared passage — route air down, food across'],
+                ['Larynx', '≈ 4–5 cm long', 'Make sound; guard the airway when swallowing'],
+                ['Trachea', '≈ 18–20 mm across', 'Hold the airway open with cartilage rings'],
+                ['Main bronchi', '≈ 10–12 mm across', 'Split the air, right and left'],
+                ['Bronchioles → alveoli', '≤ 1 mm → ≈ 0.2 mm', 'Deliver air slowly; exchange gases'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Mucociliary escalator" latin="scala mucociliaris">
+              The conveyor belt of the airways: a layer of sticky mucus that traps dust and microbes,
+              carried steadily upward by millions of beating cilia toward the pharynx, where it is
+              swallowed. It is the airway’s self-cleaning system — and the reason a smoker’s morning
+              cough exists: smoke paralyses the cilia, so the mucus has to be coughed out instead.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-airway-gray994.png"
+              alt="Gray's Anatomy plate 994: a sagittal section through the nose, mouth, pharynx, and larynx, with the conchae, epiglottis, vocal folds, and trachea labelled"
+              caption="Real anatomy reference — a sagittal section through the nose, mouth, pharynx, and larynx: the upper airway the lab traces, with the conchae, the epiglottis, the vocal folds, and the top of the trachea all labelled from a real dissection."
+              credit="Gray's Anatomy (1918), plate 994 · Public domain · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Carina', latin: 'carina tracheae', back: 'The keel-shaped ridge at the base of the trachea where it splits into the two main bronchi. Touching it triggers a violent cough — the airway’s last alarm.' },
+        { term: 'Epiglottis', latin: 'epiglottis', back: 'A flap of elastic cartilage that folds down over the larynx when you swallow, steering food into the esophagus instead of the airway.' },
+        { term: 'Conchae', latin: 'conchae nasales', back: 'Curved shelves of bone inside the nasal cavity. They force incoming air through narrow, warm, moist passages so it is conditioned before it reaches the lungs.' },
+        { term: 'Surfactant', latin: 'surfactans', back: 'A soap-like film of lipids and proteins coating the alveoli. It lowers surface tension so the tiny sacs do not collapse at the end of each breath out.' },
+      ]}
+      questions={[
+        {
+          q: 'What do the nasal conchae do to incoming air?',
+          options: [
+            'They close the airway when you swallow',
+            'They force it through narrow, warm, moist passages so it is conditioned',
+            'They produce the voice',
+            'They filter blood before it reaches the lungs',
+          ],
+          answer: 1,
+          why: 'The conchae turn the nasal cavity into a winding, warm, wet corridor — air leaves it near body temperature, humidified, and with dust trapped in mucus.',
+        },
+        {
+          q: 'Why do inhaled objects usually end up in the right lung?',
+          options: [
+            'The left bronchus is blocked by the heart',
+            'The right main bronchus is wider, shorter, and more vertical',
+            'Air only flows to the right side',
+            'The right lung has more lobes',
+          ],
+          answer: 1,
+          why: 'The right main bronchus is the straighter continuation of the trachea — an object falling down the airway follows the wider, steeper path.',
+        },
+        {
+          q: 'What keeps the trachea from collapsing when you breathe in?',
+          options: [
+            'The pleura pulling it open',
+            'Muscles squeezing it from outside',
+            'C-shaped rings of hyaline cartilage in its wall',
+            'Air pressure from the lungs alone',
+          ],
+          answer: 2,
+          why: 'Sixteen to twenty C-shaped cartilage rings act like the ribs of a hose, holding the windpipe open while the esophagus expands behind the open back of each C.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The airway is a filter, a heater, and a humidifier before it is a pipe — and a branching
+          tree before it is a destination. Only at the very end, in the alveoli, does the air
+          finally meet the blood.
         </Callout>
       }
     />

@@ -15,6 +15,7 @@ lesson caption.
 | ref-conduction-openstax.jpg | Conduction system of the heart | OpenStax, *Anatomy & Physiology*, fig. 2018 — File:2018_Conduction_System_of_Heart.jpg | CC BY 3.0 |
 | ref-appendix-gray536.png | Caecum & vermiform appendix, arteries | Gray's Anatomy (1918), plate 536 — File:Gray536.png | Public domain |
 | ref-mcburney.jpg | McBurney's point on a real abdomen | Photo by Steven Fruitsmaak — File:McBurney's_point.jpg | CC BY-SA 3.0 |
+| ref-airway-gray994.png | Sagittal section, nose, mouth, pharynx, larynx | Gray's Anatomy (1918), plate 994 — File:Gray994.png | Public domain |
 
 Note: like `heart-anterior.png`, these binary files are deployed to
 Cloudflare Pages but are not part of the GitHub snapshot push (text only).

@@ -1473,3 +1473,301 @@ export function ConductionLab() {
     />
   )
 }
+
+/* ============================ The airway ============================ */
+
+type AirwayStationId = 'nose' | 'pharynx' | 'larynx' | 'trachea' | 'bronchi' | 'alveoli'
+
+const AIRWAY_STATIONS: Record<
+  AirwayStationId,
+  { name: string; latin: string; diameter: string; width: number; job: string; blurb: string; dot: { x: number; y: number } }
+> = {
+  nose: {
+    name: 'Nose',
+    latin: 'cavitas nasi',
+    diameter: 'a few mm between the conchae',
+    width: 100,
+    job: 'Warm · moisten · filter',
+    blurb:
+      'Air enters through the nostrils into the nasal cavity, where three curved shelves of bone — the conchae — force it through narrow passages over warm, wet mucosa. Dust and microbes stick to the mucus; cilia sweep the loaded mucus toward the throat to be swallowed. By the time air leaves the nose it is close to body temperature and nearly saturated with water.',
+    dot: { x: 500, y: 78 },
+  },
+  pharynx: {
+    name: 'Pharynx',
+    latin: 'pharynx',
+    diameter: '≈ 12 cm long, 2–3 cm across',
+    width: 85,
+    job: 'The crossroads',
+    blurb:
+      'The throat is a muscular tube shared by air and food, in three parts: nasopharynx (behind the nose), oropharynx (behind the mouth), and laryngopharynx (down to the larynx). Air passes through all three on its way down — and food crosses the same space on its way to the esophagus, which is why swallowing and breathing must take turns.',
+    dot: { x: 500, y: 148 },
+  },
+  larynx: {
+    name: 'Larynx',
+    latin: 'larynx',
+    diameter: '≈ 4–5 cm long',
+    width: 62,
+    job: 'Voice + guard',
+    blurb:
+      'The voice box is a cartilaginous box between the pharynx and the trachea. Its vocal folds vibrate as air passes, making sound — and its epiglottis, a flap of elastic cartilage, folds down over the entrance whenever you swallow, steering food into the esophagus instead of the airway. The larynx is both an instrument and a gatekeeper.',
+    dot: { x: 500, y: 206 },
+  },
+  trachea: {
+    name: 'Trachea',
+    latin: 'trachea',
+    diameter: '≈ 18–20 mm across, 10–12 cm long',
+    width: 55,
+    job: 'Hold the road open',
+    blurb:
+      'The windpipe is held open by 16–20 C-shaped rings of hyaline cartilage, stacked like the ribs of a vacuum-cleaner hose. The open back of each C faces the esophagus, so food can still pass behind it. At its base the trachea splits at a ridge called the carina — touch it and you cough, hard: it is the airway’s last alarm.',
+    dot: { x: 500, y: 290 },
+  },
+  bronchi: {
+    name: 'Bronchi',
+    latin: 'bronchi principales',
+    diameter: '≈ 10–12 mm across',
+    width: 30,
+    job: 'Split the air in two',
+    blurb:
+      'At the carina the trachea divides into the right and left main bronchi, one per lung. The right bronchus is wider, shorter, and more vertical than the left — which is why an inhaled peanut or tooth almost always ends up in the right lung. Inside each lung the bronchi keep dividing, about 23 generations in total, each branch narrower than the last.',
+    dot: { x: 596, y: 398 },
+  },
+  alveoli: {
+    name: 'Alveoli',
+    latin: 'alveoli pulmonis',
+    diameter: '≈ 0.2–0.3 mm each',
+    width: 4,
+    job: 'Exchange gases',
+    blurb:
+      'At the end of the branching tree sit about 300 million alveoli — tiny grape-like sacs with walls one cell thick, wrapped in capillaries. Their combined surface is roughly 70 square metres, about half a badminton court. Oxygen crosses into the blood here and carbon dioxide crosses out. A film of surfactant keeps the sacs from collapsing at the end of each breath.',
+    dot: { x: 712, y: 490 },
+  },
+}
+
+const AIRWAY_ORDER: AirwayStationId[] = ['nose', 'pharynx', 'larynx', 'trachea', 'bronchi', 'alveoli']
+
+const AIR_IN_R = 'M500 28 C500 70 500 100 500 130 V170 V230 V345 C480 385 420 410 360 435 C330 448 305 468 288 492'
+const AIR_IN_L = 'M500 28 C500 70 500 100 500 130 V170 V230 V345 C520 385 580 410 640 435 C670 448 695 468 712 492'
+const AIR_OUT_R = 'M288 492 C305 468 330 448 360 435 C420 410 480 385 500 345 V230 V170 V130 C500 100 500 70 500 28'
+const AIR_OUT_L = 'M712 492 C695 468 670 448 640 435 C580 410 520 385 500 345 V230 V170 V130 C500 100 500 70 500 28'
+const MOUTH_IN_R = 'M655 128 C600 140 550 155 500 170 V230 V345 C480 385 420 410 360 435 C330 448 305 468 288 492'
+const MOUTH_IN_L = 'M655 128 C600 140 550 155 500 170 V230 V345 C520 385 580 410 640 435 C670 448 695 468 712 492'
+const MOUTH_OUT_R = 'M288 492 C305 468 330 448 360 435 C420 410 480 385 500 345 V230 V170 C550 155 600 140 655 128'
+const MOUTH_OUT_L = 'M712 492 C695 468 670 448 640 435 C580 410 520 385 500 345 V230 V170 C550 155 600 140 655 128'
+
+export function AirwayLab() {
+  const [station, setStation] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale')
+  const [intake, setIntake] = useState<'nose' | 'mouth'>('nose')
+  const info = AIRWAY_STATIONS[AIRWAY_ORDER[station]]
+  const inhale = phase === 'inhale'
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStation((s) => (s + 1) % AIRWAY_ORDER.length), 2400)
+    return () => clearInterval(t)
+  }, [playing])
+
+  const pathR =
+    intake === 'nose' ? (inhale ? AIR_IN_R : AIR_OUT_R) : inhale ? MOUTH_IN_R : MOUTH_OUT_R
+  const pathL =
+    intake === 'nose' ? (inhale ? AIR_IN_L : AIR_OUT_L) : inhale ? MOUTH_IN_L : MOUTH_OUT_L
+
+  const airDot = (path: string, begin: number) => (
+    <circle r={8} fill="#0E7C86" stroke="#fff" strokeWidth={2} opacity={0.9}>
+      {playing && <animateMotion dur="3.4s" begin={`${begin}s`} repeatCount="indefinite" path={path} />}
+    </circle>
+  )
+
+  const alveoliCluster = (cx: number, cy: number) => (
+    <g opacity={0.9}>
+      <circle cx={cx} cy={cy} r={14} fill="#F6C6BB" stroke="#B6544A" strokeWidth={2.5} />
+      <circle cx={cx + 17} cy={cy + 9} r={10} fill="#F6C6BB" stroke="#B6544A" strokeWidth={2.5} />
+      <circle cx={cx - 15} cy={cy + 11} r={9} fill="#F6C6BB" stroke="#B6544A" strokeWidth={2.5} />
+    </g>
+  )
+
+  return (
+    <LabShell
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of air travelling from the nose through the pharynx, larynx, trachea and bronchi to the alveoli">
+            {/* Esophagus — the food road, behind the airway */}
+            <path d="M538 168 C585 215 602 262 606 305" fill="none" stroke="#C9B79E" strokeWidth={14} strokeLinecap="round" strokeDasharray="10 9" opacity={0.8} />
+            <text x={628} y={252} fontSize={16} fontWeight={700} fill="#8A6A54">Esophagus — food, not air</text>
+
+            {/* Nasal cavity */}
+            <g opacity={intake === 'nose' ? 1 : 0.35} style={{ transition: 'opacity 0.6s ease' }}>
+              <path d="M430 58 C430 40 570 40 570 58 L570 92 C570 114 542 122 500 122 C458 122 430 114 430 92 Z" fill="#F3E3D3" stroke="#D9AE94" strokeWidth={3} />
+              {[70, 88, 106].map((y) => (
+                <path key={y} d={`M452 ${y} C478 ${y - 8} 522 ${y + 8} 548 ${y}`} fill="none" stroke="#C08A76" strokeWidth={4} strokeLinecap="round" />
+              ))}
+              <text x={500} y={22} textAnchor="middle" fontSize={16} fontWeight={700} fill="#8A6A54">Nostrils — air in</text>
+              <path d="M500 30 L492 44 M500 30 L508 44" stroke="#8A6A54" strokeWidth={2.5} fill="none" />
+            </g>
+
+            {/* Mouth — the alternative entrance */}
+            <g opacity={intake === 'mouth' ? 1 : 0.45} style={{ transition: 'opacity 0.6s ease' }}>
+              <ellipse cx={655} cy={128} rx={44} ry={17} fill="#E8B4A0" stroke="#B0574F" strokeWidth={3} />
+              <path d="M622 128 C640 136 670 136 688 128" fill="none" stroke="#8A4A3D" strokeWidth={3} strokeLinecap="round" />
+              <text x={655} y={100} textAnchor="middle" fontSize={16} fontWeight={700} fill="#8A4A3D">Mouth</text>
+              <path d="M620 136 C580 150 540 155 512 160" fill="none" stroke="#B0574F" strokeWidth={3} strokeDasharray="7 6" opacity={intake === 'mouth' ? 1 : 0} />
+            </g>
+
+            {/* Pharynx */}
+            <rect x={468} y={118} width={64} height={58} rx={26} fill="#D8C9B8" stroke="#A98F74" strokeWidth={3} />
+            <text x={415} y={152} textAnchor="end" fontSize={17} fontWeight={700} fill="#43536A">Pharynx</text>
+            <path d="M420 148 C438 150 452 150 464 150" stroke="#43536A" strokeWidth={2} fill="none" />
+
+            {/* Larynx with epiglottis flap */}
+            <rect x={462} y={176} width={76} height={60} rx={16} fill="#B9D6D8" stroke="#0E7C86" strokeWidth={3} />
+            <path d="M500 176 L484 152 L516 152 Z" fill="#E58A7B" stroke="#B6544A" strokeWidth={2.5} />
+            <path d="M474 202 H526 M474 214 H526" stroke="#0E7C86" strokeWidth={4} strokeLinecap="round" opacity={0.6} />
+            <text x={415} y={212} textAnchor="end" fontSize={17} fontWeight={700} fill="#43536A">Larynx</text>
+            <path d="M420 208 C434 210 448 210 458 210" stroke="#43536A" strokeWidth={2} fill="none" />
+            <text x={585} y={212} fontSize={15} fill="#6B7684">vocal folds · epiglottis</text>
+
+            {/* Trachea with C-rings */}
+            <rect x={470} y={236} width={60} height={110} rx={26} fill="#B9D6D8" stroke="#0E7C86" strokeWidth={3} />
+            {[256, 281, 306, 331].map((y) => (
+              <path key={y} d={`M476 ${y} h48`} stroke="#0E7C86" strokeWidth={4} opacity={0.5} />
+            ))}
+            <text x={415} y={296} textAnchor="end" fontSize={17} fontWeight={700} fill="#43536A">Trachea</text>
+            <path d="M420 292 C434 294 448 294 466 294" stroke="#43536A" strokeWidth={2} fill="none" />
+            <text x={585} y={296} fontSize={15} fill="#6B7684">C-shaped cartilage rings</text>
+
+            {/* Carina + bronchi */}
+            <path d="M500 346 C470 385 415 408 360 432" fill="none" stroke="#A9C7C9" strokeWidth={34} strokeLinecap="round" />
+            <path d="M500 346 C530 385 585 408 640 432" fill="none" stroke="#A9C7C9" strokeWidth={34} strokeLinecap="round" />
+            <path d="M500 346 L488 368 M500 346 L512 368" stroke="#0E7C86" strokeWidth={4} strokeLinecap="round" />
+            <text x={500} y={372} textAnchor="middle" fontSize={15} fontWeight={700} fill="#0E7C86">carina</text>
+
+            {/* Bronchioles */}
+            <path d="M360 432 C330 452 305 468 288 488 M360 432 C345 455 335 472 330 492 M360 432 C375 452 388 470 396 490" fill="none" stroke="#A9C7C9" strokeWidth={12} strokeLinecap="round" />
+            <path d="M640 432 C670 452 695 468 712 488 M640 432 C655 455 665 472 670 492 M640 432 C625 452 612 470 604 490" fill="none" stroke="#A9C7C9" strokeWidth={12} strokeLinecap="round" />
+
+            {/* Alveoli clusters */}
+            {alveoliCluster(288, 500)}
+            {alveoliCluster(330, 504)}
+            {alveoliCluster(396, 500)}
+            {alveoliCluster(712, 500)}
+            {alveoliCluster(670, 504)}
+            {alveoliCluster(604, 500)}
+
+            {/* Airflow particles */}
+            {airDot(pathR, -0.2)}
+            {airDot(pathL, -1.1)}
+            {airDot(pathR, -1.9)}
+            {airDot(pathL, -2.7)}
+
+            {/* Station hotspots */}
+            {AIRWAY_ORDER.map((id, i) => {
+              const s = AIRWAY_STATIONS[id]
+              const isActive = station === i
+              return (
+                <g key={id} onClick={() => setStation(i)} className="cursor-pointer">
+                  {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={13} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                  <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+                </g>
+              )
+            })}
+
+            <text x={500} y={548} textAnchor="middle" fontSize={16} fill="#6B7684">
+              {intake === 'nose'
+                ? inhale
+                  ? 'Air in: nose → pharynx → larynx → trachea → bronchi → alveoli'
+                  : 'Air out: the same road, in reverse — the airway is a two-way street'
+                : inhale
+                  ? 'Mouth breathing: air skips the nose — colder, drier, less filtered'
+                  : 'Air out through the mouth — the nose’s conditioning is bypassed'}
+            </text>
+          </svg>
+
+          {/* Station timeline */}
+          <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {AIRWAY_ORDER.map((id, i) => (
+              <button
+                key={id}
+                onClick={() => {
+                  setStation(i)
+                  setPlaying(false)
+                }}
+                aria-pressed={station === i}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  station === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">Stop {i + 1}</span>
+                <span className="mt-0.5 block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{AIRWAY_STATIONS[id].name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-sand p-1" role="tablist" aria-label="Breathe through the nose or the mouth">
+            <button
+              onClick={() => setIntake('nose')}
+              aria-pressed={intake === 'nose'}
+              className={`rounded-full px-3 py-2 font-display text-[0.85rem] font-bold transition-colors ${
+                intake === 'nose' ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+              }`}
+            >
+              Through the nose
+            </button>
+            <button
+              onClick={() => setIntake('mouth')}
+              aria-pressed={intake === 'mouth'}
+              className={`rounded-full px-3 py-2 font-display text-[0.85rem] font-bold transition-colors ${
+                intake === 'mouth' ? 'bg-arterial-500 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+              }`}
+            >
+              Through the mouth
+            </button>
+          </div>
+
+          <div className="mt-6 flex items-center justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+                Stop {station + 1} of 6 · {info.job}
+              </p>
+              <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+            </div>
+            <span className={`font-display text-lg font-extrabold ${inhale ? 'text-primary-700' : 'text-venous-600'}`}>
+              {inhale ? '▼ air in' : '▲ air out'}
+            </span>
+          </div>
+
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Airway width (relative)" value={info.width} />
+            <p className="-mt-2 font-mono text-xs text-ink-500">Diameter: {info.diameter}</p>
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause journey' : '▶ Play journey'}
+              </Button>
+              <Button size="sm" variant={inhale ? 'primary' : 'secondary'} onClick={() => setPhase('inhale')}>
+                Inhale
+              </Button>
+              <Button size="sm" variant={!inhale ? 'primary' : 'secondary'} onClick={() => setPhase('exhale')}>
+                Exhale
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              {intake === 'nose'
+                ? 'The nose is not just a hole: it is the airway’s air-conditioning unit. Watch the dots — every breath you take is warmed, moistened, and filtered before it reaches the lungs.'
+                : 'Mouth breathing works, but it skips the conditioning. The air arrives colder, drier, and carrying more dust — one reason a cold makes your throat raw when your nose is blocked.'}
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}

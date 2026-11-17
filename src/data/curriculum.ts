@@ -50,7 +50,7 @@ export const CURRICULUM: Subject[] = [
         title: 'Respiratory System',
         lessons: [
           L('The Lungs and the Pleura', 'Interactive lab + reading', 10, 'available', '/lesson/the-lungs-and-the-pleura'),
-          L('The Airway: From Nose to Alveoli', 'Reading + diagram', 8),
+          L('The Airway: From Nose to Alveoli', 'Interactive lab + reading', 8, 'available', '/lesson/the-airway-from-nose-to-alveoli'),
         ],
       },
       {

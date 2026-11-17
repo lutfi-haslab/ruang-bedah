@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Badge, Button } from '../components/primitives'
 import { AnatomyFigure, Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import HeartLab from '../components/HeartLab'
-import { AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
+import { AirwayLessonBody, AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
 import { EkgDivider, FlashCards, Quiz } from '../components/study-tools'
 import { Breadcrumb, badgeFor } from '../components/syllabus'
 import { getLessonBySlug, lessonNeighbors, subjectSlug } from '../data/curriculum'
@@ -119,6 +119,8 @@ function lessonBodyFor(slug: string) {
   switch (slug) {
     case 'the-heart-chambers-valves-and-vessels':
       return <HeartLessonBody />
+    case 'the-airway-from-nose-to-alveoli':
+      return <AirwayLessonBody />
     case 'arteries-veins-and-capillaries':
       return <VesselsLessonBody />
     case 'the-lungs-and-the-pleura':
