@@ -105,7 +105,22 @@ body {
   animation: ping-ring 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Small beating heart motif (chapter cards, hero) */
+/* Churning stomach (GI tract lab): a slow squeeze-and-release around the
+ * organ's own centre, driven by the same reduced-motion rules as the rest. */
+@keyframes churn {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.045, 1.03);
+  }
+}
+.churn {
+  animation: churn 1.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
 @keyframes heart-beat {
   0%,
   100% {
@@ -193,6 +208,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .heart-beat,
+  .churn,
   .ping-ring,
   .ekg-anim,
   .flow-line {

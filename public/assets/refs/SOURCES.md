@@ -17,6 +17,7 @@ lesson caption.
 | ref-mcburney.jpg | McBurney's point on a real abdomen | Photo by Steven Fruitsmaak — File:McBurney's_point.jpg | CC BY-SA 3.0 |
 | ref-airway-gray994.png | Sagittal section, nose, mouth, pharynx, larynx | Gray's Anatomy (1918), plate 994 — File:Gray994.png | Public domain |
 | ref-instruments-tray.jpg | Basic surgical instrument set on green cloth in a tray | Photo by Dan Bollinger — File:Circumcision instruments on green cloth in tray - centered.jpg (a circumcision set; the same general instruments used across surgery) | CC BY-SA 4.0 |
+| ref-gi-tract-ruiz.png | Whole digestive system, labelled (mouth to anus, with liver, gallbladder, pancreas) | Mariana Ruiz (LadyofHats) — File:Digestive system diagram en.svg, rasterised to PNG for the lesson page | Public domain |
 
 Note: like `heart-anterior.png`, these binary files are deployed to
 Cloudflare Pages but are not part of the GitHub snapshot push (text only).

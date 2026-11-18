@@ -2190,3 +2190,301 @@ export function InstrumentsLab() {
     />
   )
 }
+
+/* ============================ The GI tract ============================ */
+
+type GiStationId = 'mouth' | 'esophagus' | 'stomach' | 'small-intestine' | 'large-intestine' | 'rectum'
+
+const GI_STATIONS: Record<
+  GiStationId,
+  { name: string; latin: string; length: string; ph: string; transit: string; timeShare: number; job: string; blurb: string; note: string; dot: { x: number; y: number } }
+> = {
+  mouth: {
+    name: 'Mouth',
+    latin: 'cavitas oris',
+    length: '—',
+    ph: 'pH ≈ 6.7–7.3',
+    transit: 'Seconds',
+    timeShare: 1,
+    job: 'Chew + start starch digestion',
+    blurb:
+      'Digestion starts before you swallow. Teeth cut and grind food into a soft ball — the bolus — while saliva wets it and the enzyme amylase begins breaking starch into sugars. Chewing is the only part of digestion you control consciously, and it matters: the smaller the pieces, the more surface the stomach’s acid and enzymes have to work on.',
+    note: 'Swallowing is a reflex: once the bolus reaches the back of the tongue, the epiglottis seals the airway and the throat takes over — you cannot breathe and swallow at the same time.',
+    dot: { x: 190, y: 62 },
+  },
+  esophagus: {
+    name: 'Esophagus',
+    latin: 'oesophagus',
+    length: '≈ 25 cm',
+    ph: 'pH ≈ 7',
+    transit: '8–10 seconds',
+    timeShare: 1,
+    job: 'Peristalsis — the squeeze that carries food down',
+    blurb:
+      'The esophagus is a muscular tube with one job: move the bolus from throat to stomach. It does it with peristalsis — a wave of contraction behind the bolus and relaxation ahead of it, squeezing the food downward like toothpaste from a tube. The wave works even upside down, which is why you can swallow while lying flat. At the bottom, the lower esophageal sphincter opens to let food in, then closes so stomach acid cannot splash back up.',
+    note: 'Watch the rings travel down the tube: that moving squeeze is peristalsis, and the same wave runs the whole length of the gut.',
+    dot: { x: 190, y: 165 },
+  },
+  stomach: {
+    name: 'Stomach',
+    latin: 'ventriculus · gaster',
+    length: '≈ 25–30 cm, holds 1–1.5 L',
+    ph: 'pH ≈ 1.5–2',
+    transit: '2–4 hours',
+    timeShare: 14,
+    job: 'Churn + acid — turn food into chyme',
+    blurb:
+      'The stomach is a muscular bag and a chemical reactor at once. Its walls churn — waves of contraction knead the food, mixing it with gastric juice: hydrochloric acid strong enough to kill most microbes, and the enzyme pepsin, which starts cutting proteins into pieces. A thick mucus layer protects the stomach’s own lining from its acid. After two to four hours the food has become chyme, a creamy soup that the stomach squirts into the small intestine a little at a time.',
+    note: 'The stomach churns in the diagram whenever this stop is active — that rhythmic squeeze is what mixes acid into every bite.',
+    dot: { x: 215, y: 300 },
+  },
+  'small-intestine': {
+    name: 'Small Intestine',
+    latin: 'intestinum tenue',
+    length: '≈ 6–7 m',
+    ph: 'pH ≈ 6–7.4',
+    transit: '3–5 hours',
+    timeShare: 30,
+    job: 'Absorb almost everything',
+    blurb:
+      'This is where digestion pays off. Bile from the liver emulsifies fats into droplets, pancreatic enzymes finish breaking down proteins, starches, and fats, and then the wall absorbs the results: sugars, amino acids, fatty acids, vitamins, and minerals pass into the blood. The secret is surface area — the lining is folded, then covered in villi, then each villus cell is covered in microvilli, turning six metres of tube into roughly 30 square metres of absorbing surface. Watch the dots: nutrients crossing the wall, one by one.',
+    note: 'Duodenum, jejunum, ileum — three parts, one job: the duodenum receives the chemical helpers, the jejunum does most of the absorbing, the ileum finishes the job.',
+    dot: { x: 535, y: 437 },
+  },
+  'large-intestine': {
+    name: 'Large Intestine',
+    latin: 'intestinum crassum',
+    length: '≈ 1.5 m',
+    ph: 'pH ≈ 5.5–7',
+    transit: '12–48 hours',
+    timeShare: 52,
+    job: 'Reclaim water, host the microbes',
+    blurb:
+      'What arrives here is mostly water, fibre, and bacteria — the indigestible remainder. The colon’s job is recovery: it absorbs water and salts back into the blood, which is why its contents slowly firm up into stool. It is also home to trillions of gut bacteria, the microbiome, which ferment fibre into short-chain fatty acids, make some vitamins, and crowd out harmful microbes. Food spends longer here than anywhere else in the tract.',
+    note: 'Watch the droplets leave the colon wall: water being reclaimed into the blood. Lose too much water here — in diarrhoea, for example — and dehydration follows fast.',
+    dot: { x: 690, y: 340 },
+  },
+  rectum: {
+    name: 'Rectum',
+    latin: 'rectum',
+    length: '≈ 12–15 cm',
+    ph: 'pH ≈ 7',
+    transit: 'Stored until release',
+    timeShare: 2,
+    job: 'Store, then release',
+    blurb:
+      'The last stretch is a short, straight tube that stores stool until you are ready. When it fills, stretch receptors trigger the urge to go; two sphincters — one involuntary, one under your control — decide the moment. Defecation is the one step of the whole journey you can consciously delay, which is exactly why the rectum exists: a waiting room at the end of a nine-metre tube.',
+    note: 'The rectum is the only part of the tract whose emptying you can choose to postpone — every earlier step runs on reflex alone.',
+    dot: { x: 298, y: 540 },
+  },
+}
+
+const GI_ORDER: GiStationId[] = ['mouth', 'esophagus', 'stomach', 'small-intestine', 'large-intestine', 'rectum']
+
+/* One continuous bolus path: mouth → esophagus → stomach → duodenum →
+ * small-intestine coils → ascending → transverse → descending colon →
+ * sigmoid → rectum. The drawn tubes follow the same geometry. */
+const BOLUS_PATH =
+  'M 190 62 V 238 C 230 255 270 275 292 305 C 320 330 360 340 375 375 C 385 395 400 405 445 405 H 618 A 15 15 0 0 1 618 436 H 452 A 15 15 0 0 0 452 468 H 618 A 15 15 0 0 1 618 500 H 652 C 672 500 688 504 690 514 V 198 A 16 16 0 0 0 674 182 H 362 A 16 16 0 0 0 346 198 V 452 C 346 496 318 512 302 530 L 298 548'
+
+export function GiTractLab() {
+  const [station, setStation] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const info = GI_STATIONS[GI_ORDER[station]]
+  const id = GI_ORDER[station]
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStation((s) => (s + 1) % GI_ORDER.length), 3400)
+    return () => clearInterval(t)
+  }, [playing])
+
+  const seg = (active: boolean) => ({ opacity: active ? 1 : 0.32, transition: 'opacity 0.6s ease' })
+
+  return (
+    <LabShell
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of a meal travelling through the digestive tract: mouth, esophagus, stomach, small intestine, large intestine, and rectum">
+            {/* Liver + gallbladder — helper organs, always shown */}
+            <g>
+              <path d="M 350 212 C 420 196 500 200 545 224 C 560 234 556 252 536 258 C 480 268 400 266 360 252 C 344 244 342 222 350 212 Z" fill="#B4663F" stroke="#8A4A2E" strokeWidth={3} />
+              <ellipse cx={428} cy={262} rx={17} ry={10} fill="#5F8F5A" stroke="#3F6B3A" strokeWidth={2.5} transform="rotate(-18 428 262)" />
+              <text x={566} y={222} fontSize={15} fontWeight={700} fill="#8A4A2E">Liver</text>
+              <path d="M560 218 C552 220 546 222 540 226" stroke="#8A4A2E" strokeWidth={2} fill="none" />
+              <text x={452} y={290} fontSize={13} fontWeight={700} fill="#3F6B3A">Gallbladder</text>
+              <path d="M448 282 C444 276 438 270 434 266" stroke="#3F6B3A" strokeWidth={2} fill="none" />
+            </g>
+
+            {/* Pancreas — behind the duodenum */}
+            <g>
+              <rect x={330} y={302} width={118} height={17} rx={8.5} fill="#E8C87A" stroke="#B89A4A" strokeWidth={2.5} transform="rotate(-7 389 310)" />
+              <text x={458} y={316} fontSize={13} fontWeight={700} fill="#8A6A2E">Pancreas</text>
+            </g>
+
+            {/* Large intestine frame — green, drawn first so the coils sit inside it */}
+            <g style={seg(id === 'large-intestine')}>
+              <path d="M 690 514 V 198 A 16 16 0 0 0 674 182 H 362 A 16 16 0 0 0 346 198 V 452 C 346 496 318 512 302 530 L 298 548" fill="none" stroke="#7A9B5A" strokeWidth={30} strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M 690 522 C 680 536 672 542 664 540" fill="none" stroke="#7A9B5A" strokeWidth={8} strokeLinecap="round" />
+              <text x={716} y={336} fontSize={15} fontWeight={700} fill="#4E6B38">Large intestine</text>
+              <text x={700} y={548} fontSize={13} fontWeight={700} fill="#4E6B38">Appendix</text>
+              <text x={252} y={548} textAnchor="end" fontSize={15} fontWeight={700} fill="#43536A">Rectum</text>
+              <path d="M256 544 C270 544 282 544 292 542" stroke="#43536A" strokeWidth={2} fill="none" />
+            </g>
+
+            {/* Small intestine coils */}
+            <g style={seg(id === 'small-intestine')}>
+              <path d="M 360 412 C 395 408 415 404 445 405 H 618 A 15 15 0 0 1 618 436 H 452 A 15 15 0 0 0 452 468 H 618 A 15 15 0 0 1 618 500 H 652 C 672 500 688 504 690 514" fill="none" stroke="#F2B8A0" strokeWidth={26} strokeLinecap="round" strokeLinejoin="round" />
+              <text x={535} y={545} textAnchor="middle" fontSize={15} fontWeight={700} fill="#B6544A">Small intestine</text>
+            </g>
+
+            {/* Duodenum — the C-loop from stomach to coils */}
+            <g style={seg(id === 'stomach' || id === 'small-intestine')}>
+              <path d="M 295 326 C 340 330 375 345 385 375 C 390 395 380 408 360 412" fill="none" stroke="#F2B8A0" strokeWidth={26} strokeLinecap="round" />
+            </g>
+
+            {/* Stomach — churns when its stop is active */}
+            <g style={seg(id === 'stomach')}>
+              <g className={id === 'stomach' ? 'churn' : ''}>
+                <path d="M 190 238 C 150 240 122 268 126 300 C 130 332 158 352 195 356 C 235 360 275 350 295 326 C 310 306 308 282 292 264 C 282 252 268 244 252 240 L 212 238 Z" fill="#F6C6BB" stroke="#B6544A" strokeWidth={3} />
+                <path d="M 150 290 C 170 310 200 322 235 318" fill="none" stroke="#B6544A" strokeWidth={3} strokeLinecap="round" opacity={0.45} />
+              </g>
+              <text x={215} y={392} textAnchor="middle" fontSize={15} fontWeight={700} fill="#B6544A">Stomach</text>
+            </g>
+
+            {/* Esophagus */}
+            <g style={seg(id === 'esophagus')}>
+              <rect x={168} y={88} width={44} height={150} rx={20} fill="#F3E3D3" stroke="#D9AE94" strokeWidth={3} />
+              <text x={140} y={170} textAnchor="end" fontSize={15} fontWeight={700} fill="#8A6A54">Esophagus</text>
+              <path d="M144 166 C154 166 160 166 164 166" stroke="#8A6A54" strokeWidth={2} fill="none" />
+              {/* peristalsis rings travelling down while the esophagus stop is active */}
+              {id === 'esophagus' && playing && (
+                <>
+                  <ellipse rx={24} ry={6} fill="none" stroke="#B6544A" strokeWidth={3} opacity={0.85}>
+                    <animateMotion dur="1.6s" repeatCount="indefinite" path="M 190 96 V 230" />
+                  </ellipse>
+                  <ellipse rx={24} ry={6} fill="none" stroke="#B6544A" strokeWidth={3} opacity={0.85}>
+                    <animateMotion dur="1.6s" begin="0.8s" repeatCount="indefinite" path="M 190 96 V 230" />
+                  </ellipse>
+                </>
+              )}
+            </g>
+
+            {/* Mouth */}
+            <g style={seg(id === 'mouth')}>
+              <ellipse cx={190} cy={62} rx={58} ry={26} fill="#E8B4A0" stroke="#B0574F" strokeWidth={3} />
+              <ellipse cx={190} cy={70} rx={34} ry={10} fill="#D97B6C" />
+              <path d="M 152 58 H 228" stroke="#fff" strokeWidth={5} strokeLinecap="round" />
+              <text x={190} y={20} textAnchor="middle" fontSize={15} fontWeight={700} fill="#8A4A3D">Mouth</text>
+            </g>
+
+            {/* Nutrient absorption dots in the small intestine */}
+            {id === 'small-intestine' && playing && (
+              <g fill="#0E7C86">
+                {[
+                  [480, 405, 0], [560, 437, 0.5], [500, 469, 1], [600, 500, 1.5], [520, 405, 2], [580, 469, 2.5],
+                ].map(([cx, cy, begin], i) => (
+                  <circle key={i} cx={cx} cy={cy} r={4.5} opacity={0}>
+                    <animate attributeName="opacity" values="0;1;0" dur="3s" begin={`${begin}s`} repeatCount="indefinite" />
+                    <animate attributeName="cy" values={`${cy};${(cy as number) + 14}`} dur="3s" begin={`${begin}s`} repeatCount="indefinite" />
+                  </circle>
+                ))}
+              </g>
+            )}
+
+            {/* Water reclamation droplets leaving the colon wall */}
+            {id === 'large-intestine' && playing && (
+              <g fill="#5F83C2">
+                <circle r={4.5}>
+                  <animateMotion dur="2.2s" repeatCount="indefinite" path="M 706 260 H 736" />
+                  <animate attributeName="opacity" values="1;0.2" dur="2.2s" repeatCount="indefinite" />
+                </circle>
+                <circle r={4.5}>
+                  <animateMotion dur="2.2s" begin="0.7s" repeatCount="indefinite" path="M 706 380 H 736" />
+                  <animate attributeName="opacity" values="1;0.2" dur="2.2s" begin="0.7s" repeatCount="indefinite" />
+                </circle>
+                <circle r={4.5}>
+                  <animateMotion dur="2.2s" begin="1.4s" repeatCount="indefinite" path="M 520 166 V 140" />
+                  <animate attributeName="opacity" values="1;0.2" dur="2.2s" begin="1.4s" repeatCount="indefinite" />
+                </circle>
+              </g>
+            )}
+
+            {/* The travelling bolus */}
+            <circle cx={190} cy={62} r={8} fill="#D64545" stroke="#fff" strokeWidth={2} opacity={0.9}>
+              {playing && <animateMotion dur="9s" repeatCount="indefinite" path={BOLUS_PATH} />}
+            </circle>
+
+            {/* Station hotspots */}
+            {GI_ORDER.map((sid, i) => {
+              const s = GI_STATIONS[sid]
+              const isActive = station === i
+              return (
+                <g key={sid} onClick={() => { setStation(i); setPlaying(false) }} className="cursor-pointer">
+                  {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={13} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                  <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+                </g>
+              )
+            })}
+
+          </svg>
+
+          {/* Station timeline */}
+          <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {GI_ORDER.map((sid, i) => (
+              <button
+                key={sid}
+                onClick={() => {
+                  setStation(i)
+                  setPlaying(false)
+                }}
+                aria-pressed={station === i}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  station === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">Stop {i + 1}</span>
+                <span className="mt-0.5 block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{GI_STATIONS[sid].name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Stop {station + 1} of 6 · {info.job}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>{info.ph}</Chip>
+            <Chip>Length {info.length}</Chip>
+            <Chip>Stays {info.transit}</Chip>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Share of the whole journey's time" value={info.timeShare} tone="bg-amber-500" />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause journey' : '▶ Play journey'}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStation((s) => (s + GI_ORDER.length - 1) % GI_ORDER.length); setPlaying(false) }}>
+                ← Prev stop
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStation((s) => (s + 1) % GI_ORDER.length); setPlaying(false) }}>
+                Next stop →
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}

@@ -56,7 +56,7 @@ export const CURRICULUM: Subject[] = [
       {
         title: 'Digestive System',
         lessons: [
-          L('The GI Tract, End to End', 'Reading + diagram', 10),
+          L('The GI Tract, End to End', 'Interactive lab + reading', 10, 'available', '/lesson/the-gi-tract-end-to-end'),
           L('The Liver and Gallbladder', 'Reading + diagram', 8),
         ],
       },

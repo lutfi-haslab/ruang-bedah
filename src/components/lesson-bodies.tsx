@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, InstrumentsLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
 import AirwayLabCard from './AirwayLabCard'
 import LungsLabCard from './LungsLabCard'
 
@@ -1043,6 +1043,148 @@ export function InstrumentsLessonBody() {
           The tray looks like a hundred tools, but it speaks four verbs — cut, clamp, hold, sew.
           Master those, plus the arithmetic of the count, and you can follow almost any operation
           ever performed.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- The GI tract, end to end ------------------------- */
+
+/* Note: this lesson has no 3D explorer. A search of Wikimedia Commons
+ * (2026-11-18) found no openly licensed 3D model of the human digestive
+ * tract — the Visible Human STL series covers liver, lung, heart, larynx,
+ * kidney, eye, knee, and bronchi, but no stomach or intestine — so the
+ * lesson ships with its animated 2D lab only. */
+
+export function GiTractLessonBody() {
+  return (
+    <BodyShell
+      lab={<GiTractLab />}
+      chapterTitle="Nine Metres of Tube, One Long Job"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              The digestive tract is, at its simplest, one continuous tube about{' '}
+              <strong>nine metres long</strong>, running from mouth to anus. Food enters at one
+              end, and what the body cannot use leaves at the other — but between those two ends
+              the tube changes character completely, station by station. The mouth chews, the
+              esophagus carries, the stomach churns and acidifies, the small intestine absorbs,
+              the large intestine reclaims water, and the rectum waits. Same tube, six different
+              jobs.
+            </p>
+            <p>
+              Underneath the variety, the wall is built the same way everywhere, in four layers.
+              The <strong>mucosa</strong> lines the inside and does the secreting and absorbing;
+              the <strong>submucosa</strong> beneath it carries blood vessels and nerves; the{' '}
+              <strong>muscularis</strong> — two sheets of smooth muscle, one circular, one
+              lengthwise — squeezes the tube in the waves of <strong>peristalsis</strong>; and
+              the <strong>serosa</strong> wraps the outside. Each station specialises the same
+              four-layer plan: the stomach adds a third muscle layer for churning, the small
+              intestine folds its mucosa into millions of villi for absorption, the colon grows
+              a huge bacterial population.
+            </p>
+            <p>
+              Two controls run the whole journey. The first is peristalsis itself — a wave of
+              contraction behind the food and relaxation ahead of it, so the bolus is always
+              being handed forward, from the esophagus all the way to the rectum. The second is
+              a series of <strong>sphincters</strong>, rings of muscle that act as gates: the
+              lower esophageal sphincter keeps acid in the stomach, the pyloric sphincter
+              meters chyme into the small intestine a squirt at a time, the ileocecal valve
+              stops colonic bacteria washing back upstream, and the anal sphincters guard the
+              exit. When a sphincter fails, the symptom names the gate — heartburn is a lower
+              esophageal sphincter that will not stay shut.
+            </p>
+            <p>
+              The tract does not work alone. Three helper organs feed into it: the{' '}
+              <strong>liver</strong> makes bile, which the <strong>gallbladder</strong> stores and
+              releases to emulsify fats into droplets small enough for enzymes to attack; and
+              the <strong>pancreas</strong> pours in enzymes that finish digesting proteins,
+              starches, and fats, plus bicarbonate to neutralise the stomach acid arriving from
+              above. Without them, the small intestine could not do its job — which is why
+              gallstones and pancreatitis are digestive diseases, even though neither organ is
+              part of the tube itself.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Station', 'Length', 'Main job']}
+              rows={[
+                ['Mouth', '—', 'Chew food; saliva starts starch digestion'],
+                ['Esophagus', '≈ 25 cm', 'Carry the bolus down by peristalsis'],
+                ['Stomach', '≈ 25–30 cm', 'Churn with acid and pepsin; make chyme'],
+                ['Small intestine', '≈ 6–7 m', 'Digest and absorb almost all nutrients'],
+                ['Large intestine', '≈ 1.5 m', 'Reclaim water and salts; host the microbiome'],
+                ['Rectum', '≈ 12–15 cm', 'Store stool until defecation'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Peristalsis" latin="peristalsis">
+              The wave of coordinated muscle contraction that moves food along the gut: the
+              circular muscle squeezes shut behind the bolus while the muscle ahead of it
+              relaxes, so the food is handed forward one segment at a time. It is a reflex —
+              you cannot start or stop it by will — and it runs the whole nine metres, from the
+              esophagus to the rectum.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-gi-tract-ruiz.png"
+              alt="A labelled diagram of the whole human digestive system: mouth, salivary glands, pharynx, esophagus, liver, gallbladder, stomach, pancreas, small intestine, large intestine, appendix, and anus"
+              caption="Real anatomy reference — the whole digestive system, labelled from mouth to anus, with the helper organs in place: liver and gallbladder above the stomach, pancreas tucked behind it, and the appendix hanging from the caecum. Compare it with the lab above — the same road, drawn as a map instead of a journey."
+              credit="Mariana Ruiz (LadyofHats) · Public domain · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Peristalsis', latin: 'peristalsis', back: 'A wave of muscle contraction behind the food and relaxation ahead of it, handing the bolus forward segment by segment. It is a reflex — you cannot will it to start or stop.' },
+        { term: 'Chyme', latin: 'chymus', back: 'The creamy, acidic soup the stomach produces after two to four hours of churning food with gastric juice. It is squirted into the small intestine a little at a time.' },
+        { term: 'Villi', latin: 'villi intestinales', back: 'Millions of tiny finger-like projections lining the small intestine. Together with the folds beneath them and the microvilli on each cell, they expand the absorbing surface to roughly 30 square metres.' },
+        { term: 'Sphincter', latin: 'sphincter', back: 'A ring of muscle that acts as a gate between two parts of the tract — opening to let food pass, closing to stop it flowing back. The lower esophageal sphincter guards the stomach; heartburn is its failure.' },
+      ]}
+      questions={[
+        {
+          q: 'Where is almost all nutrient absorption done?',
+          options: [
+            'The stomach',
+            'The small intestine',
+            'The large intestine',
+            'The esophagus',
+          ],
+          answer: 1,
+          why: 'The small intestine — its villi give it roughly 30 square metres of absorbing surface, and it receives bile and pancreatic enzymes to finish digestion first.',
+        },
+        {
+          q: 'What is the pH inside a working stomach?',
+          options: [
+            'About 7, neutral',
+            'About 5, mildly acidic',
+            'About 1.5–2, strongly acidic',
+            'About 9, alkaline',
+          ],
+          answer: 2,
+          why: 'Gastric juice is hydrochloric acid at about pH 1.5–2 — strong enough to kill most microbes and activate pepsin, which is why the stomach lining needs its protective mucus coat.',
+        },
+        {
+          q: 'What does the large intestine mainly take back from the gut contents?',
+          options: [
+            'Glucose and amino acids',
+            'Water and salts',
+            'Bile and pancreatic enzymes',
+            'Oxygen',
+          ],
+          answer: 1,
+          why: 'Water and salts. By the time food reaches the colon, the nutrients are already absorbed; the colon’s job is recovery — which is why losing its water in diarrhoea causes dehydration so fast.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          Digestion is mostly plumbing with chemistry: one tube, four layers, a wave that
+          never stops, gates that open one at a time, and helpers standing outside the tube
+          feeding in bile and enzymes. Follow the bolus and you have followed the whole story.
         </Callout>
       }
     />
