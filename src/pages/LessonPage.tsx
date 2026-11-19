@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Badge, Button } from '../components/primitives'
 import { AnatomyFigure, Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import HeartLab from '../components/HeartLab'
-import { AirwayLessonBody, AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, GiTractLessonBody, InstrumentsLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
+import { AirwayLessonBody, AppendectomyCaseBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, GiTractLessonBody, InstrumentsLessonBody, LiverLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
 import { EkgDivider, FlashCards, Quiz } from '../components/study-tools'
 import { Breadcrumb, badgeFor } from '../components/syllabus'
 import { getLessonBySlug, lessonNeighbors, subjectSlug } from '../data/curriculum'
@@ -137,6 +137,8 @@ function lessonBodyFor(slug: string) {
       return <InstrumentsLessonBody />
     case 'the-gi-tract-end-to-end':
       return <GiTractLessonBody />
+    case 'the-liver-and-gallbladder':
+      return <LiverLessonBody />
     default:
       return null
   }

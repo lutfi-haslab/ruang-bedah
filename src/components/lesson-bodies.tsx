@@ -4,6 +4,7 @@ import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
 import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
 import AirwayLabCard from './AirwayLabCard'
+import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
 
 /* ------------------------------------------------------------------ */
@@ -1185,6 +1186,157 @@ export function GiTractLessonBody() {
           Digestion is mostly plumbing with chemistry: one tube, four layers, a wave that
           never stops, gates that open one at a time, and helpers standing outside the tube
           feeding in bile and enzymes. Follow the bolus and you have followed the whole story.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- The Liver and Gallbladder ------------------------- */
+
+export function LiverLessonBody() {
+  return (
+    <BodyShell
+      lab={<LiverLabCard />}
+      chapterTitle="The Body's Chemical Factory"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              The liver is the largest internal organ in the body — about{' '}
+              <strong>1.5 kilograms</strong> in an adult, tucked under the diaphragm in the
+              right upper corner of the abdomen, mostly hidden behind the ribs. It is a
+              wedge: the <strong>right lobe</strong> is the big one, roughly five sixths of
+              the mass, and the <strong>left lobe</strong> tapers to a thin point toward the
+              midline. The seam between them, the <strong>falciform ligament</strong>, is
+              visible on the front of the organ — a fold of peritoneum that once carried the
+              umbilical vein, and whose lower edge survives as the round ligament. Most of
+              the liver is wrapped in peritoneum, but one patch on its back — the{' '}
+              <strong>bare area</strong> — presses directly against the diaphragm, with no
+              covering at all.
+            </p>
+            <p>
+              What makes the liver strange is its plumbing. It has <strong>two</strong> blood
+              supplies: the <strong>hepatic artery</strong>, bringing oxygen-rich blood from
+              the aorta, and the <strong>portal vein</strong>, bringing about three quarters
+              of the total — blood that has just drained from the gut, loaded with the
+              nutrients of your last meal and anything else the intestine absorbed. That
+              blood does not go to the heart first. It goes through the liver first, and the
+              liver decides what the rest of the body is allowed to see. Inside, the organ
+              is a honeycomb of <strong>lobules</strong>, hexagonal units about a millimetre
+              across: at each corner a portal triad (a branch of the portal vein, a branch
+              of the hepatic artery, and a bile duct), and in the centre a vein that collects
+              the blood after it has flowed past the hepatocytes through sieve-like{' '}
+              <strong>sinusoids</strong>. Blood that leaves the lobules drains through the{' '}
+              <strong>hepatic veins</strong> into the inferior vena cava, and only then to
+              the heart.
+            </p>
+            <p>
+              The work the hepatocytes do with that blood is the liver's whole reason for
+              existing. They store glucose as <strong>glycogen</strong> after a meal and
+              release it between meals, keeping blood sugar steady. They build the plasma
+              proteins — <strong>albumin</strong>, which holds fluid in the bloodstream, and
+              most of the <strong>clotting factors</strong>. They detoxify: ammonia from
+              protein breakdown is converted to <strong>urea</strong> for the kidneys to
+              excrete, and drugs and alcohol are broken down. They store{' '}
+              <strong>vitamin B12</strong>, iron, and vitamins A and D. And they make{' '}
+              <strong>bile</strong> — roughly 800 to 1,000 millilitres a day — which flows
+              the opposite way through the lobule, out through the ducts, to the gallbladder
+              and the gut.
+            </p>
+            <p>
+              The <strong>gallbladder</strong> is not a factory but a warehouse: a
+              pear-shaped pouch holding 30 to 50 millilitres, tucked into a fossa on the
+              liver's underside. Between meals it fills with bile, drawing water out until
+              the bile is up to ten times more concentrated. When fatty food reaches the
+              small intestine, the gut releases the hormone cholecystokinin, the gallbladder
+              contracts, and bile shoots down the common bile duct into the duodenum, where
+              its salts break fat into droplets small enough for enzymes to attack. And the
+              liver has one more trick no other internal organ shares: cut away part of it,
+              and the remainder <strong>regrows</strong> to full size — which is why a
+              healthy person can donate part of their liver to someone else and both end up
+              with a whole one.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Structure', 'Where it is', 'What it does']}
+              rows={[
+                ['Right lobe', 'Under the right ribs', 'About five sixths of the liver’s mass'],
+                ['Left lobe', 'Toward the midline', 'Smaller; tapers to a point'],
+                ['Falciform ligament', 'Front of the liver, between the lobes', 'The seam between them; remnant of the umbilical vein'],
+                ['Porta hepatis', 'On the liver’s underside', 'The gateway — portal vein and hepatic artery in, common hepatic duct out'],
+                ['Hepatic lobule', 'Everywhere — the liver is built of them', 'The functional unit: hepatocytes around sinusoids, central vein in the middle'],
+                ['Gallbladder', 'In a fossa on the liver’s underside', 'Stores and concentrates bile; releases it when fat arrives'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Hepatocyte" latin="hepatocytus">
+              The liver cell — and the cell that does nearly all of the liver’s work. A
+              hepatocyte takes up nutrients and toxins from the blood flowing past it in the
+              sinusoids, stores glucose as glycogen, builds plasma proteins, converts ammonia
+              to urea, breaks down drugs and alcohol, and secretes bile into the canaliculi
+              between neighbouring cells. About 80% of the liver’s mass is hepatocytes.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-liver-gray1086.png"
+              alt="Gray's Anatomy plate 1086: the inferior (visceral) surface of the liver, labelled — left and right lobes, gallbladder, quadrate and caudate lobes, portal vein, hepatic artery, and common bile duct"
+              caption="Real anatomy reference — the liver from underneath, its visceral surface: the gallbladder (green) sitting in its fossa, the porta hepatis with the hepatic artery, portal vein, and common bile duct, and the quadrate and caudate lobes between them. Compare it with the lab above — the same organ, drawn as a map instead of a factory."
+              credit="Gray's Anatomy (1918), plate 1086 · Public domain · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Hepatocyte', latin: 'hepatocytus', back: 'The liver cell. It takes up nutrients and toxins from the blood in the sinusoids, stores glucose as glycogen, builds plasma proteins, converts ammonia to urea, breaks down drugs and alcohol, and secretes bile.' },
+        { term: 'Portal vein', latin: 'vena portae hepatis', back: 'The vein that carries nutrient-rich blood from the gut to the liver — about 75% of the liver’s blood supply. Everything absorbed from the intestine passes through the liver before it can reach the rest of the body.' },
+        { term: 'Bile', latin: 'bilis', back: 'A green-yellow fluid made by hepatocytes from cholesterol, bile salts, and bilirubin. Stored and concentrated in the gallbladder, it is released into the duodenum to emulsify fats into droplets enzymes can attack.' },
+        { term: 'Gallbladder', latin: 'vesica biliaris', back: 'A pear-shaped pouch holding 30–50 mL, tucked into a fossa on the liver’s underside. It makes nothing — it stores bile, concentrates it up to ten times, and squeezes it out when fatty food arrives in the gut.' },
+      ]}
+      questions={[
+        {
+          q: 'Which vessel brings most of the liver’s blood?',
+          options: [
+            'The hepatic artery',
+            'The hepatic vein',
+            'The portal vein',
+            'The inferior vena cava',
+          ],
+          answer: 2,
+          why: 'The portal vein — about 75% of the liver’s blood. It carries nutrient-rich blood straight from the gut, so the liver can sort it before it reaches the rest of the body.',
+        },
+        {
+          q: 'What does the gallbladder actually do?',
+          options: [
+            'It makes bile',
+            'It stores and concentrates bile',
+            'It filters the blood',
+            'It makes digestive enzymes',
+          ],
+          answer: 1,
+          why: 'It stores and concentrates bile — the liver makes the bile. The gallbladder draws water out until the bile is up to ten times more concentrated, then squeezes it out when fat arrives in the duodenum.',
+        },
+        {
+          q: 'After blood has passed through a liver lobule, where does it go next?',
+          options: [
+            'Back into the portal vein',
+            'Into the central vein, then the hepatic veins and the inferior vena cava',
+            'Into the bile ducts',
+            'Into the gallbladder',
+          ],
+          answer: 1,
+          why: 'Blood flows from the portal triads at the lobule’s corners, through the sinusoids past the hepatocytes, to the central vein — then out via the hepatic veins into the inferior vena cava and on to the heart.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The liver is the body’s checkpoint: everything absorbed from the gut passes
+          through it before it is allowed into the general circulation. Two blood supplies
+          in, one cleaned stream out — and a side product, bile, that the gallbladder
+          stores until the next fatty meal calls for it.
         </Callout>
       }
     />

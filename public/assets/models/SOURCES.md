@@ -4,7 +4,18 @@
 | --- | --- | --- | --- |
 | heart.glb | Human heart, external anatomy | "Realistic Human Heart" by neshallads — commons.wikimedia.org/wiki/File:3D_model_of_a_human_heart.stl | CC BY 4.0 |
 | lungs.glb | Human lung pair (Visible Human, female) | commons.wikimedia.org/wiki/File:Vh-f-lung.stl | CC BY 4.0 |
+| liver.glb | Human liver (Visible Human, male) | commons.wikimedia.org/wiki/File:Vh-m-liver.stl | CC BY 4.0 |
 | airway.glb | Human trachea with larynx (Visible Human, male) | commons.wikimedia.org/wiki/File:3d-vh-m-trachea.stl | Public domain |
+
+Liver processing (2026-11-19): single component, 60k faces — no decimation
+needed; merged vertices, Taubin-smoothed (18 iterations), smooth normals,
+centred + normalised → GLB (1.1 MB). Orientation verified visually before
+labelling: +Z is anterior (smooth diaphragmatic surface, falciform ligament),
+anatomical right = −X (big lobe), left = +X (tapering point). Label anchors
+verified against renders from six sides plus a marker overlay: the fossa and
+porta hepatis anchors were snapped to the surface after first floating off
+it. The gallbladder is not part of the mesh — it sits in the fossa, which the
+explorer labels. Motion is a breathing pulse (the liver rides the diaphragm).
 
 Airway processing (2026-11-17): kept all 10 components (44k faces, no
 decimation needed), merged vertices, smooth normals, rotated −21.2° about X

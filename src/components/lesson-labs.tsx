@@ -2284,8 +2284,347 @@ const GI_ORDER: GiStationId[] = ['mouth', 'esophagus', 'stomach', 'small-intesti
 /* One continuous bolus path: mouth → esophagus → stomach → duodenum →
  * small-intestine coils → ascending → transverse → descending colon →
  * sigmoid → rectum. The drawn tubes follow the same geometry. */
+/* One continuous bolus path: mouth → esophagus → stomach → duodenum →
+ * small-intestine coils → ascending → transverse → descending colon →
+ * sigmoid → rectum. The drawn tubes follow the same geometry. */
 const BOLUS_PATH =
   'M 190 62 V 238 C 230 255 270 275 292 305 C 320 330 360 340 375 375 C 385 395 400 405 445 405 H 618 A 15 15 0 0 1 618 436 H 452 A 15 15 0 0 0 452 468 H 618 A 15 15 0 0 1 618 500 H 652 C 672 500 688 504 690 514 V 198 A 16 16 0 0 0 674 182 H 362 A 16 16 0 0 0 346 198 V 452 C 346 496 318 512 302 530 L 298 548'
+
+/* ============================ Liver & gallbladder ============================ */
+
+type LiverStageId = 'portal' | 'lobule' | 'bile' | 'release'
+
+const LIVER_STAGES: Record<
+  LiverStageId,
+  { name: string; latin: string; job: string; blurb: string; note: string; dot: { x: number; y: number } }
+> = {
+  portal: {
+    name: 'Portal Blood Arrives',
+    latin: 'vena portae hepatis',
+    job: 'Two blood supplies, one organ',
+    blurb:
+      'The liver is the only organ with two blood supplies, and the odd one is the bigger: the portal vein brings about three quarters of its blood, straight from the gut — rich in the nutrients of your last meal, but also carrying anything the gut absorbed that should not reach the rest of the body. The hepatic artery brings the other quarter, oxygen-rich, straight from the aorta. Watch the blue dots: nutrient-loaded blood arriving to be sorted before it is allowed anywhere near the heart.',
+    note: 'Everything absorbed from the gut passes through the liver first — the first-pass effect. It is why some medicines are swallowed and some must bypass the gut entirely.',
+    dot: { x: 310, y: 470 },
+  },
+  lobule: {
+    name: 'Hepatocytes at Work',
+    latin: 'lobulus hepatis',
+    job: 'The lobule — the liver’s working unit',
+    blurb:
+      'Zoom in and the liver is not a solid mass but a honeycomb of tiny hexagonal units — lobules, about a millimetre across. At each corner sits a portal triad: a branch of the portal vein, a branch of the hepatic artery, and a bile duct. Blood flows inward through sieve-like sinusoids, past rows of hepatocytes, to the central vein. The hepatocytes take what the body needs — glucose to store as glycogen, amino acids to rebuild — and neutralise what it does not: ammonia becomes urea, alcohol and drugs are broken down. Watch the dots stream to the centre: blood being cleaned, one lobule at a time.',
+    note: 'Blood and bile flow in opposite directions through the lobule: blood runs in from the triads to the central vein, while bile drains out the other way, into the ducts at the corners.',
+    dot: { x: 160, y: 460 },
+  },
+  bile: {
+    name: 'Bile Is Made',
+    latin: 'bilis · fel',
+    job: '800–1,000 mL a day, made on the spot',
+    blurb:
+      'The same hepatocytes that clean the blood also manufacture bile — a green-yellow fluid built from cholesterol, bile salts, and bilirubin, the breakdown product of old red blood cells. Bile drains into tiny canaliculi between the liver cells, then into larger ducts, and down the common hepatic duct. When there is no meal to digest, it is diverted into the gallbladder, where water is drawn out until it is up to ten times more concentrated. Watch the green dots: bile on its way to storage.',
+    note: 'Bilirubin is what makes bile — and bruises — yellow-green, and what turns the skin yellow in jaundice when bile cannot drain.',
+    dot: { x: 445, y: 360 },
+  },
+  release: {
+    name: 'Stored, Then Released',
+    latin: 'vesica biliaris',
+    job: 'The gallbladder — a squeeze pouch, not a factory',
+    blurb:
+      'The gallbladder makes nothing; it stores and concentrates. A pear-shaped pouch of about 30–50 millilitres, tucked into a fossa on the liver’s underside. When fatty food reaches the small intestine, the gut releases the hormone cholecystokinin, the gallbladder contracts, and concentrated bile shoots down the common bile duct into the duodenum — where bile salts break fat into droplets small enough for enzymes to attack. Press “Send a fatty meal” and watch it happen: the pouch squeezes, the duct flashes green, and the stored bile meter drops.',
+    note: 'Gallstones form when bile sits too long and its cholesterol crystallises — which is why the gallbladder, not the liver, is the organ surgeons most often remove.',
+    dot: { x: 505, y: 345 },
+  },
+}
+
+const LIVER_ORDER: LiverStageId[] = ['portal', 'lobule', 'bile', 'release']
+
+/* Bile duct route: hepatic duct → junction with the cystic duct → common
+ * bile duct → duodenum. The drawn ducts follow the same geometry. */
+const BILE_PATH =
+  'M 430 312 C 440 350 455 385 470 420 C 545 426 665 412 790 400'
+const CYSTIC_PATH = 'M 505 388 C 500 400 488 410 470 420'
+const PORTAL_PATH = 'M 300 560 C 300 470 320 400 360 350 C 380 325 400 315 420 308'
+const ARTERY_PATH = 'M 350 560 C 350 480 365 400 395 330'
+const HEPATIC_VEIN_PATH = 'M 300 140 C 300 100 300 70 300 45'
+
+const LOBULE_CENTRE = { x: 160, y: 460 }
+const LOBULE_R = 68
+const lobuleCorner = (i: number) => ({
+  x: LOBULE_CENTRE.x + LOBULE_R * Math.cos((Math.PI / 3) * i),
+  y: LOBULE_CENTRE.y + LOBULE_R * Math.sin((Math.PI / 3) * i),
+})
+
+export function LiverLab({ bare = false }: { bare?: boolean }) {
+  const [stage, setStage] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const [bileStored, setBileStored] = useState(18)
+  const [mealFlash, setMealFlash] = useState(false)
+  const [processed, setProcessed] = useState(0)
+  const info = LIVER_STAGES[LIVER_ORDER[stage]]
+  const id = LIVER_ORDER[stage]
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStage((s) => (s + 1) % LIVER_ORDER.length), 4200)
+    return () => clearInterval(t)
+  }, [playing])
+
+  /* While the lab runs, blood keeps being processed and bile keeps filling
+   * the gallbladder (faster once bile production is the active stage). */
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => {
+      setProcessed((p) => Math.min(100, p + 1))
+      setBileStored((b) => Math.min(96, b + (id === 'bile' || id === 'release' ? 2 : 1)))
+    }, 900)
+    return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, id])
+
+  const sendMeal = () => {
+    setMealFlash(true)
+    setBileStored((b) => Math.max(8, b - 55))
+    window.setTimeout(() => setMealFlash(false), 2600)
+  }
+
+  const seg = (active: boolean) => ({ opacity: active ? 1 : 0.3, transition: 'opacity 0.6s ease' })
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of the liver and gallbladder: portal blood arriving, hepatocytes working in a lobule, bile being made and stored, then released into the duodenum">
+            {/* Inferior vena cava — blood leaving the liver for the heart */}
+            <g style={seg(id === 'portal')}>
+              <path d="M 286 140 V 40" stroke="#5F83C2" strokeWidth={26} strokeLinecap="round" />
+              <path d="M 314 140 V 40" stroke="#5F83C2" strokeWidth={26} strokeLinecap="round" opacity={0.0} />
+              <rect x={282} y={28} width={36} height={112} rx={16} fill="#5F83C2" opacity={0.85} />
+              <text x={330} y={70} fontSize={14} fontWeight={700} fill="#4D6EA3">Inferior vena cava → heart</text>
+              {id === 'portal' && playing && (
+                <circle r={5} fill="#2B4A7A">
+                  <animateMotion dur="1.8s" repeatCount="indefinite" path={HEPATIC_VEIN_PATH} />
+                </circle>
+              )}
+            </g>
+
+            {/* Liver silhouette — right lobe big on the left, left lobe tapering right */}
+            <g style={seg(true)}>
+              <path
+                d="M 168 318 C 148 215 190 138 292 116 C 395 96 520 102 625 122 C 725 141 812 178 850 210 C 864 222 854 240 826 248 C 752 268 662 280 582 288 C 482 297 382 301 302 308 C 242 314 188 330 168 318 Z"
+                fill="#B4663F"
+                stroke="#8A4A2E"
+                strokeWidth={3}
+              />
+              {/* Falciform ligament — the seam between the two lobes */}
+              <path d="M 605 128 C 598 180 585 240 570 292" fill="none" stroke="#8A4A2E" strokeWidth={2.5} opacity={0.55} />
+              <text x={618} y={158} fontSize={13} fontWeight={700} fill="#8A4A2E">Falciform ligament</text>
+              <text x={295} y={195} fontSize={15} fontWeight={700} fill="#5E2F1A">Right lobe</text>
+              <text x={705} y={200} fontSize={14} fontWeight={700} fill="#5E2F1A">Left lobe</text>
+            </g>
+
+            {/* Portal vein + hepatic artery — the two supplies entering the hilum */}
+            <g style={seg(id === 'portal')}>
+              <path d={PORTAL_PATH} fill="none" stroke="#5F83C2" strokeWidth={16} strokeLinecap="round" />
+              <path d={ARTERY_PATH} fill="none" stroke="#D64545" strokeWidth={9} strokeLinecap="round" />
+              <text x={60} y={552} fontSize={13} fontWeight={700} fill="#4D6EA3">Portal vein — from the gut</text>
+              <path d="M 242 548 H 292" stroke="#4D6EA3" strokeWidth={2} fill="none" />
+              <text x={358} y={520} fontSize={13} fontWeight={700} fill="#B93327">Hepatic artery</text>
+              {id === 'portal' && playing && (
+                <>
+                  <circle r={5} fill="#2B4A7A">
+                    <animateMotion dur="2.4s" repeatCount="indefinite" path={PORTAL_PATH} />
+                  </circle>
+                  <circle r={5} fill="#2B4A7A">
+                    <animateMotion dur="2.4s" begin="0.8s" repeatCount="indefinite" path={PORTAL_PATH} />
+                  </circle>
+                  <circle r={5} fill="#2B4A7A">
+                    <animateMotion dur="2.4s" begin="1.6s" repeatCount="indefinite" path={PORTAL_PATH} />
+                  </circle>
+                  <circle r={4} fill="#D64545">
+                    <animateMotion dur="2.4s" begin="0.4s" repeatCount="indefinite" path={ARTERY_PATH} />
+                  </circle>
+                  <circle r={4} fill="#D64545">
+                    <animateMotion dur="2.4s" begin="1.4s" repeatCount="indefinite" path={ARTERY_PATH} />
+                  </circle>
+                </>
+              )}
+            </g>
+
+            {/* Gallbladder — pear-shaped, tucked under the liver */}
+            <g style={seg(id === 'bile' || id === 'release')}>
+              <g
+                style={{
+                  transform: mealFlash ? 'scale(0.9)' : 'scale(1)',
+                  transformOrigin: '505px 345px',
+                  transition: 'transform 0.5s ease',
+                }}
+              >
+                <path
+                  d="M 505 300 C 530 300 543 322 541 348 C 539 372 524 392 505 392 C 486 392 471 372 469 348 C 467 322 480 300 505 300 Z"
+                  fill={mealFlash ? '#7FB069' : '#5F8F5A'}
+                  stroke="#3F6B3A"
+                  strokeWidth={2.5}
+                />
+              </g>
+              <text x={552} y={352} fontSize={14} fontWeight={700} fill="#3F6B3A">Gallbladder</text>
+              <path d="M548 348 C542 348 536 349 532 350" stroke="#3F6B3A" strokeWidth={2} fill="none" />
+            </g>
+
+            {/* Bile ducts: hepatic → cystic → common bile duct → duodenum */}
+            <g style={seg(id === 'bile' || id === 'release')}>
+              <path d={BILE_PATH} fill="none" stroke="#5F8F5A" strokeWidth={7} strokeLinecap="round" />
+              <path d={CYSTIC_PATH} fill="none" stroke="#5F8F5A" strokeWidth={6} strokeLinecap="round" />
+              <text x={560} y={470} fontSize={13} fontWeight={700} fill="#3F6B3A">Common bile duct</text>
+              {id === 'bile' && playing && (
+                <>
+                  <circle r={5} fill="#2F7A3D">
+                    <animateMotion dur="2.6s" repeatCount="indefinite" path={BILE_PATH} />
+                  </circle>
+                  <circle r={5} fill="#2F7A3D">
+                    <animateMotion dur="2.6s" begin="0.9s" repeatCount="indefinite" path={BILE_PATH} />
+                  </circle>
+                  <circle r={5} fill="#2F7A3D">
+                    <animateMotion dur="2.6s" begin="1.8s" repeatCount="indefinite" path={BILE_PATH} />
+                  </circle>
+                </>
+              )}
+              {mealFlash && (
+                <>
+                  <circle r={7} fill="#2F7A3D">
+                    <animateMotion dur="2.2s" repeatCount="indefinite" path={BILE_PATH} />
+                  </circle>
+                  <circle r={7} fill="#2F7A3D">
+                    <animateMotion dur="2.2s" begin="0.7s" repeatCount="indefinite" path={BILE_PATH} />
+                  </circle>
+                  <circle r={7} fill="#2F7A3D">
+                    <animateMotion dur="2.2s" begin="1.4s" repeatCount="indefinite" path={BILE_PATH} />
+                  </circle>
+                </>
+              )}
+            </g>
+
+            {/* Duodenum — where bile meets the meal */}
+            <g style={seg(id === 'release')}>
+              <path d="M 730 300 C 795 318 815 375 795 440 C 775 495 730 505 708 482" fill="none" stroke="#F2B8A0" strokeWidth={26} strokeLinecap="round" />
+              <text x={800} y={410} fontSize={14} fontWeight={700} fill="#B6544A">Duodenum</text>
+              {mealFlash && (
+                <circle r={6} fill="#2F7A3D" opacity={0.9}>
+                  <animate attributeName="r" values="6;10;6" dur="1.2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.2s" repeatCount="indefinite" />
+                  <animateMotion dur="2.2s" begin="1.9s" repeatCount="indefinite" path="M 790 400 C 800 410 805 425 800 445" />
+                </circle>
+              )}
+            </g>
+
+            {/* Lobule inset — one hexagonal working unit, blood streaming to the central vein */}
+            <g style={seg(id === 'lobule')}>
+              <polygon
+                points={[0, 1, 2, 3, 4, 5].map((i) => `${lobuleCorner(i).x},${lobuleCorner(i).y}`).join(' ')}
+                fill="#F6E8D8"
+                stroke="#B89A4A"
+                strokeWidth={2.5}
+              />
+              {[0, 1, 2, 3, 4, 5].map((i) => {
+                const c = lobuleCorner(i)
+                return <circle key={i} cx={c.x} cy={c.y} r={7} fill="#8A6A2E" />
+              })}
+              <circle cx={LOBULE_CENTRE.x} cy={LOBULE_CENTRE.y} r={15} fill="#5F83C2" stroke="#4D6EA3" strokeWidth={2.5} />
+              <text x={LOBULE_CENTRE.x} y={LOBULE_CENTRE.y + 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#fff">vein</text>
+              {id === 'lobule' && playing &&
+                [0, 1, 2, 3, 4, 5].map((i) => {
+                  const c = lobuleCorner(i)
+                  return (
+                    <circle key={i} r={4.5} fill="#2B4A7A">
+                      <animateMotion
+                        dur="2.2s"
+                        begin={`${i * 0.35}s`}
+                        repeatCount="indefinite"
+                        path={`M ${c.x} ${c.y} L ${LOBULE_CENTRE.x} ${LOBULE_CENTRE.y}`}
+                      />
+                      <animate attributeName="opacity" values="1;1;0" dur="2.2s" begin={`${i * 0.35}s`} repeatCount="indefinite" />
+                    </circle>
+                  )
+                })}
+              <text x={60} y={382} fontSize={12} fontWeight={700} fill="#8A6A2E">One lobule — portal triads at the corners</text>
+            </g>
+
+            {/* Stage hotspots */}
+            {LIVER_ORDER.map((sid, i) => {
+              const s = LIVER_STAGES[sid]
+              const isActive = stage === i
+              return (
+                <g key={sid} onClick={() => { setStage(i); setPlaying(false) }} className="cursor-pointer">
+                  {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={13} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                  <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+                </g>
+              )
+            })}
+          </svg>
+
+          {/* Stage timeline */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {LIVER_ORDER.map((sid, i) => (
+              <button
+                key={sid}
+                onClick={() => {
+                  setStage(i)
+                  setPlaying(false)
+                }}
+                aria-pressed={stage === i}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  stage === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">Stage {i + 1}</span>
+                <span className="mt-0.5 block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{LIVER_STAGES[sid].name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Stage {stage + 1} of 4 · {info.job}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>≈ 1.5 kg — the largest internal organ</Chip>
+            <Chip>Bile ≈ 800–1,000 mL/day</Chip>
+            <Chip>Blood flow ≈ 1.5 L/min</Chip>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Bile stored in the gallbladder" value={bileStored} tone="bg-success-500" />
+            <Meter label="Portal blood processed since you opened the lab" value={processed} tone="bg-venous-500" />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause' : '▶ Play'}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStage((s) => (s + LIVER_ORDER.length - 1) % LIVER_ORDER.length); setPlaying(false) }}>
+                ← Prev stage
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStage((s) => (s + 1) % LIVER_ORDER.length); setPlaying(false) }}>
+                Next stage →
+              </Button>
+              <Button size="sm" variant="accent" onClick={sendMeal}>
+                Send a fatty meal
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
 
 export function GiTractLab() {
   const [station, setStation] = useState(0)
