@@ -2827,3 +2827,371 @@ export function GiTractLab() {
     />
   )
 }
+
+/* ============================ Brain: lobes & landmarks ============================ */
+
+type BrainStepId = 'touch' | 'relay' | 'feel' | 'move'
+
+const BRAIN_STEPS: Record<
+  BrainStepId,
+  { name: string; latin: string; job: string; blurb: string; note: string; dot: { x: number; y: number } }
+> = {
+  touch: {
+    name: 'Touch',
+    latin: 'tactus',
+    job: 'Receptors fire in the fingertip',
+    blurb:
+      'Touch a hot cup and the story starts far from the brain: pressure and temperature receptors in the fingertip fire, and the signal races up a sensory nerve into the spinal cord. Watch the dots climb the cord — a single touch becomes an electrical message travelling at up to 120 metres per second, on its way to a brain that has not felt anything yet.',
+    note: 'Different receptors report different things — light touch, pressure, heat, pain — and each kind travels on its own kind of fibre, at its own speed.',
+    dot: { x: 118, y: 500 },
+  },
+  relay: {
+    name: 'Relay',
+    latin: 'thalamus',
+    job: 'The thalamus routes the signal',
+    blurb:
+      'Almost every sense passes through one small egg-shaped station deep in the middle of the brain: the thalamus. It is not a dead end but a switchboard — it sorts the incoming signal, sharpens it, and sends it on to exactly the patch of cortex that knows what to do with it. The dashed oval is the thalamus: you cannot see it from the outside, because it sits buried under the cortex.',
+    note: 'Smell is the exception — it bypasses the thalamus and goes straight to the cortex. Everything else knocks on the thalamus first.',
+    dot: { x: 540, y: 255 },
+  },
+  feel: {
+    name: 'Feel',
+    latin: 'cortex somatosensorius',
+    job: 'The parietal lobe registers it',
+    blurb:
+      'The signal lands in a narrow strip of the parietal lobe just behind the central sulcus — the primary somatosensory cortex. This is where touch becomes feeling: the strip is a map of the body, and the fingertip has its own small patch on it. Neighbouring patches belong to the hand, the arm, the face — the map is distorted, with huge areas for the fingers and lips, because that is where the receptors are densest.',
+    note: 'The strip is called the postcentral gyrus. Stroke it with a fingertip and the map lights up — that is why a neurosurgeon can wake a patient and ask what they feel.',
+    dot: { x: 512, y: 175 },
+  },
+  move: {
+    name: 'Move',
+    latin: 'cortex motorius',
+    job: 'The frontal lobe answers',
+    blurb:
+      'Feeling it is only half the job. A matching strip on the frontal side of the central sulcus — the primary motor cortex — fires, and the command races back down: through the brainstem, down the spinal cord, out to the muscles of the hand. The hand pulls away from the cup. Touch in, movement out — the whole loop, fingertip to cortex and back, in a fraction of a second.',
+    note: 'The motor strip is the mirror of the sensory strip: a body map again, with the same oversized hands and face. Damage here paralyses the matching body part.',
+    dot: { x: 488, y: 172 },
+  },
+}
+
+const BRAIN_ORDER: BrainStepId[] = ['touch', 'relay', 'feel', 'move']
+
+/* Signal routes: fingertip → cord → brainstem → thalamus → sensory cortex →
+ * motor cortex → back down to the hand. The drawn cord and brainstem follow
+ * the same geometry. */
+const CORD_PATH = 'M 118 500 C 220 522 380 528 470 520 C 500 516 516 515 528 514'
+const STEM_PATH = 'M 528 460 C 530 410 532 355 534 300'
+const THALAMUS_TO_SENSORY = 'M 566 240 C 590 215 575 185 540 172 C 530 168 520 168 512 172'
+const MOTOR_TO_HAND = 'M 490 168 C 510 250 528 360 526 470 C 524 505 400 525 250 520 C 190 518 140 510 118 500'
+
+type BrainLobeId = 'frontal' | 'parietal' | 'temporal' | 'occipital' | 'cerebellum' | 'brainstem'
+
+const BRAIN_LOBES: Record<
+  BrainLobeId,
+  { name: string; latin: string; job: string; line: string }
+> = {
+  frontal: {
+    name: 'Frontal lobe',
+    latin: 'lobus frontalis',
+    job: 'Planning, deciding, moving',
+    line: 'The biggest lobe: the motor strip that moves the body, Broca’s area for speech, and the prefrontal cortex — the part that plans, judges, and holds back.',
+  },
+  parietal: {
+    name: 'Parietal lobe',
+    latin: 'lobus parietalis',
+    job: 'Feeling where things are',
+    line: 'The sensory strip that feels touch, temperature, and pain — plus the maps that tell you where your limbs are without looking.',
+  },
+  temporal: {
+    name: 'Temporal lobe',
+    latin: 'lobus temporalis',
+    job: 'Hearing and remembering',
+    line: 'The auditory cortex that hears, Wernicke’s area that understands words — and, buried deep inside, the hippocampus that lays down new memories.',
+  },
+  occipital: {
+    name: 'Occipital lobe',
+    latin: 'lobus occipitalis',
+    job: 'Seeing',
+    line: 'The smallest lobe, and almost entirely visual: the primary visual cortex at the very back turns the retina’s signals into the world you see.',
+  },
+  cerebellum: {
+    name: 'Cerebellum',
+    latin: 'cerebellum',
+    job: 'Smooth, coordinated movement',
+    line: 'The “little brain” tucked under the occipital lobe: it does not start movements, it polishes them — timing, balance, and the smoothness you only notice when it is gone.',
+  },
+  brainstem: {
+    name: 'Brainstem',
+    latin: 'truncus encephali',
+    job: 'The vital switchboard',
+    line: 'Midbrain, pons, and medulla: every signal between brain and body passes through here, and it runs the jobs you cannot stop — breathing, heartbeat, swallowing.',
+  },
+}
+
+const BRAIN_LOBE_ORDER: BrainLobeId[] = ['frontal', 'parietal', 'temporal', 'occipital', 'cerebellum', 'brainstem']
+
+/* Lobe regions, drawn in a lateral view of the left hemisphere — face to
+ * the left, occipital pole to the right. Clipped to the cerebrum outline. */
+const CEREBRUM_PATH =
+  'M 210 335 C 185 260 205 170 280 130 C 370 85 520 78 620 105 C 710 130 765 190 758 260 C 752 315 720 345 660 358 C 540 378 340 380 250 360 C 225 354 215 348 210 335 Z'
+
+const BRAIN_LOBE_PATHS: Record<BrainLobeId, { d: string; fill: string }> = {
+  frontal: {
+    d: 'M 190 80 L 528 80 C 512 170 492 250 462 308 L 205 308 C 190 240 188 160 190 80 Z',
+    fill: '#F0D3C2',
+  },
+  parietal: {
+    d: 'M 528 80 L 652 85 C 662 150 668 230 660 308 L 462 308 C 492 250 512 170 528 80 Z',
+    fill: '#EADFC6',
+  },
+  occipital: {
+    d: 'M 652 85 L 775 125 C 785 200 770 280 725 335 L 660 308 C 668 230 662 150 652 85 Z',
+    fill: '#E2D2DD',
+  },
+  temporal: {
+    d: 'M 205 308 L 690 308 C 685 340 640 362 540 370 C 420 378 300 372 250 360 C 225 354 212 335 205 308 Z',
+    fill: '#D5DFCE',
+  },
+  cerebellum: {
+    d: 'M 630 388 C 630 368 660 356 695 358 C 735 360 760 378 758 403 C 756 428 730 446 690 446 C 655 446 632 428 630 388 Z',
+    fill: '#DCC9B4',
+  },
+  brainstem: {
+    d: 'M 498 370 C 490 402 496 428 510 444 C 512 468 513 492 514 514 L 542 514 C 543 490 544 466 544 450 C 554 442 556 424 550 404 C 544 386 538 374 532 368 Z',
+    fill: '#CDBB9E',
+  },
+}
+
+export function BrainLab({ bare = false }: { bare?: boolean }) {
+  const [step, setStep] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const [lobe, setLobe] = useState<BrainLobeId>('frontal')
+  const info = BRAIN_STEPS[BRAIN_ORDER[step]]
+  const id = BRAIN_ORDER[step]
+  const lobeInfo = BRAIN_LOBES[lobe]
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStep((s) => (s + 1) % BRAIN_ORDER.length), 4200)
+    return () => clearInterval(t)
+  }, [playing])
+
+  const seg = (active: boolean) => ({ opacity: active ? 1 : 0.32, transition: 'opacity 0.6s ease' })
+
+  const dots = (path: string, color: string, n = 3) =>
+    Array.from({ length: n }, (_, i) => (
+      <circle key={i} r={5} fill={color}>
+        <animateMotion dur="2.2s" begin={`${i * 0.7}s`} repeatCount="indefinite" path={path} />
+      </circle>
+    ))
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of the brain in lateral view: four lobes, cerebellum and brainstem, with a touch signal travelling from the fingertip to the cortex and back">
+            <defs>
+              <clipPath id="brain-clip">
+                <path d={CEREBRUM_PATH} />
+              </clipPath>
+            </defs>
+
+            {/* Cerebrum — the four lobes, clickable */}
+            <g clipPath="url(#brain-clip)">
+              {(Object.keys(BRAIN_LOBE_PATHS) as BrainLobeId[])
+                .filter((lid) => lid !== 'cerebellum' && lid !== 'brainstem')
+                .map((lid) => (
+                  <path
+                    key={lid}
+                    d={BRAIN_LOBE_PATHS[lid].d}
+                    fill={BRAIN_LOBE_PATHS[lid].fill}
+                    stroke={lobe === lid ? '#0E7C86' : '#16222E'}
+                    strokeWidth={lobe === lid ? 3.5 : 1.5}
+                    strokeOpacity={lobe === lid ? 1 : 0.22}
+                    className="cursor-pointer"
+                    onClick={() => setLobe(lid)}
+                  >
+                    <title>{BRAIN_LOBES[lid].name}</title>
+                  </path>
+                ))}
+              {/* Gyri — a few folds sketched inside each lobe */}
+              <g fill="none" stroke="#16222E" strokeWidth={2} opacity={0.28} strokeLinecap="round">
+                <path d="M 260 150 C 300 170 330 160 360 180" />
+                <path d="M 250 220 C 290 240 330 225 365 245" />
+                <path d="M 400 130 C 430 155 450 140 470 165" />
+                <path d="M 545 140 C 575 165 600 150 625 175" />
+                <path d="M 560 230 C 590 250 615 235 640 255" />
+                <path d="M 680 160 C 700 185 715 170 730 195" />
+                <path d="M 300 330 C 340 345 380 332 420 345" />
+                <path d="M 480 335 C 520 348 560 335 600 348" />
+              </g>
+              {/* Thalamus — deep inside, shown dashed because it is buried */}
+              <g style={seg(id === 'relay')}>
+                <ellipse cx={540} cy={255} rx={52} ry={34} fill="#5F83C2" fillOpacity={0.25} stroke="#4D6EA3" strokeWidth={2.5} strokeDasharray="7 5" />
+              </g>
+              {/* Sensory strip (postcentral gyrus) — lights up on the Feel step */}
+              <path
+                d="M 522 100 C 512 170 500 250 486 302 L 510 304 C 524 250 534 170 544 100 Z"
+                fill="#0E7C86"
+                opacity={id === 'feel' ? 0.55 : 0}
+                style={{ transition: 'opacity 0.6s ease' }}
+              />
+              {/* Motor strip (precentral gyrus) — lights up on the Move step */}
+              <path
+                d="M 500 100 C 488 170 478 250 462 300 L 486 302 C 500 250 512 170 522 100 Z"
+                fill="#B93327"
+                opacity={id === 'move' ? 0.55 : 0}
+                style={{ transition: 'opacity 0.6s ease' }}
+              />
+            </g>
+            <path d={CEREBRUM_PATH} fill="none" stroke="#16222E" strokeWidth={3} />
+
+            {/* Sulci — the landmarks that draw the lobe borders */}
+            <g fill="none" stroke="#16222E" strokeWidth={2.5} opacity={0.6} strokeLinecap="round">
+              <path d="M 520 92 C 505 170 488 250 468 305" />
+              <path d="M 212 300 C 320 292 420 296 470 302 C 540 308 620 306 688 302" />
+              <path d="M 652 88 C 660 150 664 200 662 240" />
+            </g>
+
+            {/* Cerebellum + brainstem — clickable, below the cerebrum */}
+            {(['cerebellum', 'brainstem'] as const).map((lid) => (
+              <path
+                key={lid}
+                d={BRAIN_LOBE_PATHS[lid].d}
+                fill={BRAIN_LOBE_PATHS[lid].fill}
+                stroke={lobe === lid ? '#0E7C86' : '#16222E'}
+                strokeWidth={lobe === lid ? 3.5 : 2.5}
+                strokeOpacity={lobe === lid ? 1 : 0.5}
+                className="cursor-pointer"
+                onClick={() => setLobe(lid)}
+              >
+                <title>{BRAIN_LOBES[lid].name}</title>
+              </path>
+            ))}
+            {/* Cerebellar folia — the fine parallel stripes */}
+            <g fill="none" stroke="#8A6A4A" strokeWidth={2} opacity={0.55} strokeLinecap="round">
+              <path d="M 645 380 C 680 372 720 374 748 384" />
+              <path d="M 638 398 C 675 390 720 392 752 400" />
+              <path d="M 640 416 C 678 408 718 410 748 418" />
+              <path d="M 650 433 C 682 426 714 428 738 434" />
+            </g>
+
+            {/* Spinal cord — the signal's road in and out */}
+            <path d={CORD_PATH} fill="none" stroke="#5F83C2" strokeWidth={14} strokeLinecap="round" opacity={0.85} />
+            <path d={CORD_PATH} fill="none" stroke="#4D6EA3" strokeWidth={2} strokeDasharray="4 8" opacity={0.7} />
+
+            {/* Fingertip — where the journey starts and ends */}
+            <g style={seg(id === 'touch' || id === 'move')}>
+              <circle cx={118} cy={500} r={17} fill="#F2B8A0" stroke="#B6544A" strokeWidth={2.5} />
+              {(id === 'move' || id === 'touch') && playing && (
+                <circle cx={118} cy={500} r={17} fill="none" stroke="#B6544A" strokeWidth={2} className="ping-ring" />
+              )}
+              <text x={118} y={545} textAnchor="middle" fontSize={13} fontWeight={700} fill="#B6544A">Fingertip</text>
+            </g>
+
+            {/* Signal dots — only the active leg of the journey moves */}
+            {id === 'touch' && playing && dots(CORD_PATH, '#2B4A7A')}
+            {id === 'relay' && playing && dots(STEM_PATH, '#2B4A7A')}
+            {id === 'feel' && playing && dots(THALAMUS_TO_SENSORY, '#0E7C86')}
+            {id === 'move' && playing && dots(MOTOR_TO_HAND, '#B93327')}
+
+            {/* Lobe labels */}
+            <g fontWeight={700} fill="#3D2E22" pointerEvents="none">
+              <text x={330} y={180} fontSize={14}>Frontal lobe</text>
+              <text x={575} y={180} fontSize={14}>Parietal lobe</text>
+              <text x={400} y={345} fontSize={14}>Temporal lobe</text>
+              <text x={700} y={200} fontSize={13}>Occipital</text>
+              <text x={700} y={216} fontSize={13}>lobe</text>
+            </g>
+            <g fontSize={11} fontWeight={700} fill="#5E4A33" pointerEvents="none">
+              <text x={648} y={468}>Cerebellum</text>
+              <text x={560} y={480}>Brainstem</text>
+              <text x={545} y={122}>Central sulcus</text>
+              <text x={270} y={288}>Lateral sulcus</text>
+            </g>
+            <g style={seg(id === 'relay')}>
+              <text x={600} y={252} fontSize={12} fontWeight={700} fill="#4D6EA3">Thalamus</text>
+              <path d="M 596 250 L 590 252" stroke="#4D6EA3" strokeWidth={1.5} />
+            </g>
+
+            {/* Step hotspots */}
+            {BRAIN_ORDER.map((sid, i) => {
+              const s = BRAIN_STEPS[sid]
+              const isActive = step === i
+              return (
+                <g key={sid} onClick={() => { setStep(i); setPlaying(false) }} className="cursor-pointer">
+                  {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={14} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                  <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+                </g>
+              )
+            })}
+          </svg>
+
+          {/* Lobe picker */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {BRAIN_LOBE_ORDER.map((lid) => (
+              <button
+                key={lid}
+                onClick={() => setLobe(lid)}
+                aria-pressed={lobe === lid}
+                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                  lobe === lid ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{BRAIN_LOBES[lid].name}</span>
+                <span className="mt-0.5 block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">{BRAIN_LOBES[lid].job}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Step {step + 1} of 4 · {info.job}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-5 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">
+              Landmark under the cursor — {lobeInfo.name}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-800">
+              <strong className="font-semibold">{lobeInfo.name}</strong>{' '}
+              <span className="font-serif italic text-ink-500">({lobeInfo.latin})</span> — {lobeInfo.line}
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>≈ 86 billion neurons</Chip>
+            <Chip>≈ 1.4 kg — about 2% of body mass</Chip>
+            <Chip>≈ 20% of the body’s energy</Chip>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Share of the body’s energy the brain uses" value={20} tone="bg-primary-600" />
+            <Meter label="Brain mass that is cortex" value={80} tone="bg-venous-500" />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause signal' : '▶ Play signal'}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + BRAIN_ORDER.length - 1) % BRAIN_ORDER.length); setPlaying(false) }}>
+                ← Prev step
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + 1) % BRAIN_ORDER.length); setPlaying(false) }}>
+                Next step →
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, CabgLab, CardiacCycleLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, BrainLab, CabgLab, CardiacCycleLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
 import AirwayLabCard from './AirwayLabCard'
 import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
@@ -1337,6 +1337,158 @@ export function LiverLessonBody() {
           through it before it is allowed into the general circulation. Two blood supplies
           in, one cleaned stream out — and a side product, bile, that the gallbladder
           stores until the next fatty meal calls for it.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- The Brain: Lobes and Landmarks ------------------------- */
+
+export function BrainLessonBody() {
+  return (
+    <BodyShell
+      lab={<BrainLab />}
+      chapterTitle="Four Lobes, One Map, and a Switchboard Inside"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              The brain weighs about <strong>1.4 kilograms</strong> — roughly 2% of body mass —
+              yet burns about <strong>20% of the body&rsquo;s energy</strong>, and it does so
+              with about <strong>86 billion neurons</strong> wired together by something like
+              100 trillion connections. Most of that mass is the <strong>cerebrum</strong>, the
+              big folded dome: two hemispheres, split by the longitudinal fissure, joined
+              underneath by the <strong>corpus callosum</strong>, a thick band of fibres that
+              lets the halves talk. The outside of each hemisphere is the{' '}
+              <strong>cerebral cortex</strong>, a sheet of grey matter only 2–4 millimetres
+              thick — folded into ridges (<strong>gyri</strong>) and grooves (
+              <strong>sulci</strong>) so that a sheet the size of a newspaper page fits inside
+              the skull. The folding is the point: more cortex in the same skull.
+            </p>
+            <p>
+              The cortex is not one uniform sheet but a map, divided into{' '}
+              <strong>four lobes</strong> by the sulci that cross it. The{' '}
+              <strong>frontal lobe</strong> sits at the front, behind the forehead: it plans,
+              decides, holds back — and along its back edge runs the strip that moves the body,
+              the primary motor cortex. The <strong>parietal lobe</strong> sits behind the
+              central sulcus: its front strip feels touch, temperature, and pain, and the rest
+              of it maps where your limbs are without you looking. The{' '}
+              <strong>temporal lobe</strong> sits below the lateral sulcus: it hears, it
+              understands words, and buried deep inside it the hippocampus lays down new
+              memories. The <strong>occipital lobe</strong>, the smallest, sits at the back
+              and does almost nothing but see — the primary visual cortex turns the retina&rsquo;s
+              signals into the world you look at. The borders are real landmarks you can
+              find on any brain: the <strong>central sulcus</strong> between frontal and
+              parietal, the <strong>lateral sulcus</strong> above the temporal lobe.
+            </p>
+            <p>
+              Under the cerebrum, the rest of the brain does the jobs the lobes cannot. The{' '}
+              <strong>cerebellum</strong> — the &ldquo;little brain&rdquo; tucked under the
+              occipital lobe — never starts a movement, but it polishes every one: timing,
+              balance, and the smoothness you only notice when it is gone. The{' '}
+              <strong>brainstem</strong> — midbrain, pons, and medulla — is the stalk the
+              whole brain sits on: every signal between brain and body passes through it, and
+              it runs the jobs you cannot stop, breathing and heartbeat among them. And deep
+              in the middle sits the <strong>thalamus</strong>, the switchboard: almost every
+              sense knocks on it first, and it routes each signal to exactly the patch of
+              cortex that knows what to do with it. Smell is the only sense that skips the
+              queue.
+            </p>
+            <p>
+              The lab above follows one signal through the whole map: a touch on the fingertip
+              climbs the spinal cord, passes the brainstem, is relayed by the thalamus, and
+              lands on the sensory strip of the parietal lobe — where it becomes a feeling.
+              The frontal lobe answers on the motor strip, and the command races back down
+              to pull the hand away. Both strips are body maps, and both are distorted the
+              same way: the fingers and lips take up far more cortex than the back or the
+              legs, because that is where the receptors — and the dexterity — are densest.
+              Damage a patch of the map and you lose exactly that patch&rsquo;s job, which is
+              why neurologists read symptoms the way you would read a map: find the missing
+              function, find the lobe.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Structure', 'Landmark that bounds it', 'What it does']}
+              rows={[
+                ['Frontal lobe', 'Central sulcus behind it', 'Plans, decides, holds back; the motor strip moves the body; Broca’s area speaks'],
+                ['Parietal lobe', 'Central sulcus in front, lateral sulcus below', 'The sensory strip feels touch and pain; maps where the limbs are'],
+                ['Temporal lobe', 'Lateral sulcus above it', 'Hears; Wernicke’s area understands words; the hippocampus makes memories'],
+                ['Occipital lobe', 'Parieto-occipital sulcus in front', 'Sees — the primary visual cortex at the very back of the brain'],
+                ['Cerebellum', 'Under the occipital lobe', 'Polishes movement: timing, coordination, balance'],
+                ['Brainstem', 'The stalk under the cerebrum', 'All traffic between brain and body; breathing and heartbeat run here'],
+                ['Thalamus', 'Deep in the middle, under the cortex', 'The switchboard — relays almost every sense to the right patch of cortex'],
+                ['Corpus callosum', 'Between the two hemispheres', 'The fibre bridge that lets the left and right halves talk to each other'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Cerebral cortex" latin="cortex cerebri">
+              The outer sheet of the cerebrum — grey matter, 2–4 millimetres thick, folded
+              into gyri and sulci so that roughly a newspaper page of it fits inside the
+              skull. It is where sensation becomes perception, where decisions are made, and
+              where movement is commanded. Everything under it — thalamus, brainstem,
+              cerebellum — exists to feed it signals and carry out its orders.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-brain-openstax-lobes.jpg"
+              alt="OpenStax figure of the lobes of the cerebral cortex: a lateral view of the brain with the frontal, parietal, temporal, and occipital lobes coloured and labelled, with the central sulcus, precentral and postcentral gyri, and lateral sulcus marked"
+              caption="Real anatomy reference — the four lobes as a map, coloured and labelled: frontal in front, parietal behind the central sulcus, temporal below the lateral sulcus, occipital at the back — with the precentral gyrus (movement) and postcentral gyrus (feeling) straddling the central sulcus, exactly as the lab above shows them. Compare it with the lab — the same landmarks, drawn as a map instead of a journey."
+              credit="OpenStax, Anatomy and Physiology 2e, Figure 13.7 “Lobes of the Cerebral Cortex” · CC BY 4.0 · via openstax.org"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Neuron', latin: 'neuron', back: 'The brain’s signalling cell: about 86 billion of them, each with branches (dendrites) that listen and one long fibre (the axon) that talks. Neurons do not touch — they pass signals across tiny gaps called synapses.' },
+        { term: 'Sulcus', latin: 'sulcus', back: 'A groove in the folded cortex — the valleys between the ridges (gyri). The big sulci are landmarks: the central sulcus divides frontal from parietal lobe, the lateral sulcus marks the top of the temporal lobe.' },
+        { term: 'Thalamus', latin: 'thalamus', back: 'The egg-shaped relay station deep in the middle of the brain. Almost every sense passes through it on the way to the cortex, which routes each signal to exactly the patch that knows what to do with it. Smell is the only exception.' },
+        { term: 'Corpus callosum', latin: 'corpus callosum', back: 'The thick band of about 200 million fibres joining the two cerebral hemispheres, so the halves can share what each one knows. Cut it, and the two halves start working — and answering — on their own.' },
+      ]}
+      questions={[
+        {
+          q: 'Which sulcus separates the frontal lobe from the parietal lobe?',
+          options: [
+            'The lateral sulcus',
+            'The central sulcus',
+            'The longitudinal fissure',
+            'The parieto-occipital sulcus',
+          ],
+          answer: 1,
+          why: 'The central sulcus — it runs diagonally across the top of the hemisphere. The motor strip sits just in front of it (frontal side), the sensory strip just behind it (parietal side).',
+        },
+        {
+          q: 'Which structure relays almost all sensory signals to the cortex?',
+          options: [
+            'The cerebellum',
+            'The corpus callosum',
+            'The thalamus',
+            'The medulla',
+          ],
+          answer: 2,
+          why: 'The thalamus — the brain’s switchboard, buried deep under the cortex. Every sense except smell passes through it before reaching the patch of cortex that handles it.',
+        },
+        {
+          q: 'Which lobe holds the primary visual cortex?',
+          options: [
+            'The frontal lobe',
+            'The parietal lobe',
+            'The temporal lobe',
+            'The occipital lobe',
+          ],
+          answer: 3,
+          why: 'The occipital lobe, at the very back of the brain — the smallest lobe, and almost entirely devoted to turning the retina’s signals into sight.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The brain is a map, and the sulci are its borders: every patch of cortex has one
+          job, and the landmarks tell you which patch you are looking at. Follow a signal
+          from fingertip to thalamus to cortex and back, and you have followed the whole
+          story — sensation in, decision made, movement out.
         </Callout>
       }
     />

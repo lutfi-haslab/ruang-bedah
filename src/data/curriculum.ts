@@ -63,7 +63,7 @@ export const CURRICULUM: Subject[] = [
       {
         title: 'Nervous System',
         lessons: [
-          L('The Brain: Lobes and Landmarks', 'Reading + diagram', 10),
+          L('The Brain: Lobes and Landmarks', 'Interactive lab + reading', 10, 'available', '/lesson/the-brain-lobes-and-landmarks'),
           L('Neurons and the Synapse', 'Interactive lab', 8),
         ],
       },

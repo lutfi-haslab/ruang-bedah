@@ -19,6 +19,7 @@ lesson caption.
 | ref-instruments-tray.jpg | Basic surgical instrument set on green cloth in a tray | Photo by Dan Bollinger — File:Circumcision instruments on green cloth in tray - centered.jpg (a circumcision set; the same general instruments used across surgery) | CC BY-SA 4.0 |
 | ref-gi-tract-ruiz.png | Whole digestive system, labelled (mouth to anus, with liver, gallbladder, pancreas) | Mariana Ruiz (LadyofHats) — File:Digestive system diagram en.svg, rasterised to PNG for the lesson page | Public domain |
 | ref-liver-gray1086.png | Inferior (visceral) surface of the liver, labelled — lobes, gallbladder, porta hepatis | Gray's Anatomy (1918), plate 1086 — File:Gray1086-liver.PNG | Public domain |
+| ref-brain-openstax-lobes.jpg | Lobes of the cerebral cortex, lateral view — frontal, parietal, temporal, occipital lobes; central sulcus, pre/postcentral gyri, lateral sulcus | OpenStax, *Anatomy and Physiology* 2e, Figure 13.7 — fetched from openstax.org (Wikimedia Commons' upload host was rate-limiting this VM with HTTP 429 throughout the run, so the identical CC BY figure was taken from the publisher's own site instead) | CC BY 4.0 |
 
 Note: like `heart-anterior.png`, these binary files are deployed to
 Cloudflare Pages but are not part of the GitHub snapshot push (text only).
