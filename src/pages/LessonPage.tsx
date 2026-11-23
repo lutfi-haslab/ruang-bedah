@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Badge, Button } from '../components/primitives'
 import { AnatomyFigure, Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import HeartLab from '../components/HeartLab'
-import { AirwayLessonBody, AppendectomyCaseBody, BrainLessonBody, CabgLessonBody, CardiacCycleLessonBody, ConductionLessonBody, GiTractLessonBody, InstrumentsLessonBody, LiverLessonBody, LungsLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
+import { AirwayLessonBody, AppendectomyCaseBody, BrainLessonBody, CabgLessonBody, CardiacCycleLessonBody, CholecystectomyCaseBody, ConductionLessonBody, GiTractLessonBody, InstrumentsLessonBody, LiverLessonBody, LungsLessonBody, MusclesLessonBody, NeuronLessonBody, SkeletonLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
 import { EkgDivider, FlashCards, Quiz } from '../components/study-tools'
 import { Breadcrumb, badgeFor } from '../components/syllabus'
 import { getLessonBySlug, lessonNeighbors, subjectSlug } from '../data/curriculum'
@@ -133,6 +133,8 @@ function lessonBodyFor(slug: string) {
       return <CabgLessonBody />
     case 'appendicectomy-the-easy-case':
       return <AppendectomyCaseBody />
+    case 'cholecystectomy-the-medium-case':
+      return <CholecystectomyCaseBody />
     case 'surgical-instruments-the-tools-of-the-operation':
       return <InstrumentsLessonBody />
     case 'the-gi-tract-end-to-end':
@@ -141,6 +143,12 @@ function lessonBodyFor(slug: string) {
       return <LiverLessonBody />
     case 'the-brain-lobes-and-landmarks':
       return <BrainLessonBody />
+    case 'neurons-and-the-synapse':
+      return <NeuronLessonBody />
+    case 'the-skeleton-206-bones-one-frame':
+      return <SkeletonLessonBody />
+    case 'muscles-how-movement-is-made':
+      return <MusclesLessonBody />
     default:
       return null
   }

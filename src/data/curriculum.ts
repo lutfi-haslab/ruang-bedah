@@ -64,14 +64,14 @@ export const CURRICULUM: Subject[] = [
         title: 'Nervous System',
         lessons: [
           L('The Brain: Lobes and Landmarks', 'Interactive lab + reading', 10, 'available', '/lesson/the-brain-lobes-and-landmarks'),
-          L('Neurons and the Synapse', 'Interactive lab', 8),
+          L('Neurons and the Synapse', 'Interactive lab + reading', 8, 'available', '/lesson/neurons-and-the-synapse'),
         ],
       },
       {
         title: 'Musculoskeletal System',
         lessons: [
-          L('The Skeleton: 206 Bones, One Frame', 'Reading + diagram', 9),
-          L('Muscles: How Movement Is Made', 'Reading + diagram', 8),
+          L('The Skeleton: 206 Bones, One Frame', 'Interactive lab + reading', 9, 'available', '/lesson/the-skeleton-206-bones-one-frame'),
+          L('Muscles: How Movement Is Made', 'Interactive lab + reading', 8, 'available', '/lesson/muscles-how-movement-is-made'),
         ],
       },
     ],
@@ -145,7 +145,7 @@ export const CURRICULUM: Subject[] = [
         title: 'Operation Case Studies',
         lessons: [
           L('Appendicectomy: The Easy Case', 'Case study + interactive lab', 12, 'available', '/lesson/appendicectomy-the-easy-case'),
-          L('Cholecystectomy: The Medium Case', 'Case study', 12),
+          L('Cholecystectomy: The Medium Case', 'Case study + interactive lab', 12, 'available', '/lesson/cholecystectomy-the-medium-case'),
           L('Coronary Bypass: The Hard Case', 'Case study', 14),
         ],
       },

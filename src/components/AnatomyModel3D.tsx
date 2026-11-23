@@ -23,13 +23,14 @@ export type AnatomyModelConfig = {
   clearcoat?: number
   envIntensity?: number
   keyIntensity?: number
-  mode: 'beat' | 'breathe'
+  mode: 'beat' | 'breathe' | 'sway' | 'contract'
   motionLabel: string
   kicker: string
   caption: ReactNode
   credit: string
   home: [number, number, number]
   initialRotY?: number
+  initialRotX?: number
 }
 
 function Toggle({
@@ -134,6 +135,7 @@ export default function AnatomyModel3D({
 
     const group = new THREE.Group()
     group.rotation.y = config.initialRotY ?? 0.55
+    group.rotation.x = config.initialRotX ?? 0
     scene.add(group)
 
     const material = new THREE.MeshPhysicalMaterial({
@@ -216,6 +218,21 @@ export default function AnatomyModel3D({
             : Math.pow(1 - (p - 0.4) / 0.6, 2)
         group.scale.set(1 + 0.05 * v, 1 + 0.035 * v, 1 + 0.05 * v)
         material.emissiveIntensity = 0.16 + 0.14 * v
+      } else if (s.motion && config.mode === 'sway') {
+        // A slow presentation motion for structures that neither beat nor
+        // breathe (e.g. the skeleton): a gentle rock, barely a percent.
+        const v = 0.5 + 0.5 * Math.sin(t * 0.55)
+        group.scale.set(1 + 0.006 * v, 1 + 0.01 * v, 1 + 0.006 * v)
+        material.emissiveIntensity = 0.2 + 0.06 * v
+      } else if (s.motion && config.mode === 'contract') {
+        // A slow contraction cycle for a skeletal muscle: the belly
+        // shortens along its long axis and bulges sideways, about one
+        // curl every 4 s — the same rhythm as the 2D lab's slow curl.
+        // The mesh is a static segmentation, so this stands in for the
+        // contraction; the caption says so.
+        const v = 0.5 - 0.5 * Math.cos((t * Math.PI * 2) / 4)
+        group.scale.set(1 + 0.03 * v, 1 - 0.06 * v, 1 + 0.03 * v)
+        material.emissiveIntensity = 0.2 + 0.1 * v
       } else {
         group.scale.set(1, 1, 1)
         material.emissiveIntensity = 0.22

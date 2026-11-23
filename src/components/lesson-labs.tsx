@@ -2626,6 +2626,321 @@ export function LiverLab({ bare = false }: { bare?: boolean }) {
   )
 }
 
+/* ===================== Muscles: how movement is made ===================== */
+
+type MuscleStepId = 0 | 1 | 2 | 3
+
+const MUSCLE_STEPS: {
+  name: string
+  latin: string
+  job: string
+  blurb: string
+  note: string
+  flex: number
+  headAngle: number
+}[] = [
+  {
+    name: 'Cocked and ready',
+    latin: 'caput myosini paratum',
+    job: 'the head waits, loaded',
+    blurb:
+      'A myosin head, loaded with ADP and phosphate from the last ATP it split, sits cocked back like a loaded spring. Calcium — released from the sarcoplasmic reticulum when the nerve fired — has pulled tropomyosin off the actin binding sites, so the road is open.',
+    note: 'No calcium, no contraction: at rest, tropomyosin blocks every binding site, and the heads wait.',
+    flex: 0.15,
+    headAngle: -35,
+  },
+  {
+    name: 'Bind — the cross-bridge forms',
+    latin: 'pons transversus',
+    job: 'myosin grips actin',
+    blurb:
+      'The cocked myosin head reaches out and locks onto an actin filament. This grip is called a cross-bridge — thousands of them form at once along every myofibril, each one a tiny hand grabbing the rope it is about to pull.',
+    note: 'One head pulls almost nothing. A single muscle fibre has billions of heads pulling in step — that is where force comes from.',
+    flex: 0.45,
+    headAngle: -10,
+  },
+  {
+    name: 'Power stroke — the pull',
+    latin: 'ictus potens',
+    job: 'actin slides inward',
+    blurb:
+      'The head pivots, dragging the actin filament toward the centre of the sarcomere, and lets go of its ADP and phosphate. The filaments do not shorten themselves — they slide past each other, and the Z-discs are pulled together. This is the step that actually shortens the muscle.',
+    note: 'Watch the Z-discs: the sarcomere narrows from about 2.2 µm at rest to about 1.6 µm fully contracted.',
+    flex: 0.9,
+    headAngle: 25,
+  },
+  {
+    name: 'Detach and re-cock',
+    latin: 'dimitte et recollige',
+    job: 'ATP resets the head',
+    blurb:
+      'A fresh ATP molecule binds to the head, and the head lets go of actin. Splitting that ATP re-cocks the head, ready to grab a new site further along the filament — and the cycle repeats, about five times a second per head, for as long as calcium stays high.',
+    note: 'Without ATP the heads cannot let go — they stay locked to actin. That is rigor mortis: the muscle stiffens because the reset step never comes.',
+    flex: 0.3,
+    headAngle: -35,
+  },
+]
+
+type MuscleId = 'biceps' | 'triceps' | 'quadriceps' | 'gastrocnemius'
+
+const MUSCLES: Record<
+  MuscleId,
+  { name: string; latin: string; origin: string; insertion: string; action: string; line: string }
+> = {
+  biceps: {
+    name: 'Biceps brachii',
+    latin: 'musculus biceps brachii',
+    origin: 'Scapula — coracoid process & above the shoulder socket',
+    insertion: 'Radial tuberosity, just below the elbow',
+    action: 'Flexes the elbow · supinates the forearm (turns the palm up)',
+    line: 'The show muscle of the arm — two heads, one tendon — and the flexor in the curl above. It pulls the forearm up because it crosses the elbow on the front side.',
+  },
+  triceps: {
+    name: 'Triceps brachii',
+    latin: 'musculus triceps brachii',
+    origin: 'Scapula & the back of the humerus',
+    insertion: 'Olecranon — the point of the elbow',
+    action: 'Extends the elbow · the antagonist of the biceps',
+    line: 'Three heads, one tendon, and the muscle that straightens the arm again. When the biceps shortens to lift, the triceps must lengthen and let go — muscles only pull, never push.',
+  },
+  quadriceps: {
+    name: 'Quadriceps femoris',
+    latin: 'musculus quadriceps femoris',
+    origin: 'Pelvis & the front of the femur',
+    insertion: 'Tibial tuberosity, via the patellar tendon',
+    action: 'Extends the knee · the engine of standing up, climbing, kicking',
+    line: 'Four muscles in one sleeve — the largest muscle group in the body. The patella sits inside its tendon like a pulley, giving the quadriceps a better lever arm over the knee.',
+  },
+  gastrocnemius: {
+    name: 'Gastrocnemius',
+    latin: 'musculus gastrocnemius',
+    origin: 'The two condyles of the femur, behind the knee',
+    insertion: 'Heel bone (calcaneus), via the Achilles tendon',
+    action: 'Plantarflexes the foot · pushes you off the ground with every step',
+    line: 'The calf muscle you can see — two heads forming the bulge of the calf. It crosses both the knee and the ankle, so it flexes the knee a little while it points the foot down.',
+  },
+}
+
+const MUSCLE_ORDER: MuscleId[] = ['biceps', 'triceps', 'quadriceps', 'gastrocnemius']
+
+export function MuscleLab({ bare = false }: { bare?: boolean }) {
+  const [step, setStep] = useState<MuscleStepId>(0)
+  const [playing, setPlaying] = useState(true)
+  const [pace, setPace] = useState<'slow' | 'fast'>('slow')
+  const [muscle, setMuscle] = useState<MuscleId>('biceps')
+  const [flex, setFlex] = useState(0.15)
+
+  const info = MUSCLE_STEPS[step]
+  const muscleInfo = MUSCLES[muscle]
+
+  useEffect(() => {
+    if (!playing) return
+    const duration = pace === 'slow' ? 4200 : 1800
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const cycle = ((now - start) / duration) % 1
+      setFlex(0.5 - 0.5 * Math.cos(cycle * Math.PI * 2))
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [playing, pace])
+
+  useEffect(() => {
+    if (!playing) setFlex(info.flex)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, playing])
+
+  const headAngle = playing
+    ? -35 + 55 * (0.5 + 0.5 * Math.sin(performance.now() / 300))
+    : info.headAngle
+  const armAngle = 8 + 118 * flex
+  const sarcoHalf = 150 - 45 * flex
+  const zLeft = 320 - sarcoHalf
+  const zRight = 320 + sarcoHalf
+  const headXs = [288, 310, 332, 354]
+
+  const goStep = (s: MuscleStepId) => {
+    setStep(s)
+    setPlaying(false)
+  }
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <div>
+          <svg viewBox="0 0 640 590" className="mx-auto w-full max-w-[560px]" role="img" aria-label="Animated diagram: a biceps curl flexes the elbow while a sarcomere below shortens as myosin heads row along actin">
+            {/* ---- the curl: arm in side view, anterior to the left ---- */}
+            <text x="20" y="28" className="fill-ink-500 font-mono" fontSize="11" letterSpacing="2">THE CURL — ONE REPETITION</text>
+            {/* upper arm */}
+            <path d="M138 62 Q138 52 150 52 L196 52 Q208 52 208 62 L208 178 Q208 192 194 192 L152 192 Q138 192 138 178 Z" fill="#e9dcc3" stroke="#d8c9a8" strokeWidth="1.5" />
+            {/* triceps (posterior, right side) — lengthens as the elbow flexes */}
+            <ellipse cx="197" cy={130 + 8 * flex} rx={19 - 4 * flex} ry={52 + 12 * flex} fill="#c96a4e" opacity="0.9" />
+            {/* biceps (anterior, left side) — shortens and bulges as it contracts */}
+            <ellipse cx="150" cy={122 - 6 * flex} rx={24 + 13 * flex} ry={52 - 14 * flex} fill="#d64545" />
+            <path d="M150 84 L150 66" stroke="#b93327" strokeWidth="4" strokeLinecap="round" />
+            <path d="M150 174 L158 186" stroke="#b93327" strokeWidth="4" strokeLinecap="round" />
+            {/* shoulder + elbow joints */}
+            <circle cx="173" cy="58" r="10" fill="#f7f4ee" stroke="#d8c9a8" strokeWidth="1.5" />
+            <text x="118" y="62" className="fill-ink-500" fontSize="11" textAnchor="end">Shoulder</text>
+            <circle cx="173" cy="190" r="8" fill="#f7f4ee" stroke="#d8c9a8" strokeWidth="1.5" />
+            <text x="232" y="194" className="fill-ink-500" fontSize="11">Elbow</text>
+            {/* forearm + hand + dumbbell, rotating about the elbow */}
+            <g transform={`rotate(${armAngle} 173 190)`}>
+              <path d="M150 190 L196 190 L192 272 Q191 284 177 284 L169 284 Q155 284 154 272 Z" fill="#e9dcc3" stroke="#d8c9a8" strokeWidth="1.5" />
+              <path d="M158 202 L188 202 L186 258 L160 258 Z" fill="#f3e9d2" opacity="0.7" />
+              <circle cx="173" cy="296" r="14" fill="#e9dcc3" stroke="#d8c9a8" strokeWidth="1.5" />
+              <rect x="132" y="290" width="82" height="11" rx="5.5" fill="#5f6b7a" />
+              <circle cx="130" cy="295" r="11" fill="#3d4756" />
+              <circle cx="216" cy="295" r="11" fill="#3d4756" />
+            </g>
+            <text x="320" y="62" className="fill-ink-700" fontSize="13" fontWeight="600" textAnchor="middle">
+              Elbow angle: {Math.round(172 - 118 * flex)}°
+            </text>
+            <text x="320" y="80" className="fill-ink-500 font-serif" fontSize="12" fontStyle="italic" textAnchor="middle">
+              biceps shortens → forearm rises · triceps yields
+            </text>
+
+            {/* ---- the sarcomere: the unit that shortens ---- */}
+            <text x="20" y="356" className="fill-ink-500 font-mono" fontSize="11" letterSpacing="2">ONE SARCOMERE — THE UNIT THAT SHORTENS</text>
+            <text x="620" y="356" className="fill-ink-500 font-mono" fontSize="11" textAnchor="end">≈ 2.2 µm → ≈ 1.6 µm</text>
+            {/* actin filaments, anchored to the Z-discs */}
+            {[438, 464, 490].map((y) => (
+              <g key={y}>
+                <line x1={zLeft + 3} y1={y} x2={zLeft + 108} y2={y} stroke="#d64545" strokeWidth="3" strokeLinecap="round" />
+                <line x1={zRight - 3} y1={y} x2={zRight - 108} y2={y} stroke="#d64545" strokeWidth="3" strokeLinecap="round" />
+              </g>
+            ))}
+            {/* myosin thick filament */}
+            <rect x="272" y="450" width="96" height="34" rx="12" fill="#5f83c2" />
+            <text x="320" y="471" className="fill-white" fontSize="11" fontWeight="700" textAnchor="middle">MYOSIN</text>
+            {/* myosin heads rowing along actin */}
+            {headXs.map((x) => (
+              <g key={x}>
+                <line
+                  x1={x}
+                  y1="450"
+                  x2={x + 16 * Math.sin((headAngle * Math.PI) / 180)}
+                  y2={450 - 20 * Math.cos((headAngle * Math.PI) / 180)}
+                  stroke="#4d6ea3"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                <circle cx={x + 16 * Math.sin((headAngle * Math.PI) / 180)} cy={450 - 20 * Math.cos((headAngle * Math.PI) / 180)} r="4" fill="#4d6ea3" />
+                <line
+                  x1={x}
+                  y1="484"
+                  x2={x + 16 * Math.sin((headAngle * Math.PI) / 180)}
+                  y2={484 + 20 * Math.cos((headAngle * Math.PI) / 180)}
+                  stroke="#4d6ea3"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                <circle cx={x + 16 * Math.sin((headAngle * Math.PI) / 180)} cy={484 + 20 * Math.cos((headAngle * Math.PI) / 180)} r="4" fill="#4d6ea3" />
+              </g>
+            ))}
+            {/* Z-discs */}
+            <rect x={zLeft - 3} y="420" width="6" height="92" rx="3" fill="#16222e" />
+            <rect x={zRight - 3} y="420" width="6" height="92" rx="3" fill="#16222e" />
+            <text x={zLeft} y="534" className="fill-ink-700" fontSize="12" fontWeight="600" textAnchor="middle">Z-disc</text>
+            <text x={zRight} y="534" className="fill-ink-700" fontSize="12" fontWeight="600" textAnchor="middle">Z-disc</text>
+            <text x={zLeft + 60} y="412" className="fill-arterial-600" fontSize="11" fontWeight="600">Actin (thin)</text>
+            <text x={zRight - 60} y="412" className="fill-arterial-600" fontSize="11" fontWeight="600" textAnchor="end">Actin (thin)</text>
+            <text x="320" y="560" className="fill-ink-500 font-serif" fontSize="12.5" fontStyle="italic" textAnchor="middle">
+              Myosin heads row along actin — the Z-discs are pulled together, and the sarcomere shortens.
+            </text>
+            <text x="320" y="580" className="fill-ink-500 font-serif" fontSize="12.5" fontStyle="italic" textAnchor="middle">
+              Stack a million sarcomeres end to end, and a whole muscle shortens.
+            </text>
+          </svg>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Chip>≈ 600 skeletal muscles</Chip>
+            <Chip>≈ 40% of body mass is muscle</Chip>
+            <Chip>Sarcomere: the contractile unit</Chip>
+            <Chip>Biceps (red) shortens · triceps (terracotta) yields</Chip>
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Cross-bridge cycle · Step {step + 1} of 4 · {info.job}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-5 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">
+              Muscle under the cursor — {muscleInfo.name}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-800">
+              <strong className="font-semibold">{muscleInfo.name}</strong>{' '}
+              <span className="font-serif italic text-ink-500">({muscleInfo.latin})</span> — {muscleInfo.line}
+            </p>
+            <dl className="mt-3 space-y-1.5 text-sm">
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 font-mono text-xs uppercase tracking-wide text-ink-400">Origin</dt>
+                <dd className="text-ink-800">{muscleInfo.origin}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 font-mono text-xs uppercase tracking-wide text-ink-400">Insertion</dt>
+                <dd className="text-ink-800">{muscleInfo.insertion}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 font-mono text-xs uppercase tracking-wide text-ink-400">Action</dt>
+                <dd className="text-ink-800">{muscleInfo.action}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="mt-5 grid gap-4">
+            <Meter label="Contraction right now — biceps shortening" value={Math.round(flex * 100)} tone="bg-arterial-500" />
+            <Meter label="Skeletal muscle — share of body mass" value={40} tone="bg-primary-600" />
+            <Meter label="Smooth + cardiac muscle — share of body mass" value={10} tone="bg-venous-500" />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause curl' : '▶ Play curl'}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => goStep(((step + MUSCLE_STEPS.length - 1) % MUSCLE_STEPS.length) as MuscleStepId)}>
+                ← Prev step
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => goStep(((step + 1) % MUSCLE_STEPS.length) as MuscleStepId)}>
+                Next step →
+              </Button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Curl pace">
+              {(
+                [
+                  ['slow', 'Slow curl'],
+                  ['fast', 'Fast reps'],
+                ] as const
+              ).map(([p, label]) => (
+                <Button key={p} size="sm" variant={pace === p ? 'primary' : 'secondary'} onClick={() => { setPace(p); setPlaying(true) }}>
+                  {label}
+                </Button>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Pick a muscle">
+              {MUSCLE_ORDER.map((m) => (
+                <Button key={m} size="sm" variant={muscle === m ? 'primary' : 'secondary'} onClick={() => setMuscle(m)}>
+                  {MUSCLES[m].name}
+                </Button>
+              ))}
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
 export function GiTractLab() {
   const [station, setStation] = useState(0)
   const [playing, setPlaying] = useState(true)
@@ -3187,6 +3502,1168 @@ export function BrainLab({ bare = false }: { bare?: boolean }) {
               <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + 1) % BRAIN_ORDER.length); setPlaying(false) }}>
                 Next step →
               </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+/* ===================== Operation case: cholecystectomy ===================== */
+
+const CHOL_STAGES: CaseStage[] = [
+  {
+    time: '14:20',
+    title: 'The pain that would not stop',
+    text: 'A 46-year-old woman arrives at the emergency department. For months she has had attacks of pain under her right ribs after fatty meals — gripping and miserable, but always gone within the hour: biliary colic. This time the pain started 18 hours ago and never left. It is constant now, she has a fever of 38.4 °C, and she has vomited twice.',
+  },
+  {
+    time: '14:50',
+    title: 'Hands on the right upper quadrant',
+    text: 'Her right upper quadrant is tender under the ribs. The examiner slides a hand under the right costal margin and asks her to breathe in deeply: as the liver and gallbladder descend onto the hand, she catches her breath and stops mid-breath — Murphy’s sign. An inflamed gallbladder announces itself the moment it is touched.',
+  },
+  {
+    time: '16:05',
+    title: 'Scans and bloods',
+    text: 'Bloods: white cell count 13.6, CRP 118 — systemic inflammation in full swing. Ultrasound: multiple gallstones, the gallbladder wall thickened to 5 mm, a rim of fluid around the gallbladder, and pressing the probe over it reproduces her pain (sonographic Murphy positive). Local signs, systemic signs, imaging — the Tokyo Guidelines criteria for acute cholecystitis are met in all three groups.',
+  },
+  {
+    time: '17:30',
+    title: 'The decision',
+    text: 'This is no longer simple colic: a stone is impacted in the cystic duct and the gallbladder wall is inflamed. She is 46 and otherwise fit. The call is yours:',
+  },
+  {
+    time: '19:10',
+    title: 'In theatre: cholecystectomy',
+    text: 'Under general anaesthesia, laparoscopically — camera and instruments through small ports. In this operation the danger is not the clock but identity: the anatomy around the gallbladder can deceive, and clipping the wrong duct is the classic catastrophe. Step through it:',
+  },
+  {
+    time: 'Day 2',
+    title: 'Recovery',
+    text: 'She eats the next morning and goes home on day two with four small dressings. Pathology: gallstones with acute-on-chronic cholecystitis — today’s flare on top of months of irritation. The medium case is won by identification, not speed: everything that was divided had first been proven to be what it claimed to be.',
+  },
+]
+
+const CHOL_OP_STEPS: { title: string; text: string }[] = [
+  { title: 'Ports in, fundus lifted', text: 'Four small ports: a camera at the umbilicus and working ports under the right ribs. The fundus — the rounded bottom of the gallbladder — is grasped and lifted up over the liver, opening the view of everything underneath it.' },
+  { title: 'Retract and open Calot’s triangle', text: 'The neck of the gallbladder is pulled down and out, and the peritoneum over Calot’s triangle (the hepatocystic triangle) is opened. Inside and around the triangle run the cystic duct and the cystic artery — and, dangerously nearby, the common bile duct, which must not be touched.' },
+  { title: 'Achieve the Critical View of Safety', text: 'The safety ritual, completed before anything is clipped: the triangle is cleared of fat and fibrous tissue, the lower part of the gallbladder is separated from the liver bed, and the surgeon must see exactly two structures entering the gallbladder — the cystic duct and the cystic artery. If that view cannot be achieved, the safe move is to stop, convert, or drain. Never to guess.' },
+  { title: 'Clip and divide the cystic duct and artery', text: 'Only now: clips are placed across the cystic duct and the cystic artery, and both are divided between clips. What is clipped has been proven — by the Critical View — to belong to the gallbladder alone.' },
+  { title: 'Off the liver bed, out in a bag', text: 'The gallbladder is dissected off its bed on the liver, placed in a retrieval bag so no stones can spill, and removed through a port. The bed and the clips are checked: no bile leak, no bleeding.' },
+]
+
+const CHOL_DECISIONS: { label: string; ok: boolean; feedback: string }[] = [
+  {
+    label: 'Send her home with antispasmodics',
+    ok: false,
+    feedback: 'That was the right answer for her old attacks — it is the wrong one now. Colic settles within hours and leaves no inflammation behind; this pain has lasted 18 hours with fever and a CRP of 118. The gallbladder is inflamed, not merely squeezing, and sending her home risks it perforating or turning gangrenous.',
+  },
+  {
+    label: 'Antibiotics alone, book elective surgery in six weeks',
+    ok: false,
+    feedback: 'Understandable, but not the standard for a fit patient. Antibiotics will probably calm this episode — yet the stone that caused it stays in place, attacks recur, and the delayed operation is often harder, dissected through scarred and inflamed tissue. The guidelines favour early laparoscopic cholecystectomy during this same admission.',
+  },
+  {
+    label: 'IV antibiotics, consent, early laparoscopic cholecystectomy',
+    ok: true,
+    feedback: 'Correct. IV fluids and antibiotics now, consent that names the specific risk of this operation — injury to the bile duct — and the definitive operation during this admission, while the anatomy is still readable.',
+  },
+]
+
+export function CholecystectomyCaseLab() {
+  const [stage, setStage] = useState(0)
+  const [opStep, setOpStep] = useState(0)
+  const [decision, setDecision] = useState<number | null>(null)
+
+  const inTheatre = stage === 4
+  const removed = stage === 5 || (inTheatre && opStep >= 4)
+  const lifted = inTheatre && opStep >= 1 && !removed
+  const clipsShown = inTheatre && opStep >= 3 && !removed
+
+  const gbFill = stage <= 0 ? '#7FA85C' : stage === 1 ? '#5E8F43' : '#B84A3E'
+  const gbWall = stage >= 2 ? 6 : 3
+
+  return (
+    <LabShell
+      diagram={
+        <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Case diagram of an abdomen with the liver and an inflamed gallbladder tucked under its right lobe">
+          {/* Abdomen */}
+          <path
+            d="M500 40 C660 40 742 150 742 285 C742 420 652 522 500 522 C348 522 258 420 258 285 C258 150 340 40 500 40 Z"
+            fill="#F3D9C8"
+            stroke="#D9AE94"
+            strokeWidth={3}
+          />
+          {/* Intestine hint */}
+          <path d="M340 452 C420 428 520 452 600 430" fill="none" stroke="#E3B7A6" strokeWidth={17} strokeLinecap="round" opacity={0.6} />
+
+          {/* Umbilicus */}
+          <circle cx={500} cy={300} r={9} fill="#D9AE94" />
+          <text x={478} y={294} textAnchor="end" fontSize={16} fontWeight={700} fill="#8A6A54">Umbilicus</text>
+
+          {/* Liver — patient's right lobe is on the viewer's left */}
+          <path
+            d="M302 208 C298 148 362 112 468 106 C584 100 692 128 701 182 C706 214 688 240 632 250 C548 264 396 262 338 242 C314 234 303 224 302 208 Z"
+            fill="#9C4A3C"
+            stroke="#7C3628"
+            strokeWidth={3}
+          />
+          <text x={500} y={178} textAnchor="middle" fontSize={19} fontWeight={700} fill="#F3D9C8">Liver</text>
+
+          {/* Bile ducts — cystic duct joins the common bile duct toward the midline */}
+          {!removed && (
+            <g>
+              <path d="M470 205 C475 232 470 250 462 262 C472 284 480 306 486 330" fill="none" stroke="#C9A86A" strokeWidth={8} strokeLinecap="round" />
+              <path d="M400 240 C420 247 442 254 462 262" fill="none" stroke="#C9A86A" strokeWidth={7} strokeLinecap="round" />
+            </g>
+          )}
+          {removed && (
+            <path d="M470 205 C475 232 470 250 462 262 C472 284 480 306 486 330" fill="none" stroke="#C9A86A" strokeWidth={8} strokeLinecap="round" />
+          )}
+          <text x={610} y={240} fontSize={17} fontWeight={700} fill="#8A6D2F">Cystic duct</text>
+          <path d="M606 244 C556 250 502 254 468 260" stroke="#8A6D2F" strokeWidth={2.5} fill="none" />
+          <text x={610} y={302} fontSize={17} fontWeight={700} fill="#8A6D2F">Common bile duct</text>
+          <path d="M606 298 C560 294 520 292 492 294" stroke="#8A6D2F" strokeWidth={2.5} fill="none" />
+
+          {/* Cystic artery — theatre view only */}
+          {inTheatre && !removed && (
+            <path d="M404 248 C424 254 440 259 456 265" fill="none" stroke="#C22F27" strokeWidth={3.5} strokeLinecap="round" />
+          )}
+
+          {/* Clips — placed only after the Critical View of Safety */}
+          {clipsShown && (
+            <g>
+              <rect x={412} y={238} width={16} height={8} rx={2} fill="#43536A" transform="rotate(24 420 242)" />
+              <rect x={427} y={245} width={16} height={8} rx={2} fill="#43536A" transform="rotate(24 435 249)" />
+              <rect x={419} y={253} width={14} height={7} rx={2} fill="#43536A" transform="rotate(24 426 256)" />
+              <text x={452} y={226} fontSize={15} fontWeight={700} fill="#43536A">Clips</text>
+            </g>
+          )}
+
+          {/* Gallbladder — pear tucked under the liver's right lobe (viewer's left) */}
+          {!removed && (
+            <g transform={lifted ? 'translate(-6 -12) rotate(-16 400 250)' : undefined} style={{ transition: 'transform 0.7s ease' }}>
+              <path
+                d="M400 236 C384 240 372 256 372 278 C372 300 384 316 400 316 C416 316 428 300 428 278 C428 256 416 240 400 236 Z"
+                fill={gbFill}
+                stroke="#5E4A2A"
+                strokeWidth={gbWall}
+                style={{ transition: 'fill 0.6s ease, stroke-width 0.6s ease' }}
+              />
+              <circle cx={392} cy={292} r={6} fill="#E9DB9E" stroke="#B49B4A" strokeWidth={1.5} />
+              <circle cx={408} cy={298} r={5} fill="#E9DB9E" stroke="#B49B4A" strokeWidth={1.5} />
+              <circle cx={400} cy={280} r={4.5} fill="#E9DB9E" stroke="#B49B4A" strokeWidth={1.5} />
+            </g>
+          )}
+          {removed && (
+            <>
+              {/* Empty gallbladder fossa */}
+              <ellipse cx={400} cy={272} rx={34} ry={14} fill="#E8C8B4" stroke="#C08A76" strokeWidth={2.5} strokeDasharray="5 4" />
+              {/* Specimen in its retrieval bag */}
+              <g>
+                <rect x={648} y={396} width={264} height={112} rx={14} fill="#E8EDF2" stroke="#B9C4CF" strokeWidth={2.5} />
+                <path d="M780 430 C768 434 760 446 760 460 C760 476 768 486 780 486 C792 486 800 476 800 460 C800 446 792 434 780 430 Z" fill="#B84A3E" stroke="#8C352A" strokeWidth={3} />
+                <circle cx={774} cy={464} r={4.5} fill="#E9DB9E" stroke="#B49B4A" strokeWidth={1.2} />
+                <circle cx={788} cy={470} r={3.8} fill="#E9DB9E" stroke="#B49B4A" strokeWidth={1.2} />
+                <text x={780} y={420} textAnchor="middle" fontSize={16} fontWeight={700} fill="#43536A">Specimen → pathology</text>
+              </g>
+            </>
+          )}
+          <text x={212} y={292} fontSize={17} fontWeight={700} fill="#5E7A3A">{removed ? 'Gallbladder fossa' : 'Gallbladder'}</text>
+          <path d="M292 288 C320 286 348 284 368 282" stroke="#5E7A3A" strokeWidth={2.5} fill="none" />
+
+          {/* Pain marker */}
+          {stage <= 1 && (
+            <g>
+              <circle cx={400} cy={285} r={15} fill="none" stroke="#C22F27" strokeWidth={3} className="ping-ring" />
+              <circle cx={400} cy={285} r={6} fill="#C22F27" />
+              <text x={560} y={356} textAnchor="middle" fontSize={16} fontWeight={700} fill="#C22F27">
+                {stage === 0 ? 'Pain under the right ribs' : 'Murphy’s sign — the breath catches'}
+              </text>
+            </g>
+          )}
+
+          {/* Laparoscopic ports */}
+          {inTheatre && (
+            <g opacity={opStep >= 4 ? 0 : 1} style={{ transition: 'opacity 0.6s ease' }}>
+              <circle cx={500} cy={300} r={11} fill="#43536A" stroke="#fff" strokeWidth={3} />
+              <circle cx={352} cy={330} r={11} fill="#43536A" stroke="#fff" strokeWidth={3} />
+              <circle cx={322} cy={405} r={11} fill="#43536A" stroke="#fff" strokeWidth={3} />
+              <text x={258} y={452} fontSize={16} fontWeight={700} fill="#43536A">Ports</text>
+            </g>
+          )}
+          {inTheatre && opStep >= 4 && (
+            <g>
+              <rect x={486} y={286} width={28} height={28} rx={6} fill="#FFF7E8" stroke="#D9AE94" strokeWidth={2} />
+              <rect x={338} y={316} width={28} height={28} rx={6} fill="#FFF7E8" stroke="#D9AE94" strokeWidth={2} />
+              <rect x={308} y={391} width={28} height={28} rx={6} fill="#FFF7E8" stroke="#D9AE94" strokeWidth={2} />
+            </g>
+          )}
+
+          {/* Stage caption */}
+          <text x={500} y={548} textAnchor="middle" fontSize={16} fill="#5A6B80">
+            {stage === 0 && 'Biliary colic for months — but this attack has lasted 18 hours and brought fever'}
+            {stage === 1 && 'Murphy’s sign: the descending gallbladder meets the examiner’s hand, and the breath stops'}
+            {stage === 2 && 'Stones, a 5 mm wall, fluid around the gallbladder — acute cholecystitis'}
+            {stage === 3 && 'Tokyo criteria met in all three groups — for a fit patient, early surgery is the standard'}
+            {stage === 4 && CHOL_OP_STEPS[opStep].title}
+            {stage === 5 && 'Gallbladder removed, bile duct untouched — home on day two'}
+          </text>
+        </svg>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">
+            Case 02 · Medium · Emergency department → theatre
+          </p>
+
+          <div className="mt-4 grid gap-2">
+            {CHOL_STAGES.map((s, i) => (
+              <button
+                key={s.title}
+                onClick={() => setStage(i)}
+                aria-pressed={stage === i}
+                className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                  stage === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="font-display text-[0.95rem] font-bold text-ink-950">
+                  <span className="mr-2 font-mono text-sm text-arterial-500">{s.time}</span>
+                  {s.title}
+                </span>
+                {stage === i && <span className="mt-1 block text-sm leading-relaxed text-ink-700">{s.text}</span>}
+              </button>
+            ))}
+          </div>
+
+          {stage === 0 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Chip>Temp 38.4 °C</Chip>
+              <Chip>HR 108</Chip>
+              <Chip>BP 124/76</Chip>
+              <Chip>RR 18</Chip>
+              <Chip>SpO₂ 98%</Chip>
+            </div>
+          )}
+
+          {stage === 2 && (
+            <div className="mt-5">
+              <Meter label="Tokyo criteria" value={100} tone="bg-amber-500" />
+              <p className="mt-2 text-sm text-ink-500">3 of 3 groups — local signs, systemic inflammation, and imaging are all positive: definite acute cholecystitis.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Chip tone="closed">WBC 13.6 ↑</Chip>
+                <Chip tone="closed">CRP 118 ↑</Chip>
+                <Chip>US: stones, wall 5 mm, fluid</Chip>
+              </div>
+            </div>
+          )}
+
+          {stage === 3 && (
+            <div className="mt-5 grid gap-2">
+              {CHOL_DECISIONS.map((d, i) => (
+                <button
+                  key={d.label}
+                  onClick={() => setDecision(i)}
+                  aria-pressed={decision === i}
+                  className={`rounded-xl border px-4 py-3 text-left font-display text-[0.92rem] font-bold transition-colors ${
+                    decision === i
+                      ? d.ok
+                        ? 'border-success-500 bg-success-50 text-success-600'
+                        : 'border-arterial-500 bg-arterial-50 text-arterial-600'
+                      : 'border-line bg-surface text-ink-800 hover:border-primary-600/40'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+              {decision !== null && (
+                <p className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${CHOL_DECISIONS[decision].ok ? 'bg-success-50 text-ink-800' : 'bg-arterial-50 text-ink-800'}`}>
+                  {CHOL_DECISIONS[decision].feedback}
+                </p>
+              )}
+            </div>
+          )}
+
+          {inTheatre && (
+            <div className="mt-5 grid gap-2">
+              {CHOL_OP_STEPS.map((s, i) => (
+                <button
+                  key={s.title}
+                  onClick={() => setOpStep(i)}
+                  aria-pressed={opStep === i}
+                  className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                    opStep === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                  }`}
+                >
+                  <span className="font-display text-[0.92rem] font-bold text-ink-950">
+                    <span className="mr-2 font-mono text-sm text-arterial-500">{i + 1}</span>
+                    {s.title}
+                  </span>
+                  {opStep === i && <span className="mt-1 block text-sm leading-relaxed text-ink-700">{s.text}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {stage === 5 && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Chip tone="open">Eating: day 1</Chip>
+              <Chip tone="open">Home: day 2</Chip>
+              <Chip tone="open">Pathology: acute-on-chronic cholecystitis ✓</Chip>
+            </div>
+          )}
+        </div>
+      }
+    />
+  )
+}
+
+/* ===================== Neurons and the synapse ===================== */
+
+type NeuronPartId = 'dendrites' | 'soma' | 'nucleus' | 'hillock' | 'myelin' | 'node' | 'synapse'
+
+const NEURON_PARTS: Record<
+  NeuronPartId,
+  { name: string; latin: string; line: string; dot: { x: number; y: number } }
+> = {
+  dendrites: {
+    name: 'Dendrites',
+    latin: 'dendritae',
+    line: 'The listening branches. Each one collects small graded signals from the synapses of other neurons and carries them toward the soma — the more branches, the more conversations this neuron can join.',
+    dot: { x: 185, y: 150 },
+  },
+  soma: {
+    name: 'Soma (cell body)',
+    latin: 'soma',
+    line: 'The neuron’s home base. It holds the nucleus, makes the proteins, and adds up every signal the dendrites deliver — excitation minus inhibition — to decide whether to fire.',
+    dot: { x: 320, y: 280 },
+  },
+  nucleus: {
+    name: 'Nucleus',
+    latin: 'nucleus',
+    line: 'The control room inside the soma: the neuron’s DNA lives here, and it issues the instructions for the proteins that keep the cell signalling — including the ion channels that make the spike possible.',
+    dot: { x: 320, y: 280 },
+  },
+  hillock: {
+    name: 'Axon hillock',
+    latin: 'colliculus axonis',
+    line: 'The trigger zone. The summed signal reaches here, and if it crosses about −55 mV, the hillock fires an action potential — all or nothing. Below threshold, nothing happens at all.',
+    dot: { x: 415, y: 280 },
+  },
+  myelin: {
+    name: 'Myelin sheath',
+    latin: 'vagina myelinica',
+    line: 'Fatty insulation wrapped around the axon by Schwann cells (in the peripheral nervous system) or oligodendrocytes (in the brain and cord). It stops the signal leaking out, so the spike jumps — fast.',
+    dot: { x: 610, y: 250 },
+  },
+  node: {
+    name: 'Node of Ranvier',
+    latin: 'nodus Ranvieri',
+    line: 'The bare gap between two myelin segments, packed with voltage-gated sodium channels. The action potential is reborn here, node after node — saltatory conduction, the fastest way to send a signal.',
+    dot: { x: 668, y: 280 },
+  },
+  synapse: {
+    name: 'Synapse',
+    latin: 'synapsis',
+    line: 'The hand-off. When the spike reaches the terminal bouton, vesicles fuse and spill neurotransmitter into the cleft — a chemical message that opens channels on the next neuron. Neurons never touch; they whisper across a gap.',
+    dot: { x: 930, y: 280 },
+  },
+}
+
+const NEURON_ORDER: NeuronPartId[] = ['dendrites', 'soma', 'nucleus', 'hillock', 'myelin', 'node', 'synapse']
+
+type NeuronStepId = 'receive' | 'sum' | 'fire' | 'travel' | 'release'
+
+const NEURON_STEPS: Record<
+  NeuronStepId,
+  { name: string; job: string; latin: string; blurb: string; note: string; voltage: number; dot: { x: number; y: number } }
+> = {
+  receive: {
+    name: 'Dendrites listen',
+    job: 'Input',
+    latin: 'dendritae audiunt',
+    blurb:
+      'Signals arrive from other neurons as tiny graded potentials — small rises and falls in voltage at the synapses on the dendrites. Each one alone is far too weak to fire the cell; they drift toward the soma, fading as they go.',
+    note: 'Watch the dots: each one is a small graded potential travelling in from a dendrite tip. On their own they are whispers — the soma has to hear enough of them at once.',
+    voltage: -66,
+    dot: { x: 185, y: 150 },
+  },
+  sum: {
+    name: 'The soma adds it up',
+    job: 'Summation',
+    latin: 'summatio',
+    blurb:
+      'In the soma, excitation and inhibition are summed. Signals arriving close together in time and space add up — this is temporal and spatial summation. The membrane voltage climbs toward the threshold of about −55 mV.',
+    note: 'The voltage meter is climbing. If enough excitatory signals arrive together, the hillock will cross threshold — if they don’t, the potentials simply fade away and nothing happens.',
+    voltage: -56,
+    dot: { x: 320, y: 280 },
+  },
+  fire: {
+    name: 'The spike fires',
+    job: 'Action potential',
+    latin: 'potentia actionis',
+    blurb:
+      'Threshold crossed. Voltage-gated sodium channels at the axon hillock fly open, sodium rushes in, and the membrane voltage shoots from −55 mV up to about +30 mV in a millisecond — an all-or-none spike, always the same size.',
+    note: 'A bigger stimulus does not make a bigger spike — it makes more spikes, faster. The action potential is the neuron’s unit of currency, and it never changes value.',
+    voltage: 30,
+    dot: { x: 415, y: 280 },
+  },
+  travel: {
+    name: 'Down the axon',
+    job: 'Saltatory conduction',
+    latin: 'conductio saltatoria',
+    blurb:
+      'The spike races down the axon. Where myelin insulates it, the signal cannot leak out — so it jumps from one node of Ranvier to the next, up to 100 metres per second. Strip the myelin away and the same spike crawls at about 1 m/s.',
+    note: 'Toggle the myelin off and watch the dots crawl: without insulation the spike has to be rebuilt at every point along the axon. That is why demyelinating diseases slow everything down.',
+    voltage: 30,
+    dot: { x: 610, y: 280 },
+  },
+  release: {
+    name: 'The synapse speaks',
+    job: 'Chemical hand-off',
+    latin: 'transmissio synaptica',
+    blurb:
+      'The spike reaches the terminal boutons, calcium rushes in, and vesicles fuse with the membrane, spilling neurotransmitter into the synaptic cleft. The chemical crosses the gap and opens channels on the next neuron — the signal is electrical again.',
+    note: 'Neurons never touch. Every thought you have is a chain of these hand-offs: electricity, then chemistry, then electricity again, across a gap about 20 nanometres wide.',
+    voltage: -70,
+    dot: { x: 930, y: 280 },
+  },
+}
+
+const NEURON_STEP_ORDER: NeuronStepId[] = ['receive', 'sum', 'fire', 'travel', 'release']
+
+/* Dendrite branches (from the soma's left edge out to the tips) */
+const DENDRITE_PATHS = [
+  'M272 258 C230 220 205 185 185 150',
+  'M268 280 C220 275 175 260 140 235',
+  'M272 302 C235 335 205 360 178 395',
+  'M268 318 C230 350 200 395 185 440',
+  'M285 240 C260 195 240 150 228 105',
+  'M288 325 C265 370 250 420 242 470',
+]
+const DENDRITE_TIPS = [
+  [185, 150],
+  [140, 235],
+  [178, 395],
+  [185, 440],
+  [228, 105],
+  [242, 470],
+]
+const RECEIVE_PATH = 'M185 150 C230 220 260 250 320 280'
+const AXON_PATH = 'M430 280 H840'
+const RELEASE_PATHS = ['M922 222 C945 228 960 240 972 252', 'M940 280 H972', 'M922 338 C945 332 960 320 972 308']
+const NODE_X = [548, 668, 788]
+const MYELIN_SEGMENTS: [number, number][] = [
+  [438, 540],
+  [556, 660],
+  [676, 780],
+  [796, 838],
+]
+
+export function NeuronLab({ bare = false }: { bare?: boolean }) {
+  const [step, setStep] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const [myelin, setMyelin] = useState(true)
+  const [part, setPart] = useState<NeuronPartId>('dendrites')
+  const id = NEURON_STEP_ORDER[step]
+  const info = NEURON_STEPS[id]
+  const partInfo = NEURON_PARTS[part]
+  const voltagePct = Math.round(((info.voltage + 70) / 110) * 100)
+  const travelDur = myelin ? 1.1 : 4.5
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStep((s) => (s + 1) % NEURON_STEP_ORDER.length), 4600)
+    return () => clearInterval(t)
+  }, [playing])
+
+  const dots = (path: string, color: string, n = 3, dur = 2.4) =>
+    Array.from({ length: n }, (_, i) => (
+      <circle key={i} r={6} fill={color} stroke="#fff" strokeWidth={2}>
+        <animateMotion dur={`${dur}s`} begin={`${i * (dur / n)}s`} repeatCount="indefinite" path={path} />
+      </circle>
+    ))
+
+  const seg = (active: boolean) => ({ opacity: active ? 1 : 0.3, transition: 'opacity 0.6s ease' })
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of a neuron: a signal arrives at the dendrites, is summed in the soma, fires as an action potential at the axon hillock, jumps down the myelinated axon, and is released at the synapse">
+            {/* Dendrites */}
+            <g fill="none" stroke="#B6544A" strokeWidth={9} strokeLinecap="round" style={seg(id === 'receive' || part === 'dendrites')}>
+              {DENDRITE_PATHS.map((d, i) => (
+                <path key={i} d={d} strokeWidth={i < 2 ? 9 : 7} />
+              ))}
+            </g>
+            <g fill="#B6544A" opacity={0.9} style={seg(id === 'receive')}>
+              {DENDRITE_TIPS.map(([x, y], i) => (
+                <circle key={i} cx={x} cy={y} r={5} />
+              ))}
+            </g>
+
+            {/* Axon — the tube, drawn under the myelin */}
+            <rect x={425} y={268} width={420} height={24} rx={12} fill="#F6D9B8" stroke="#B6544A" strokeWidth={3} />
+            {/* Axon hillock — the taper from soma to axon */}
+            <path d="M388 252 L432 268 L432 292 L388 308 Z" fill="#E9A98F" stroke="#B6544A" strokeWidth={3} />
+
+            {/* Myelin sheath segments (or bare axon when toggled off) */}
+            {myelin ? (
+              <g style={seg(part === 'myelin' || id === 'travel')}>
+                {MYELIN_SEGMENTS.map(([x0, x1], i) => (
+                  <g key={i}>
+                    <rect x={x0} y={256} width={x1 - x0} height={48} rx={22} fill="#B9D6D8" stroke="#0E7C86" strokeWidth={3} />
+                    <path d={`M${x0 + 14} 262 v36 M${x0 + 30} 260 v40`} stroke="#0E7C86" strokeWidth={3} opacity={0.45} />
+                  </g>
+                ))}
+              </g>
+            ) : (
+              <g style={seg(id === 'travel')}>
+                <rect x={438} y={256} width={400} height={48} rx={22} fill="none" stroke="#B6544A" strokeWidth={2.5} strokeDasharray="10 8" opacity={0.7} />
+                <text x={638} y={245} textAnchor="middle" fontSize={13} fontWeight={700} fill="#B6544A">bare axon — no insulation</text>
+              </g>
+            )}
+
+            {/* Nodes of Ranvier — the gaps, glowing on the travel step */}
+            {NODE_X.map((x) => (
+              <g key={x} style={seg(id === 'travel' || part === 'node')}>
+                <circle cx={x} cy={280} r={id === 'travel' && playing ? 13 : 9} fill="#0E7C86" stroke="#fff" strokeWidth={2.5} />
+                {id === 'travel' && playing && <circle cx={x} cy={280} r={13} fill="none" stroke="#0E7C86" strokeWidth={2} className="ping-ring" />}
+              </g>
+            ))}
+
+            {/* Soma */}
+            <g style={seg(id === 'sum' || id === 'fire' || part === 'soma' || part === 'nucleus')}>
+              <ellipse cx={320} cy={280} rx={76} ry={63} fill="#E9A98F" stroke="#B6544A" strokeWidth={3.5} />
+              {id === 'fire' && playing && (
+                <ellipse cx={320} cy={280} rx={76} ry={63} fill="none" stroke="#B93327" strokeWidth={3} className="ping-ring" />
+              )}
+              {/* Nucleus */}
+              <circle cx={320} cy={280} r={23} fill="#8A6FB8" stroke="#5E4A8A" strokeWidth={2.5} />
+              <circle cx={313} cy={274} r={7} fill="#5E4A8A" opacity={0.7} />
+            </g>
+
+            {/* Terminal arbor + boutons */}
+            <g fill="none" stroke="#B6544A" strokeWidth={7} strokeLinecap="round" style={seg(id === 'release' || part === 'synapse')}>
+              <path d="M840 280 C870 250 895 235 918 222" />
+              <path d="M840 280 H918" />
+              <path d="M840 280 C870 310 895 325 918 338" />
+            </g>
+            <g style={seg(id === 'release' || part === 'synapse')}>
+              {[
+                [922, 222],
+                [940, 280],
+                [922, 338],
+              ].map(([x, y], i) => (
+                <g key={i}>
+                  <circle cx={x} cy={y} r={13} fill="#E9A98F" stroke="#B6544A" strokeWidth={2.5} />
+                  <circle cx={x - 4} cy={y - 4} r={3.5} fill="#8A6FB8" />
+                  <circle cx={x + 4} cy={y + 3} r={3.5} fill="#8A6FB8" />
+                </g>
+              ))}
+            </g>
+
+            {/* The next neuron — a dendrite fragment across the cleft */}
+            <g style={seg(id === 'release')}>
+              <path d="M985 215 C972 245 968 260 968 280" fill="none" stroke="#5F83C2" strokeWidth={8} strokeLinecap="round" />
+              <path d="M985 345 C972 315 968 300 968 280" fill="none" stroke="#5F83C2" strokeWidth={8} strokeLinecap="round" />
+              <circle cx={968} cy={280} r={7} fill="#5F83C2" />
+              <text x={965} y={392} textAnchor="middle" fontSize={12} fontWeight={700} fill="#4D6EA3">next neuron</text>
+            </g>
+
+            {/* Signal dots — only the active leg moves */}
+            {id === 'receive' && playing && dots(RECEIVE_PATH, '#2B4A7A', 3, 2.4)}
+            {id === 'sum' && playing && (
+              <circle r={5} fill="#8A6FB8" stroke="#fff" strokeWidth={2}>
+                <animateMotion dur="1.6s" repeatCount="indefinite" path="M320 250 A30 30 0 1 1 319.9 250" />
+              </circle>
+            )}
+            {id === 'fire' && playing && dots('M415 280 H548', '#B93327', 2, 0.9)}
+            {id === 'travel' && playing && dots(AXON_PATH, '#B93327', 3, travelDur)}
+            {id === 'release' && playing && (
+              <>
+                {RELEASE_PATHS.map((p, i) => (
+                  <circle key={i} r={4.5} fill="#8A6FB8" stroke="#fff" strokeWidth={1.5}>
+                    <animateMotion dur="1.4s" begin={`${i * 0.45}s`} repeatCount="indefinite" path={p} />
+                  </circle>
+                ))}
+              </>
+            )}
+
+            {/* Labels */}
+            <g fontWeight={700} fill="#3D2E22" pointerEvents="none">
+              <text x={120} y={85} fontSize={14}>Dendrites</text>
+              <text x={285} y={365} fontSize={14}>Soma</text>
+              <text x={300} y={255} fontSize={12}>Nucleus</text>
+              <text x={392} y={240} fontSize={13}>Axon hillock</text>
+              <text x={600} y={235} fontSize={13}>Myelin sheath</text>
+              <text x={648} y={325} fontSize={12}>Node of Ranvier</text>
+              <text x={845} y={195} fontSize={13}>Synaptic terminals</text>
+              <text x={470} y={325} fontSize={12}>Axon</text>
+            </g>
+
+            {/* Step + structure hotspots */}
+            {NEURON_STEP_ORDER.map((sid, i) => {
+              const s = NEURON_STEPS[sid]
+              const isActive = step === i
+              return (
+                <g key={sid} onClick={() => { setStep(i); setPlaying(false) }} className="cursor-pointer">
+                  {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={14} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                  <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+                </g>
+              )
+            })}
+          </svg>
+
+          {/* Structure picker */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            {NEURON_ORDER.map((pid) => (
+              <button
+                key={pid}
+                onClick={() => setPart(pid)}
+                aria-pressed={part === pid}
+                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                  part === pid ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{NEURON_PARTS[pid].name}</span>
+                <span className="mt-0.5 block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">{NEURON_PARTS[pid].latin}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Step {step + 1} of 5 · {info.job}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-5 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">
+              Structure under the cursor — {partInfo.name}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-800">
+              <strong className="font-semibold">{partInfo.name}</strong>{' '}
+              <span className="font-serif italic text-ink-500">({partInfo.latin})</span> — {partInfo.line}
+            </p>
+          </div>
+
+          <div className="mt-5 grid gap-4">
+            <div>
+              <div className="flex items-baseline justify-between font-mono text-xs text-ink-500">
+                <span>Membrane voltage at the hillock</span>
+                <span>{info.voltage > 0 ? '+' : ''}{info.voltage} mV</span>
+              </div>
+              <span className="mt-1.5 block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden>
+                <span
+                  className={`block h-full rounded-full transition-all duration-700 ${info.voltage > 0 ? 'bg-arterial-500' : 'bg-primary-600'}`}
+                  style={{ width: `${voltagePct}%` }}
+                />
+              </span>
+              <p className="mt-1 font-mono text-[0.68rem] text-ink-400">resting −70 mV · threshold ≈ −55 mV · peak ≈ +30 mV</p>
+            </div>
+            <Meter label="Conduction speed — myelinated axon" value={myelin ? 100 : 1} tone="bg-primary-600" />
+            <p className="-mt-2 font-mono text-[0.68rem] text-ink-400">
+              {myelin ? '≈ 100 m/s — the spike jumps node to node' : '≈ 1 m/s — the spike is rebuilt at every point'}
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>≈ 86 billion neurons</Chip>
+            <Chip>≈ 100 trillion synapses</Chip>
+            <Chip>signal ≈ 1 ms per spike</Chip>
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause signal' : '▶ Play signal'}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + NEURON_STEP_ORDER.length - 1) % NEURON_STEP_ORDER.length); setPlaying(false) }}>
+                ← Prev step
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + 1) % NEURON_STEP_ORDER.length); setPlaying(false) }}>
+                Next step →
+              </Button>
+              <Button size="sm" variant={myelin ? 'primary' : 'secondary'} onClick={() => setMyelin((m) => !m)}>
+                Myelin {myelin ? 'on' : 'off'}
+              </Button>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+/* ===================== The skeleton: 206 bones ===================== */
+
+type SkeletonPartId =
+  | 'skull'
+  | 'spine'
+  | 'ribs'
+  | 'shoulder'
+  | 'pelvis'
+  | 'arm'
+  | 'leg'
+  | 'hand'
+  | 'foot'
+
+const SKELETON_PARTS: Record<
+  SkeletonPartId,
+  { name: string; latin: string; bones: number; axial: boolean; line: string; dot: { x: number; y: number } }
+> = {
+  skull: {
+    name: 'Skull',
+    latin: 'cranium',
+    bones: 22,
+    axial: true,
+    line: '22 bones — 8 cranial bones form the braincase around the brain, 14 facial bones shape the face and jaw. In adults they are fused into one rigid helmet with a single moving part: the mandible.',
+    dot: { x: 320, y: 72 },
+  },
+  spine: {
+    name: 'Spine',
+    latin: 'columna vertebralis',
+    bones: 26,
+    axial: true,
+    line: '26 bones — 24 vertebrae (7 cervical, 12 thoracic, 5 lumbar) plus the sacrum and the coccyx. The vertebrae stack into a flexible column; the discs between them are the shock absorbers.',
+    dot: { x: 320, y: 280 },
+  },
+  ribs: {
+    name: 'Rib cage',
+    latin: 'costae',
+    bones: 25,
+    axial: true,
+    line: '25 bones — 24 ribs (12 pairs) plus the sternum. The ribs hinge on the spine and the sternum, so the whole cage can swing open a little with every breath while shielding the heart and lungs.',
+    dot: { x: 252, y: 240 },
+  },
+  shoulder: {
+    name: 'Shoulder girdle',
+    latin: 'cingulum pectorale',
+    bones: 4,
+    axial: false,
+    line: '4 bones — 2 clavicles and 2 scapulae. The girdle hangs the arms off the rib cage with almost no bony joint to the trunk: that is why the shoulder is the most mobile — and the most dislocatable — joint in the body.',
+    dot: { x: 224, y: 178 },
+  },
+  pelvis: {
+    name: 'Pelvis',
+    latin: 'pelvis',
+    bones: 2,
+    axial: false,
+    line: '2 hip bones — each one a fusion of ilium, ischium, and pubis. The pelvis is the keystone of the skeleton: it takes the whole weight of the trunk from the spine and hands it to the legs.',
+    dot: { x: 320, y: 415 },
+  },
+  arm: {
+    name: 'Arm',
+    latin: 'brachium',
+    bones: 30,
+    axial: false,
+    line: '30 bones per side — humerus, radius, and ulna, then 8 carpals, 5 metacarpals, and 14 phalanges in the hand. The arm trades strength for reach: it can lift, throw, and write, but it carries no body weight.',
+    dot: { x: 212, y: 240 },
+  },
+  leg: {
+    name: 'Leg',
+    latin: 'crus',
+    bones: 30,
+    axial: false,
+    line: '30 bones per side — femur, patella, tibia, and fibula, then 7 tarsals, 5 metatarsals, and 14 phalanges in the foot. The femur is the longest and strongest bone in the body: it has to be, it carries you.',
+    dot: { x: 278, y: 510 },
+  },
+  hand: {
+    name: 'Hand',
+    latin: 'manus',
+    bones: 27,
+    axial: false,
+    line: '27 bones per hand — 8 carpals in the wrist, 5 metacarpals in the palm, 14 phalanges in the fingers. More than a quarter of all your bones live in your hands and feet, because fine movement needs many small joints.',
+    dot: { x: 193, y: 435 },
+  },
+  foot: {
+    name: 'Foot',
+    latin: 'pes',
+    bones: 26,
+    axial: false,
+    line: '26 bones per foot — 7 tarsals, 5 metatarsals, and 14 phalanges. The tarsals form two arches that flatten a little with every step, spreading the impact before it reaches the leg.',
+    dot: { x: 283, y: 706 },
+  },
+}
+
+const SKELETON_ORDER: SkeletonPartId[] = [
+  'skull',
+  'spine',
+  'ribs',
+  'shoulder',
+  'pelvis',
+  'arm',
+  'leg',
+  'hand',
+  'foot',
+]
+
+const SKELETON_STEPS: {
+  id: string
+  name: string
+  latin: string
+  job: string
+  blurb: string
+  note: string
+  parts: SkeletonPartId[]
+  dot: { x: number; y: number }
+  paths: string[]
+}[] = [
+  {
+    id: 'feet',
+    name: 'Feet — the landing pad',
+    latin: 'pedes',
+    job: 'the load lands',
+    blurb:
+      'Every step starts here. When a foot strikes the ground, the two arches of the foot flatten a fraction and spread the impact across 26 small bones — the first shock absorber in the chain.',
+    note: 'The heel takes the hit first; the arch springs back and hands the load up to the ankle.',
+    parts: ['foot'],
+    dot: { x: 283, y: 706 },
+    paths: ['M283 724 L283 694'],
+  },
+  {
+    id: 'legs',
+    name: 'Legs — the pillars',
+    latin: 'crura',
+    job: 'the load climbs',
+    blurb:
+      'The load runs up the tibia and femur, the two longest levers in the body. The femur angles slightly inward as it rises, so the weight of the trunk lands dead centre over the knee — an engineering trick called the carrying angle.',
+    note: 'The patella is a sesamoid bone — it grows inside a tendon, and it works like a pulley for the quadriceps.',
+    parts: ['leg'],
+    dot: { x: 278, y: 510 },
+    paths: ['M283 700 L276 575 L282 445', 'M357 700 L364 575 L358 445'],
+  },
+  {
+    id: 'pelvis',
+    name: 'Pelvis — the keystone',
+    latin: 'pelvis',
+    job: 'the load transfers',
+    blurb:
+      'At the top of the legs the load reaches the pelvis, the bowl that joins the two sides of the body. The sacrum wedges between the two hip bones like the keystone of an arch — the harder the weight pushes down, the tighter the joint locks.',
+    note: 'The hip socket is a ball-and-socket joint: the deepest, most stable joint in the body.',
+    parts: ['pelvis'],
+    dot: { x: 320, y: 415 },
+    paths: ['M288 436 Q320 398 352 436'],
+  },
+  {
+    id: 'spine',
+    name: 'Spine — the flexible column',
+    latin: 'columna vertebralis',
+    job: 'the load rises',
+    blurb:
+      'The spine carries the load up 24 vertebrae, each pair separated by a disc of cartilage that squashes a fraction of a millimetre with every step — which is why you are about a centimetre taller in the morning than at night.',
+    note: 'The spine is not straight: its four curves (neck, chest, lower back, sacrum) act like a spring.',
+    parts: ['spine'],
+    dot: { x: 320, y: 280 },
+    paths: ['M320 398 L320 158'],
+  },
+  {
+    id: 'skull',
+    name: 'Skull — the protected cargo',
+    latin: 'cranium',
+    job: 'the load arrives',
+    blurb:
+      'At the top of the column sits the skull: 22 fused bones forming a helmet around the brain, balanced on the first vertebra so the head can turn, nod, and stay level while the body moves underneath it.',
+    note: 'The skull is the only part of the skeleton that takes almost no load — its job is protection, not support.',
+    parts: ['skull'],
+    dot: { x: 320, y: 72 },
+    paths: ['M320 18 A54 58 0 1 1 319 18'],
+  },
+]
+
+const RIB_Y = [194, 210, 226, 242, 258, 274, 290]
+
+export function SkeletonLab({ bare = false }: { bare?: boolean }) {
+  const [step, setStep] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const [part, setPart] = useState<SkeletonPartId>('skull')
+  const [mode, setMode] = useState<'all' | 'axial' | 'appendicular'>('all')
+  const info = SKELETON_STEPS[step]
+  const partInfo = SKELETON_PARTS[part]
+  const sharePct = Math.round((partInfo.bones / 206) * 100)
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setStep((s) => (s + 1) % SKELETON_STEPS.length), 4600)
+    return () => clearInterval(t)
+  }, [playing])
+
+  const opacityFor = (pid: SkeletonPartId) => {
+    const p = SKELETON_PARTS[pid]
+    if (mode !== 'all' && p.axial !== (mode === 'axial')) return 0.15
+    if (info.parts.includes(pid) || part === pid) return 1
+    return 0.35
+  }
+  const seg = (pid: SkeletonPartId) => ({
+    opacity: opacityFor(pid),
+    transition: 'opacity 0.6s ease',
+  })
+
+  const dots = (path: string, n = 3, dur = 2.2) =>
+    Array.from({ length: n }, (_, i) => (
+      <circle key={i} r={6} fill="#B93327" stroke="#fff" strokeWidth={2}>
+        <animateMotion dur={`${dur}s`} begin={`${i * (dur / n)}s`} repeatCount="indefinite" path={path} />
+      </circle>
+    ))
+
+  const boneFill = '#EFE7D3'
+  const boneStroke = '#A89B7E'
+  const boneLight = '#E3DAC4'
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <div>
+          <svg viewBox="0 0 640 780" className="mx-auto w-full max-w-[520px]" role="img" aria-label="Animated diagram of the human skeleton: the load of a step travels from the feet up the legs, through the pelvis and spine, to the skull">
+            {/* ---------- Skull ---------- */}
+            <g style={seg('skull')} stroke={boneStroke} strokeWidth={2.5} fill={boneFill}>
+              <ellipse cx={320} cy={72} rx={54} ry={58} />
+              <path d="M288 100 L288 126 Q288 148 320 148 Q352 148 352 126 L352 100" />
+              <line x1={296} y1={132} x2={344} y2={132} strokeWidth={1.5} />
+              <circle cx={299} cy={70} r={9} fill="#16222E" stroke="none" />
+              <circle cx={341} cy={70} r={9} fill="#16222E" stroke="none" />
+              <path d="M320 84 L314 98 L326 98 Z" fill="#16222E" stroke="none" opacity={0.75} />
+            </g>
+
+            {/* ---------- Cervical vertebrae ---------- */}
+            <g style={seg('spine')} fill={boneFill} stroke={boneStroke} strokeWidth={2}>
+              {Array.from({ length: 7 }, (_, i) => (
+                <rect key={i} x={311} y={154 + i * 4.2} width={18} height={3.4} rx={1.5} />
+              ))}
+            </g>
+
+            {/* ---------- Clavicles + scapulae ---------- */}
+            <g style={seg('shoulder')} stroke={boneStroke} strokeWidth={2} fill={boneFill}>
+              <line x1={298} y1={186} x2={226} y2={172} strokeWidth={7} strokeLinecap="round" />
+              <line x1={342} y1={186} x2={414} y2={172} strokeWidth={7} strokeLinecap="round" />
+              <path d="M232 180 L262 180 L258 232 L234 222 Z" fill={boneLight} />
+              <path d="M408 180 L378 180 L382 232 L406 222 Z" fill={boneLight} />
+            </g>
+
+            {/* ---------- Sternum ---------- */}
+            <g style={seg('ribs')} fill={boneFill} stroke={boneStroke} strokeWidth={2.5}>
+              <rect x={314} y={184} width={12} height={116} rx={6} />
+            </g>
+
+            {/* ---------- Ribs ---------- */}
+            <g style={seg('ribs')} fill="none" stroke={boneStroke} strokeWidth={6} strokeLinecap="round">
+              {RIB_Y.map((y) => (
+                <path key={y} d={`M316 ${y} C 288 ${y - 6} 260 ${y} 248 ${y + 14}`} />
+              ))}
+            </g>
+            <g style={seg('ribs')} fill="none" stroke={boneStroke} strokeWidth={6} strokeLinecap="round">
+              <g transform="translate(640,0) scale(-1,1)">
+                {RIB_Y.map((y) => (
+                  <path key={y} d={`M316 ${y} C 288 ${y - 6} 260 ${y} 248 ${y + 14}`} />
+                ))}
+              </g>
+            </g>
+
+            {/* ---------- Thoracic + lumbar vertebrae, sacrum, coccyx ---------- */}
+            <g style={seg('spine')} fill={boneFill} stroke={boneStroke} strokeWidth={2}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <rect key={i} x={310} y={186 + i * 9.8} width={20} height={8} rx={2} />
+              ))}
+              {Array.from({ length: 5 }, (_, i) => (
+                <rect key={i} x={307} y={306 + i * 12.5} width={26} height={10} rx={2} />
+              ))}
+              <path d="M307 370 L333 370 L327 400 L313 400 Z" />
+              <path d="M316 402 L324 402 L320 414 Z" />
+            </g>
+
+            {/* ---------- Pelvis ---------- */}
+            <g style={seg('pelvis')} fill={boneFill} stroke={boneStroke} strokeWidth={2.5}>
+              <path d="M306 396 C 282 390 254 396 242 414 C 238 428 250 440 272 440 L300 434 Z" />
+              <path d="M334 396 C 358 390 386 396 398 414 C 402 428 390 440 368 440 L340 434 Z" />
+              <circle cx={284} cy={432} r={10} fill={boneLight} />
+              <circle cx={356} cy={432} r={10} fill={boneLight} />
+              <rect x={314} y={436} width={12} height={10} rx={3} />
+            </g>
+
+            {/* ---------- Arms ---------- */}
+            <g style={seg('arm')} stroke={boneStroke} strokeWidth={2.5} fill={boneFill}>
+              <line x1={224} y1={184} x2={202} y2={298} strokeWidth={14} strokeLinecap="round" />
+              <circle cx={224} cy={184} r={8} />
+              <circle cx={202} cy={300} r={7} />
+              <line x1={198} y1={306} x2={190} y2={392} strokeWidth={6} strokeLinecap="round" />
+              <line x1={208} y1={306} x2={198} y2={392} strokeWidth={6} strokeLinecap="round" />
+              <circle cx={193} cy={398} r={6} />
+              <rect x={180} y={402} width={26} height={32} rx={9} />
+              <line x1={184} y1={434} x2={182} y2={466} strokeWidth={4} strokeLinecap="round" />
+              <line x1={190} y1={436} x2={189} y2={470} strokeWidth={4} strokeLinecap="round" />
+              <line x1={196} y1={436} x2={196} y2={470} strokeWidth={4} strokeLinecap="round" />
+              <line x1={202} y1={434} x2={204} y2={466} strokeWidth={4} strokeLinecap="round" />
+              <line x1={206} y1={412} x2={216} y2={428} strokeWidth={5} strokeLinecap="round" />
+            </g>
+            <g style={seg('arm')} stroke={boneStroke} strokeWidth={2.5} fill={boneFill}>
+              <g transform="translate(640,0) scale(-1,1)">
+                <line x1={224} y1={184} x2={202} y2={298} strokeWidth={14} strokeLinecap="round" />
+                <circle cx={224} cy={184} r={8} />
+                <circle cx={202} cy={300} r={7} />
+                <line x1={198} y1={306} x2={190} y2={392} strokeWidth={6} strokeLinecap="round" />
+                <line x1={208} y1={306} x2={198} y2={392} strokeWidth={6} strokeLinecap="round" />
+                <circle cx={193} cy={398} r={6} />
+                <rect x={180} y={402} width={26} height={32} rx={9} />
+                <line x1={184} y1={434} x2={182} y2={466} strokeWidth={4} strokeLinecap="round" />
+                <line x1={190} y1={436} x2={189} y2={470} strokeWidth={4} strokeLinecap="round" />
+                <line x1={196} y1={436} x2={196} y2={470} strokeWidth={4} strokeLinecap="round" />
+                <line x1={202} y1={434} x2={204} y2={466} strokeWidth={4} strokeLinecap="round" />
+                <line x1={206} y1={412} x2={216} y2={428} strokeWidth={5} strokeLinecap="round" />
+              </g>
+            </g>
+
+            {/* ---------- Legs ---------- */}
+            <g style={seg('leg')} stroke={boneStroke} strokeWidth={2.5} fill={boneFill}>
+              <line x1={284} y1={442} x2={272} y2={566} strokeWidth={15} strokeLinecap="round" />
+              <circle cx={284} cy={442} r={8} />
+              <circle cx={272} cy={572} r={9} />
+              <line x1={270} y1={582} x2={266} y2={686} strokeWidth={12} strokeLinecap="round" />
+              <line x1={280} y1={582} x2={276} y2={682} strokeWidth={5} strokeLinecap="round" />
+              <circle cx={268} cy={690} r={7} />
+            </g>
+            <g style={seg('leg')} stroke={boneStroke} strokeWidth={2.5} fill={boneFill}>
+              <g transform="translate(640,0) scale(-1,1)">
+                <line x1={284} y1={442} x2={272} y2={566} strokeWidth={15} strokeLinecap="round" />
+                <circle cx={284} cy={442} r={8} />
+                <circle cx={272} cy={572} r={9} />
+                <line x1={270} y1={582} x2={266} y2={686} strokeWidth={12} strokeLinecap="round" />
+                <line x1={280} y1={582} x2={276} y2={682} strokeWidth={5} strokeLinecap="round" />
+                <circle cx={268} cy={690} r={7} />
+              </g>
+            </g>
+
+            {/* ---------- Feet ---------- */}
+            <g style={seg('foot')} fill={boneFill} stroke={boneStroke} strokeWidth={2.5}>
+              <rect x={254} y={692} width={58} height={28} rx={12} />
+              <line x1={260} y1={720} x2={260} y2={728} strokeWidth={3} strokeLinecap="round" />
+              <line x1={270} y1={720} x2={270} y2={729} strokeWidth={3} strokeLinecap="round" />
+              <line x1={280} y1={720} x2={280} y2={729} strokeWidth={3} strokeLinecap="round" />
+              <line x1={290} y1={720} x2={290} y2={728} strokeWidth={3} strokeLinecap="round" />
+              <line x1={300} y1={720} x2={300} y2={726} strokeWidth={3} strokeLinecap="round" />
+            </g>
+            <g style={seg('foot')} fill={boneFill} stroke={boneStroke} strokeWidth={2.5}>
+              <g transform="translate(640,0) scale(-1,1)">
+                <rect x={254} y={692} width={58} height={28} rx={12} />
+                <line x1={260} y1={720} x2={260} y2={728} strokeWidth={3} strokeLinecap="round" />
+                <line x1={270} y1={720} x2={270} y2={729} strokeWidth={3} strokeLinecap="round" />
+                <line x1={280} y1={720} x2={280} y2={729} strokeWidth={3} strokeLinecap="round" />
+                <line x1={290} y1={720} x2={290} y2={728} strokeWidth={3} strokeLinecap="round" />
+                <line x1={300} y1={720} x2={300} y2={726} strokeWidth={3} strokeLinecap="round" />
+              </g>
+            </g>
+
+            {/* ---------- Load dots — only the active leg moves ---------- */}
+            {playing && info.paths.map((p) => dots(p))}
+
+            {/* ---------- Labels ---------- */}
+            <g fontWeight={700} fill="#3D2E22" pointerEvents="none">
+              <text x={398} y={60} fontSize={14}>Skull · 22</text>
+              <text x={96} y={166} fontSize={13}>Clavicle</text>
+              <text x={452} y={222} fontSize={13}>Rib cage · 25</text>
+              <text x={398} y={320} fontSize={13}>Spine · 26</text>
+              <text x={428} y={420} fontSize={13}>Pelvis · 2</text>
+              <text x={104} y={240} fontSize={13}>Humerus</text>
+              <text x={156} y={512} fontSize={13}>Femur</text>
+              <text x={330} y={576} fontSize={12}>Patella</text>
+              <text x={156} y={636} fontSize={13}>Tibia</text>
+              <text x={392} y={712} fontSize={13}>Foot · 26</text>
+            </g>
+
+            {/* ---------- Step hotspots ---------- */}
+            {SKELETON_STEPS.map((s, i) => (
+              <g key={s.id} onClick={() => { setStep(i); setPlaying(false) }} className="cursor-pointer">
+                {step === i && <circle cx={s.dot.x} cy={s.dot.y} r={14} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                <circle cx={s.dot.x} cy={s.dot.y} r={step === i ? 11 : 8} fill={step === i ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+              </g>
+            ))}
+          </svg>
+
+          {/* Structure picker */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {SKELETON_ORDER.map((pid) => (
+              <button
+                key={pid}
+                onClick={() => setPart(pid)}
+                aria-pressed={part === pid}
+                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                  part === pid ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{SKELETON_PARTS[pid].name}</span>
+                <span className="mt-0.5 block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">
+                  {SKELETON_PARTS[pid].latin} · {SKELETON_PARTS[pid].bones} bones
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            Step {step + 1} of 5 · {info.job}
+          </p>
+          <h3 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-1 font-serif text-sm italic text-ink-500">{info.latin}</p>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+
+          <div className="mt-5 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-ink-400">
+              Structure under the cursor — {partInfo.name}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-800">
+              <strong className="font-semibold">{partInfo.name}</strong>{' '}
+              <span className="font-serif italic text-ink-500">({partInfo.latin})</span> — {partInfo.line}
+            </p>
+          </div>
+
+          <div className="mt-5 grid gap-4">
+            <Meter label={`Share of the 206 bones — ${partInfo.name} (${partInfo.bones})`} value={sharePct} tone="bg-primary-600" />
+            <Meter label="Axial skeleton — 80 bones" value={Math.round((80 / 206) * 100)} tone="bg-venous-500" />
+            <Meter label="Appendicular skeleton — 126 bones" value={Math.round((126 / 206) * 100)} tone="bg-arterial-500" />
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>206 bones in the adult skeleton</Chip>
+            <Chip>≈ 300 at birth — they fuse as you grow</Chip>
+            <Chip>longest: femur · smallest: stapes</Chip>
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause load' : '▶ Play load'}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + SKELETON_STEPS.length - 1) % SKELETON_STEPS.length); setPlaying(false) }}>
+                ← Prev step
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => { setStep((s) => (s + 1) % SKELETON_STEPS.length); setPlaying(false) }}>
+                Next step →
+              </Button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Highlight one division of the skeleton">
+              {(
+                [
+                  ['all', 'Whole skeleton'],
+                  ['axial', 'Axial · 80'],
+                  ['appendicular', 'Appendicular · 126'],
+                ] as const
+              ).map(([m, label]) => (
+                <Button key={m} size="sm" variant={mode === m ? 'primary' : 'secondary'} onClick={() => setMode(m)}>
+                  {label}
+                </Button>
+              ))}
             </div>
             <p className="mt-3 text-sm leading-relaxed text-ink-700">{info.note}</p>
           </div>

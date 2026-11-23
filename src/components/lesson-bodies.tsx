@@ -2,10 +2,14 @@ import type { ReactNode } from 'react'
 import { AnatomyFigure, Callout, DefinitionBox, SpecTable } from './wiki'
 import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
-import { AppendectomyCaseLab, BloodVesselLab, BrainLab, CabgLab, CardiacCycleLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
+import { AppendectomyCaseLab, BloodVesselLab, BrainLab, CabgLab, CardiacCycleLab, CholecystectomyCaseLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
 import AirwayLabCard from './AirwayLabCard'
+import BrainLabCard from './BrainLabCard'
 import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
+import MuscleLabCard from './MuscleLabCard'
+import NeuronLabCard from './NeuronLabCard'
+import SkeletonLabCard from './SkeletonLabCard'
 
 /* ------------------------------------------------------------------ */
 /* Complete lesson bodies: Lab → Reading chapter → Check yourself.     */
@@ -1348,7 +1352,7 @@ export function LiverLessonBody() {
 export function BrainLessonBody() {
   return (
     <BodyShell
-      lab={<BrainLab />}
+      lab={<BrainLabCard />}
       chapterTitle="Four Lobes, One Map, and a Switchboard Inside"
       chapter={
         <>
@@ -1489,6 +1493,614 @@ export function BrainLessonBody() {
           job, and the landmarks tell you which patch you are looking at. Follow a signal
           from fingertip to thalamus to cortex and back, and you have followed the whole
           story — sensation in, decision made, movement out.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------- Operation case 2: cholecystectomy ------------------- */
+
+export function CholecystectomyCaseBody() {
+  return (
+    <BodyShell
+      lab={<CholecystectomyCaseLab />}
+      chapterTitle="The Pain That Kept Coming Back"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              This patient’s story has two chapters, and telling them apart is the whole diagnosis.
+              For months she had <strong>biliary colic</strong>: a gallstone would drift into the
+              neck of the gallbladder and briefly block the cystic duct, the gallbladder would
+              squeeze against the blockage — pain — and then the stone would fall back, the duct
+              would drain, and within the hour everything settled. Colic is a plumbing spasm: severe,
+              but it leaves no inflammation behind, no fever, and normal blood tests. This time the
+              stone did not fall back. Impacted in the cystic duct, it trapped bile inside; the wall
+              swelled, its blood supply suffered, bacteria joined in — and colic became{' '}
+              <strong>acute cholecystitis</strong>, an inflamed organ that will not settle on its own.
+            </p>
+            <p>
+              <strong>Murphy’s sign</strong> is that inflammation made palpable. The gallbladder hangs
+              from the underside of the liver, just below the right ribs. When the patient breathes
+              in deeply, the diaphragm pushes the liver — and the gallbladder riding on it — downward,
+              straight onto the examiner’s waiting hand. A healthy gallbladder slides past without
+              complaint; an inflamed one collides, hurts sharply, and the patient catches her breath
+              and stops inspiring. The sign is the organ reporting its own tenderness.
+            </p>
+            <p>
+              The <strong>Tokyo Guidelines</strong> turn the diagnosis into three groups of evidence:
+              local signs (Murphy’s sign, right-upper-quadrant pain, tenderness or a palpable mass),
+              systemic inflammation (fever, raised CRP, raised white cell count), and imaging
+              (gallstones with a thickened wall, pericholecystic fluid, a positive sonographic
+              Murphy). One finding from each group makes the diagnosis definite — and this case has
+              findings in all three, several times over.
+            </p>
+            <p>
+              Why not simply cool it down with antibiotics and operate later, at leisure? Because
+              antibiotics treat the flare, not the stone. The impacted stone stays, attacks recur —
+              often within weeks — and the delayed operation is frequently the harder one, dissected
+              through tissue scarred by repeated inflammation. For a patient fit for anaesthesia, the
+              Tokyo Guidelines favour <strong>early laparoscopic cholecystectomy</strong> during the
+              same admission: remove the gallbladder while the anatomy is still readable.
+            </p>
+            <p>
+              The operation’s danger zone is <strong>Calot’s triangle</strong> (the hepatocystic
+              triangle), bordered by the cystic duct, the common hepatic duct, and the edge of the
+              liver. Through or near it pass the cystic artery and, in a significant minority of
+              people, variant bile ducts and arteries that do not read the textbook. The defence is
+              the <strong>Critical View of Safety</strong>, Strasberg’s discipline from 1995: before
+              anything is clipped, the triangle is cleared of fat and fibrous tissue, the lower
+              gallbladder is lifted off the liver bed, and the surgeon must see{' '}
+              <em>exactly two</em> structures entering the gallbladder — the cystic duct and the
+              cystic artery. Nothing else may be divided, because nothing else has been proven.
+            </p>
+            <p>
+              The feared complication explains the ritual. <strong>Bile duct injury</strong> —
+              clipping or dividing the common bile duct after mistaking it for the cystic duct — is
+              rarely a slip of the hand; it is almost always an error of identification, the duct
+              looking exactly like what the surgeon expected to see. Its consequences are severe:
+              leaking bile, strictures, repeated procedures, sometimes major reconstructive surgery.
+              The Critical View exists to make identity a demonstrated fact rather than an
+              assumption — and when the view cannot be achieved, the professional move is to bail
+              out: drain the gallbladder, remove only part of it, or convert to open surgery. Pride
+              is not a structure in Calot’s triangle.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Tokyo Guidelines group', 'Criterion', 'Finding in this case']}
+              rows={[
+                ['Local signs', 'Murphy’s sign', 'Positive — the breath catches on deep inspiration'],
+                ['Local signs', 'RUQ pain / tenderness / mass', '18 hours of constant right-upper-quadrant pain, tender'],
+                ['Systemic signs', 'Fever', '38.4 °C'],
+                ['Systemic signs', 'Raised inflammatory markers', 'WBC 13.6, CRP 118'],
+                ['Imaging', 'Gallstones, thickened wall (≥ 4 mm)', 'Multiple stones, wall 5 mm'],
+                ['Imaging', 'Pericholecystic fluid / sonographic Murphy', 'Rim of fluid present; probe tenderness positive'],
+                ['Verdict', 'One finding from each group', 'Definite acute cholecystitis'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <Callout kind="warning" title="Scope of this case">
+              This is a teaching case with a fictional patient, written to explain how surgeons
+              reason and operate. Real right-upper-abdominal pain has many causes and always needs
+              assessment by a clinician in person — a wiki score is never a diagnosis.
+            </Callout>
+          </div>
+          <div className="prose-wiki mt-6 max-w-3xl">
+            <p>
+              Ultrasound was this case’s first-line scan — fast, free of radiation, and superb at
+              finding stones and a thickened wall. But medicine owns several ways of seeing inside
+              the body, and each one sees a different truth. This gallery of real body scans —
+              a chest radiograph first, with CT and MRI examples being added — shows what each
+              method would, and would not, tell the team looking after this patient.
+            </p>
+          </div>
+          <div className="mt-6 max-w-xl">
+            <AnatomyFigure
+              src="/assets/refs/scan-xray-chest.png"
+              alt="Chest X-ray (radiograph) of the thorax"
+              caption="Body scan — a plain X-ray is a single projection shadow: excellent for chest and bone, but almost blind to the gallbladder. Most gallstones share the density of the soft tissue around them — only the calcified minority show up — which is why this is not the gallbladder test. (CT and MRI examples join this gallery in a follow-up update.)"
+              credit="Radiograph: Cecco · Public domain · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Murphy’s sign', latin: 'signum Murphy', back: 'Inspiratory arrest when the examiner’s hand, pressed under the right costal margin, meets the descending inflamed gallbladder as the patient breathes in. A positive sign points to gallbladder inflammation.' },
+        { term: 'Calot’s triangle', latin: 'trigonum cystohepaticum', back: 'The hepatocystic triangle, bordered by the cystic duct, the common hepatic duct, and the edge of the liver. The cystic artery runs inside it — and variant ducts and arteries hide there too. It is the dissection field of cholecystectomy, and the place where misidentification happens.' },
+        { term: 'Critical View of Safety', latin: 'visus criticus securitatis', back: 'Strasberg’s safety standard, proven before anything is clipped: (1) Calot’s triangle cleared of fat and fibrous tissue, (2) the lower gallbladder separated from the liver bed, (3) exactly two structures seen entering the gallbladder — the cystic duct and the cystic artery.' },
+        { term: 'Biliary colic', latin: 'colica biliaris', back: 'Pain from a gallstone temporarily obstructing the cystic duct: severe right-upper-quadrant pain, often after fatty meals, that settles completely within about six hours — no fever, no inflammation. Pain that persists with fever is no longer colic; it is cholecystitis.' },
+      ]}
+      questions={[
+        {
+          q: 'What separates this attack from her months of biliary colic?',
+          options: [
+            'The pain is under the right ribs instead of the left',
+            'Colic settles within hours and leaves no inflammation; this pain persisted 18 hours with fever and raised inflammatory markers — the gallbladder wall itself is now inflamed',
+            'Colic is caused by gallstones, cholecystitis is not',
+            'She vomited during this attack',
+          ],
+          answer: 1,
+          why: 'A stone briefly stuck is colic; a stone impacted in the cystic duct with an inflamed wall is acute cholecystitis. Duration plus systemic inflammation is the dividing line.',
+        },
+        {
+          q: 'Why must the Critical View of Safety be achieved before anything is clipped?',
+          options: [
+            'It makes the operation faster',
+            'It is a traditional pause with no practical purpose',
+            'It proves the structures about to be divided enter the gallbladder — the catastrophic error in this operation is mistaking the common bile duct for the cystic duct and dividing it',
+            'The clips only grip properly after the view is achieved',
+          ],
+          answer: 2,
+          why: 'Bile duct injury is almost always an identification error, not a slip of the hand. The Critical View makes identity a demonstrated fact — and if it cannot be achieved, the safe move is to bail out, never to guess.',
+        },
+        {
+          q: 'A stone is now suspected inside the common bile duct. Which scan maps the bile ducts?',
+          options: [
+            'A plain abdominal X-ray',
+            'MRCP — the MRI variant that images the bile and pancreatic ducts',
+            'A chest X-ray',
+            'A CT scan of the chest',
+          ],
+          answer: 1,
+          why: 'MRCP uses MRI sequences that make static fluid — bile — glow, drawing a map of the whole duct system with no incision and no injected dye. Plain X-rays barely show gallstones at all, and only the calcified minority.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          Appendicitis is a race against the clock; cholecystectomy is a test of identification.
+          The medium case in one line: the operation is safe when the surgeon proves what each
+          structure is before dividing anything.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- Neurons and the Synapse ------------------------- */
+
+export function NeuronLessonBody() {
+  return (
+    <BodyShell
+      lab={<NeuronLabCard />}
+      chapterTitle="One Cell, One Spark — and 86 Billion of Them"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Every thought you have ever had, every memory, every flinch from a hot stove, is
+              a chain of sparks jumping between cells. The cell that carries the spark is the{' '}
+              <strong>neuron</strong> — and the whole nervous system, all 86 billion of them, is
+              built from variations on one shape: branches that listen, a body that decides, one
+              long fibre that talks, and a hand-off at the end. Learn this one cell and you have
+              the alphabet of the entire brain.
+            </p>
+            <p>
+              The listening branches are the <strong>dendrites</strong>. They bristle with
+              synapses from other neurons, and each incoming signal arrives as a small{' '}
+              <strong>graded potential</strong> — a slight rise or fall in voltage that fades as
+              it travels. The <strong>soma</strong>, the cell body, adds them all up: excitation
+              against inhibition, signals close together in time and space reinforcing each
+              other. This is <strong>summation</strong>, and it happens at the{' '}
+              <strong>axon hillock</strong>, the trigger zone where the axon leaves the soma.
+            </p>
+            <p>
+              If the summed voltage crosses about <strong>−55 mV</strong>, the hillock fires an{' '}
+              <strong>action potential</strong>: voltage-gated sodium channels fly open, sodium
+              rushes in, and the membrane voltage shoots to about <strong>+30 mV</strong> in
+              roughly a millisecond, then potassium channels open and drag it back down — with a
+              brief overshoot below resting level, the refractory period, during which the cell
+              cannot fire again. The spike is <strong>all or nothing</strong>: a stronger
+              stimulus never makes a bigger spike, only more spikes, more often. That is why
+              the code of the nervous system is written in frequency, not amplitude.
+            </p>
+            <p>
+              The spike then travels the <strong>axon</strong>, and how fast it travels depends
+              on insulation. Most long axons are wrapped in <strong>myelin</strong> — fatty
+              segments laid down by Schwann cells outside the brain and cord, and by
+              oligodendrocytes inside it. Myelin stops the current leaking out through the
+              membrane, so the spike is reborn only at the bare gaps between segments, the{' '}
+              <strong>nodes of Ranvier</strong>, jumping from node to node in what is called{' '}
+              <strong>saltatory conduction</strong> — up to 100 metres per second. Strip the
+              myelin away, as multiple sclerosis does, and the same spike crawls at about 1 m/s,
+              rebuilt at every point along the fibre. Speed, in the nervous system, is mostly
+              insulation.
+            </p>
+            <p>
+              At the end of the axon, the spike reaches the <strong>synaptic terminals</strong>,
+              the boutons. Calcium rushes in, vesicles full of{' '}
+              <strong>neurotransmitter</strong> fuse with the membrane and spill their contents
+              into the <strong>synaptic cleft</strong> — a gap about 20 nanometres wide. The
+              chemical drifts across, binds receptors on the next neuron, and opens its channels:
+              the signal is electrical again. Neurons never touch each other. Everything you
+              experience is a chain of these hand-offs — electricity, chemistry, electricity —
+              repeated across some 100 trillion synapses.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Structure', 'What it is', 'What it does']}
+              rows={[
+                ['Dendrites', 'Branching processes off the soma', 'Listen — collect graded potentials from other neurons’ synapses'],
+                ['Soma', 'The cell body, with the nucleus', 'Adds the signals up; makes the proteins the cell runs on'],
+                ['Axon hillock', 'The trigger zone where the axon starts', 'Decides: cross −55 mV and the cell fires, or it stays silent'],
+                ['Axon', 'One long fibre, up to a metre in places', 'Carries the action potential away from the soma'],
+                ['Myelin sheath', 'Fatty insulation in segments', 'Stops the signal leaking; makes conduction up to 100× faster'],
+                ['Node of Ranvier', 'Bare gap between myelin segments', 'Rebuilds the spike, node after node — saltatory conduction'],
+                ['Synaptic terminal', 'Bouton at the axon’s end', 'Releases neurotransmitter into the cleft when the spike arrives'],
+                ['Synaptic cleft', 'The ~20 nm gap between neurons', 'Where the chemical message crosses from one cell to the next'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Action potential" latin="potentia actionis">
+              A brief, all-or-none reversal of the membrane voltage — from the resting
+              potential of about −70 mV up to about +30 mV and back, in roughly a millisecond.
+              It is triggered at the axon hillock when summation crosses threshold, travels
+              unchanged down the axon, and ends by releasing neurotransmitter at the synapse.
+              Every signal in the nervous system is a train of these identical spikes; what
+              varies is how often they come.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-neuron-openstax.jpg"
+              alt="OpenStax figure of a neuron: an irregular cell body with a purple nucleus, branching dendrites on the left, a long axon to the right wrapped in segments of myelin sheath with nodes of Ranvier between them, and branched synaptic terminals at the end"
+              caption="Real anatomy reference — the neuron as a textbook draws it: dendrites listening on the left, the soma with its nucleus in the middle, the long axon wrapped in myelin segments with bare nodes of Ranvier between them, and the branched terminals at the end. The lab above follows exactly this shape — and the 3D explorer shows the same cell as it really looks, mapped from electron-microscope slices."
+              credit="OpenStax, Anatomy and Physiology 2e, Figure 12.8 “The Neuron” · CC BY 4.0 · via openstax.org"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Neuron', latin: 'neuron', back: 'The signalling cell of the nervous system: about 86 billion of them. Dendrites listen, the soma adds the signals up, the axon carries the spike, and the synapse hands it on — chemically — to the next cell.' },
+        { term: 'Action potential', latin: 'potentia actionis', back: 'The all-or-none spike: membrane voltage shooting from −70 mV to about +30 mV in a millisecond when the axon hillock crosses threshold. Always the same size — stronger stimuli make more spikes, not bigger ones.' },
+        { term: 'Myelin sheath', latin: 'vagina myelinica', back: 'Fatty insulation wrapped around the axon in segments. It stops the signal leaking out, so the spike jumps from node to node — up to 100 m/s instead of about 1 m/s. Made by Schwann cells outside the brain and cord, oligodendrocytes inside it.' },
+        { term: 'Synapse', latin: 'synapsis', back: 'The hand-off between two neurons: the spike triggers vesicles to spill neurotransmitter into a ~20 nm cleft, and the chemical opens channels on the next cell. Neurons never touch — every signal crosses this gap.' },
+      ]}
+      questions={[
+        {
+          q: 'What happens at the axon hillock when the summed signal crosses about −55 mV?',
+          options: [
+            'The neuron releases neurotransmitter',
+            'An action potential fires — all or nothing',
+            'The myelin sheath is rebuilt',
+            'The dendrites grow new branches',
+          ],
+          answer: 1,
+          why: 'The hillock is the trigger zone. Cross threshold and voltage-gated sodium channels open, firing a full action potential; stay below it and nothing happens at all. The spike is always the same size.',
+        },
+        {
+          q: 'Why does myelin make conduction so much faster?',
+          options: [
+            'It makes the axon thicker, so more current fits',
+            'It stops the signal leaking out, so the spike jumps node to node',
+            'It adds extra sodium channels along the axon',
+            'It shortens the axon',
+          ],
+          answer: 1,
+          why: 'Myelin insulates the axon, so the current cannot leak out through the membrane — the spike is reborn only at the nodes of Ranvier. That saltatory conduction reaches ~100 m/s, against ~1 m/s in a bare axon.',
+        },
+        {
+          q: 'What crosses the synaptic cleft?',
+          options: [
+            'An action potential, travelling directly',
+            'Sodium ions through a gap junction',
+            'Neurotransmitter, released from vesicles',
+            'The axon itself, reaching across',
+          ],
+          answer: 2,
+          why: 'The cleft is a ~20 nm gap the spike cannot cross electrically. The spike triggers vesicles to spill neurotransmitter, the chemical drifts across, and it opens channels on the next neuron — electricity, then chemistry, then electricity again.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          One cell, one rule: listen on the dendrites, add it up in the soma, fire at the
+          hillock if the sum crosses threshold, jump the myelinated axon node to node, and hand
+          the message on chemically at the synapse. Everything the brain does — every memory,
+          every movement, every word — is this five-step journey, repeated 86 billion times.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- The skeleton: 206 bones ------------------------- */
+
+export function SkeletonLessonBody() {
+  return (
+    <BodyShell
+      lab={<SkeletonLabCard />}
+      chapterTitle="206 Bones, One Frame — and Every One Earns Its Place"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Count the bones in an adult and you get <strong>206</strong> — no more, no less,
+              in almost every healthy adult. But the number is not the point. The point is the
+              division of labour: the skeleton is two skeletons in one. The{' '}
+              <strong>axial skeleton</strong> — skull, spine, and rib cage, 80 bones — is the
+              central pillar: it protects the brain, the spinal cord, the heart, and the lungs,
+              and it carries the weight. The <strong>appendicular skeleton</strong> — shoulders,
+              arms, pelvis, and legs, 126 bones — is the machinery bolted onto the pillar: it
+              moves you, lifts things, and walks you around.
+            </p>
+            <p>
+              Bone looks dead — dry, white, still — but living bone is anything but. It is a
+              tissue that rebuilds itself constantly: <strong>osteoclasts</strong> dissolve old
+              bone and <strong>osteoblasts</strong> lay down new bone, so your whole skeleton is
+              replaced roughly once a decade. That is why a broken bone can heal, why astronauts
+              lose bone in weightlessness, and why the load in the lab above matters: bone
+              grows stronger exactly where it is loaded, and weaker where it is not.
+            </p>
+            <p>
+              The spine is the most honest example. Twenty-four vertebrae stack into a column
+              that is strong enough to carry the trunk and flexible enough to bend, twist, and
+              absorb a landing — because the vertebrae are separated by{' '}
+              <strong>intervertebral discs</strong>, pads of cartilage with a jelly centre that
+              squash a fraction of a millimetre with every step. The discs are also why you are
+              about a centimetre taller in the morning than at night: they rehydrate while you
+              sleep and compress again during the day.
+            </p>
+            <p>
+              The skeleton has two jobs nobody sees. Inside many bones,{' '}
+              <strong>red bone marrow</strong> makes your blood — about 100 billion new blood
+              cells every day, red cells, white cells, and platelets, all born in the marrow of
+              the pelvis, the spine, the ribs, and the ends of the long bones. And the bones are
+              the body&apos;s calcium bank: 99% of your calcium sits in bone, lent out to the
+              blood whenever nerves and muscles need it, paid back with every meal.
+            </p>
+            <p>
+              You were not born with 206 bones. A newborn has around{' '}
+              <strong>300 bones</strong>, many of them separate pieces of cartilage that slowly
+              ossify and fuse as you grow — the skull of a baby has soft spots, the fontanelles,
+              where the plates have not yet met. By your mid-twenties the fusing is mostly done
+              and the count settles at 206. The smallest bone in the body, the{' '}
+              <strong>stapes</strong> in the middle ear, is about 3 millimetres long; the
+              longest, the <strong>femur</strong>, is about 50 centimetres. Both do exactly one
+              job, and the whole frame depends on both.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Region', 'Bones', 'What it does']}
+              rows={[
+                ['Skull', '22', 'Protects the brain; houses the senses; the mandible chews and speaks'],
+                ['Spine', '26', '24 vertebrae + sacrum + coccyx — carries the trunk, protects the cord, bends and absorbs shock'],
+                ['Rib cage', '25', '24 ribs + sternum — shields heart and lungs, swings open to breathe'],
+                ['Shoulder girdle', '4', '2 clavicles + 2 scapulae — hangs the arms off the trunk for maximum reach'],
+                ['Pelvis', '2', '2 hip bones — the keystone: hands the trunk’s weight to the legs'],
+                ['Arms (both)', '60', '30 per side — reach, lift, throw, and write; no body weight to carry'],
+                ['Legs (both)', '60', '30 per side — walk, run, and stand; the femur is the longest bone'],
+                ['Hyoid + ear ossicles', '7', '1 hyoid (anchors the tongue) + 6 ossicles (3 per ear, carry sound)'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Axial skeleton" latin="skeleton axiale">
+              The 80 bones of the body&apos;s central axis: the skull (22), the spine (26),
+              the rib cage (25), the hyoid (1), and the six tiny ear ossicles. Everything else —
+              the 126 bones of the shoulders, arms, pelvis, and legs — is the appendicular
+              skeleton, attached to the axis. The axis protects and carries; the appendages move.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-skeleton-openstax.jpg"
+              alt="OpenStax figure of the axial and appendicular skeleton: two full-body skeletons, front view on the left and back view on the right, the axial bones coloured blue and the appendicular bones in bone colour, with the major bones labelled"
+              caption="Real anatomy reference — the whole skeleton, front and back: the axial skeleton (skull, spine, rib cage) in blue, the appendicular skeleton (limbs and girdles) in bone colour. The lab above follows exactly this division — and the 3D explorer shows the same bones as they really look, except the clavicles, forearms, hands and feet, which this open dataset does not publish."
+              credit="OpenStax, Anatomy and Physiology 2e, Figure 7.2 “Axial and Appendicular Skeleton” · CC BY 4.0 · via openstax.org"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Skeleton', latin: 'skeleton', back: 'The body’s frame: 206 bones in the adult, divided into the axial skeleton (80 — skull, spine, rib cage) and the appendicular skeleton (126 — shoulders, arms, pelvis, legs). It supports, protects, moves, makes blood, and stores calcium.' },
+        { term: 'Axial skeleton', latin: 'skeleton axiale', back: 'The 80 bones of the central axis — skull, spine, rib cage, hyoid, and ear ossicles. Its jobs are protection (brain, cord, heart, lungs) and carrying the body’s weight.' },
+        { term: 'Appendicular skeleton', latin: 'skeleton appendiculare', back: 'The 126 bones bolted onto the axis — shoulder girdle, arms, pelvis, and legs. Its jobs are movement: walking, running, reaching, lifting, and the fine work of the hands.' },
+        { term: 'Vertebra', latin: 'vertebra', back: 'One of the 24 bones of the spine (7 cervical, 12 thoracic, 5 lumbar), stacked with a disc of cartilage between each pair. Together they form a column that is strong enough to carry the trunk and flexible enough to bend.' },
+      ]}
+      questions={[
+        {
+          q: 'How many bones does a typical adult skeleton have?',
+          options: ['186', '206', '226', '300'],
+          answer: 1,
+          why: '206 in the adult. A newborn has around 300 bones, but many fuse together as the cartilage ossifies — the skull plates, the sacrum, and the hip bones among them — so the count settles at 206 by the mid-twenties.',
+        },
+        {
+          q: 'Which bone is the longest and strongest in the human body?',
+          options: [
+            'The humerus, in the upper arm',
+            'The tibia, the shin bone',
+            'The femur, the thigh bone',
+            'The pelvis, the hip bone',
+          ],
+          answer: 2,
+          why: 'The femur: about 50 cm long in an adult, and the strongest bone because it carries the whole weight of the trunk on every step. It angles slightly inward as it rises, so the load lands dead centre over the knee.',
+        },
+        {
+          q: 'The skull, the spine, and the rib cage belong to which division of the skeleton?',
+          options: [
+            'The appendicular skeleton',
+            'The axial skeleton',
+            'The sesamoid skeleton',
+            'The visceral skeleton',
+          ],
+          answer: 1,
+          why: 'The axial skeleton — the 80 bones of the central axis. Its jobs are protection and carrying weight. The appendicular skeleton (126 bones) is the shoulders, arms, pelvis, and legs — the machinery for movement.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          Two skeletons in one: an axial pillar of 80 bones that protects the brain, cord,
+          heart, and lungs and carries the weight — and an appendicular machine of 126 bones
+          that moves you. Every step you take is a load travelling from the arches of the feet,
+          up the legs, through the keystone of the pelvis, up the spring of the spine, to the
+          helmet of the skull — and the bones grow stronger exactly where that load lands.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- Muscles: how movement is made ------------------------- */
+
+export function MusclesLessonBody() {
+  return (
+    <BodyShell
+      lab={<MuscleLabCard />}
+      chapterTitle="Six Hundred Muscles, One Trick: Pull"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              You own about <strong>600 skeletal muscles</strong>, and together they are roughly{' '}
+              <strong>40% of your body mass</strong> — the largest organ system you have, hiding
+              in plain sight. Every step, every word, every blink is a muscle shortening on
+              command. And every one of them knows exactly one trick: <strong>pull</strong>.
+              A muscle can only shorten and drag its two ends toward each other. It can never
+              push. That single fact explains the whole design of the body: muscles always work
+              in <strong>antagonistic pairs</strong>. The biceps flexes the elbow; the triceps
+              extends it. When one shortens, the other must lengthen and let go — the curl in
+              the lab above is the two of them negotiating.
+            </p>
+            <p>
+              Zoom into a muscle and it is bundles inside bundles. A whole muscle is wrapped in
+              fascia; inside it, <strong>fascicles</strong> — bundles of muscle fibres — run in
+              parallel; each <strong>fibre</strong> is a single long cell packed with{' '}
+              <strong>myofibrils</strong>; and each myofibril is a chain of{' '}
+              <strong>sarcomeres</strong>, the tiny contractile units that do the actual pulling.
+              At each end, the muscle narrows into a <strong>tendon</strong>, a cord of dense
+              connective tissue that anchors it to bone. The attachment that stays mostly still
+              is the <strong>origin</strong>; the one that moves is the{' '}
+              <strong>insertion</strong>. The biceps originates on the scapula and inserts just
+              below the elbow — so when it shortens, the forearm has nowhere to go but up.
+            </p>
+            <p>
+              Inside a sarcomere, two kinds of protein filament overlap: thin{' '}
+              <strong>actin</strong> filaments anchored to the Z-discs at each end, and thick{' '}
+              <strong>myosin</strong> filaments in the middle, studded with little heads. When a
+              nerve fires, <strong>calcium</strong> floods out of the sarcoplasmic reticulum and
+              pulls <strong>tropomyosin</strong> off the actin binding sites. The myosin heads —
+              already cocked and loaded with energy — grab the actin, pivot, and drag it toward
+              the centre. The filaments themselves never shorten; they <strong>slide</strong>{' '}
+              past each other, and the Z-discs are pulled together. That is the{' '}
+              <strong>sliding filament theory</strong>, and the four steps in the lab are its
+              cross-bridge cycle: bind, power stroke, detach, re-cock.
+            </p>
+            <p>
+              The fuel for all of it is <strong>ATP</strong>, and its job is more subtle than
+              most people think. ATP does not power the pull itself — the power stroke runs on
+              energy stored in the cocked head from the ATP split <em>before</em> it bound.
+              Fresh ATP is what lets the head <em>let go</em> and re-cock for the next pull.
+              Without it, the heads stay locked to actin — which is why a body stiffens after
+              death, in rigor mortis. While you are alive, the cycle repeats about five times a
+              second per head, and thousands of heads pulling in step add up to the force that
+              lifts a dumbbell — or your whole body off the ground.
+            </p>
+            <p>
+              Not all muscle is the same. <strong>Skeletal muscle</strong> is voluntary and
+              striated — the striped pattern you see under a microscope is the regular overlap
+              of actin and myosin. <strong>Cardiac muscle</strong>, in the heart, is striated
+              too but beats on its own, its cells joined by intercalated discs so the whole
+              chamber contracts as one. <strong>Smooth muscle</strong> — in the walls of the
+              gut, the blood vessels, the airways — has no stripes and no conscious control; it
+              squeezes slowly and does not tire. And within skeletal muscle, fibres come in two
+              flavours: slow-twitch (type I), built for endurance, and fast-twitch (type II),
+              built for power. Your mix is mostly set at birth — sprinters are born with more
+              fast fibres, marathoners with more slow ones — but training decides how many of
+              the fibres you have are recruited, and how big they grow.
+            </p>
+            <p>
+              Strength training, for the record, does not give you more muscle fibres. You are
+              born with essentially all you will ever have. What grows is each fibre: more
+              myofibrils packed inside it, a thicker belly, a stronger tendon. And the ache the
+              day after a hard session — delayed-onset muscle soreness — is not lactic acid,
+              which clears within the hour. It is microscopic damage to the fibres themselves,
+              and the repair that follows is exactly how the muscle gets stronger.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Muscle', 'Origin → insertion', 'What it does']}
+              rows={[
+                ['Biceps brachii', 'Scapula → radial tuberosity', 'Flexes the elbow; turns the palm up (supination)'],
+                ['Triceps brachii', 'Scapula & humerus → olecranon', 'Extends the elbow — the biceps’ antagonist'],
+                ['Quadriceps femoris', 'Pelvis & femur → tibial tuberosity', 'Extends the knee; stands you up, climbs stairs, kicks'],
+                ['Gastrocnemius', 'Femoral condyles → heel bone (Achilles tendon)', 'Points the foot down; pushes you off the ground'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Sarcomere" latin="sarcomerum">
+              The contractile unit of a muscle fibre: the segment of a myofibril between two
+              Z-discs, about 2.2 micrometres long at rest. Inside it, thin actin filaments
+              anchored to the Z-discs overlap thick myosin filaments in the middle. When the
+              myosin heads row along the actin, the Z-discs are pulled together and the
+              sarcomere shortens — and a million sarcomeres shortening end to end is a muscle
+              contracting.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-muscles-gray525.png"
+              alt="Gray's Anatomy plate 525: the muscles of the arm — biceps brachii in front, triceps behind, deltoid above, with the pectoralis major and coracobrachialis"
+              caption="Real anatomy reference — the muscles of the arm, drawn from dissection: the biceps brachii running down the front of the arm to the forearm, the triceps behind it, the deltoid capping the shoulder. The lab above curls this exact arm — and the 3D explorer shows the biceps itself, segmented from a whole-body MRI, as two separate heads."
+              credit="Gray's Anatomy (1918), plate 525 · Public domain · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Sarcomere', latin: 'sarcomerum', back: 'The contractile unit of a muscle fibre — the segment of a myofibril between two Z-discs, about 2.2 µm at rest. Myosin heads row along actin inside it, pulling the Z-discs together so the sarcomere — and the whole muscle — shortens.' },
+        { term: 'Myosin', latin: 'myosinum', back: 'The thick filament protein of the sarcomere. Its heads bind actin, pivot in the power stroke to drag actin toward the centre, then detach when fresh ATP binds and re-cock for the next pull. Thousands of heads pulling in step make the muscle’s force.' },
+        { term: 'Actin', latin: 'actinum', back: 'The thin filament protein of the sarcomere, anchored to the Z-discs. Myosin heads grab it and pull it toward the centre during contraction. At rest its binding sites are covered by tropomyosin until calcium arrives.' },
+        { term: 'Tendon', latin: 'tendo', back: 'A cord of dense connective tissue that anchors muscle to bone. It does not contract — it transmits the muscle’s pull to the skeleton. The biceps tendon inserts on the radius; the Achilles tendon joins the calf muscles to the heel bone.' },
+      ]}
+      questions={[
+        {
+          q: 'Why do muscles always work in antagonistic pairs, like biceps and triceps?',
+          options: [
+            'Because one muscle is always stronger than the other',
+            'Because a muscle can only pull — it can never push a joint back',
+            'Because the brain can only control one muscle at a time',
+            'Because tendons only attach to one side of a joint',
+          ],
+          answer: 1,
+          why: 'A muscle shortens and pulls its ends together — it has no way to push. So every joint needs an opposing muscle to return it: the biceps flexes the elbow, the triceps extends it, and each must lengthen while the other shortens.',
+        },
+        {
+          q: 'In the sliding filament theory, what actually shortens when a muscle contracts?',
+          options: [
+            'The actin and myosin filaments themselves shrink',
+            'The sarcomere shortens as the filaments slide past each other',
+            'The tendon stretches and pulls the bone',
+            'The Z-discs dissolve and reform closer together',
+          ],
+          answer: 1,
+          why: 'The filaments keep their length — they slide past each other, and the Z-discs are pulled together, so the sarcomere narrows from about 2.2 µm to about 1.6 µm. A million sarcomeres shortening end to end is the muscle contracting.',
+        },
+        {
+          q: 'What is ATP’s key job in the cross-bridge cycle?',
+          options: [
+            'It powers the power stroke directly',
+            'It lets the myosin head detach from actin and re-cock for the next pull',
+            'It releases calcium from the sarcoplasmic reticulum',
+            'It builds new actin filaments during exercise',
+          ],
+          answer: 1,
+          why: 'The power stroke runs on energy stored in the cocked head from an ATP split earlier. Fresh ATP is what makes the head let go of actin and re-cock — without it, heads stay locked, which is why a body stiffens in rigor mortis.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          One trick, six hundred times over: a muscle only pulls. The biceps shortens, the
+          forearm rises; the triceps yields, then pulls it back down. Inside, the trick is the
+          cross-bridge cycle — myosin heads rowing along actin, five pulls a second, powered
+          by ATP and switched on by calcium — repeated in a million sarcomeres at once, in
+          every muscle you own, every time you move.
         </Callout>
       }
     />
