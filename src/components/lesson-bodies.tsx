@@ -4,6 +4,7 @@ import { EkgDivider, FlashCards, Quiz } from './study-tools'
 import type { FlashCardData, QuizQuestion } from './study-tools'
 import { AppendectomyCaseLab, BloodVesselLab, BrainLab, CabgLab, CardiacCycleLab, CholecystectomyCaseLab, ConductionLab, GiTractLab, InstrumentsLab } from './lesson-labs'
 import AirwayLabCard from './AirwayLabCard'
+import BloodPressureLabCard from './BloodPressureLabCard'
 import BrainLabCard from './BrainLabCard'
 import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
@@ -1592,17 +1593,29 @@ export function CholecystectomyCaseBody() {
             <p>
               Ultrasound was this case’s first-line scan — fast, free of radiation, and superb at
               finding stones and a thickened wall. But medicine owns several ways of seeing inside
-              the body, and each one sees a different truth. This gallery of real body scans —
-              a chest radiograph first, with CT and MRI examples being added — shows what each
-              method would, and would not, tell the team looking after this patient.
+              the body, and each one sees a different truth. The three real scans below — a CT
+              slice, a chest radiograph, and an MRI — show what each method would, and would
+              not, tell the team looking after this patient.
             </p>
           </div>
-          <div className="mt-6 max-w-xl">
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            <AnatomyFigure
+              src="/assets/refs/scan-ct-abdomen.png"
+              alt="Axial CT scan of a normal abdomen and pelvis"
+              caption="Body scan — CT (computed tomography) builds the body as a stack of cross-section slices: fast, detailed, and the scan reached for when the diagnosis is uncertain or a complication such as perforation or an abscess is suspected. Here ultrasound answered first; CT is the trouble-shooter standing behind it."
+              credit="CT: Mikael Häggström, M.D. · CC0 · via Wikimedia Commons"
+            />
             <AnatomyFigure
               src="/assets/refs/scan-xray-chest.png"
               alt="Chest X-ray (radiograph) of the thorax"
-              caption="Body scan — a plain X-ray is a single projection shadow: excellent for chest and bone, but almost blind to the gallbladder. Most gallstones share the density of the soft tissue around them — only the calcified minority show up — which is why this is not the gallbladder test. (CT and MRI examples join this gallery in a follow-up update.)"
+              caption="Body scan — a plain X-ray is a single projection shadow: excellent for chest and bone, but almost blind to the gallbladder. Most gallstones share the density of the soft tissue around them — only the calcified minority show up — which is why this is not the gallbladder test."
               credit="Radiograph: Cecco · Public domain · via Wikimedia Commons"
+            />
+            <AnatomyFigure
+              src="/assets/refs/scan-mri-brain.png"
+              alt="Sagittal MRI scan of a human brain (T1 FLAIR)"
+              caption="Body scan — MRI builds images from magnetic fields and radio waves: no ionising radiation, and the finest soft-tissue contrast of the three. In gallbladder medicine its variant MRCP turns that contrast onto the bile ducts themselves, mapping them when a stone is suspected of escaping into the common bile duct."
+              credit="MRI: Osirinisaboon · CC0 · via Wikimedia Commons"
             />
           </div>
         </>
@@ -2101,6 +2114,179 @@ export function MusclesLessonBody() {
           cross-bridge cycle — myosin heads rowing along actin, five pulls a second, powered
           by ATP and switched on by calcium — repeated in a million sarcomeres at once, in
           every muscle you own, every time you move.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- Blood pressure and flow ------------------------- */
+
+export function BloodPressureLessonBody() {
+  return (
+    <BodyShell
+      lab={<BloodPressureLabCard />}
+      chapterTitle="Pressure Is the Product of Flow and Resistance"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Blood pressure is not a property of the blood. It is a property of the{' '}
+              <strong>container</strong> — the pressure the blood exerts on the walls of the
+              arteries as the heart drives it around. And it obeys one short equation:{' '}
+              <strong>mean arterial pressure = cardiac output × total peripheral resistance</strong>.
+              The heart sets the flow; the arterioles set the resistance. Change either one and
+              the pressure moves — which is why the body controls pressure mostly at the
+              arterioles, not at the heart.
+            </p>
+            <p>
+              <strong>Cardiac output</strong> is the volume the heart pumps per minute: heart
+              rate × stroke volume. At rest, about 70 beats a minute × 70 millilitres a beat ≈{' '}
+              <strong>4.9 litres a minute</strong> — your entire blood volume, roughly 5 litres,
+              passes through the heart about once a minute. In hard exercise the heart rate can
+              more than double and each beat gets bigger, pushing output past{' '}
+              <strong>16 litres a minute</strong>. Yet blood pressure rises only modestly in
+              exercise, because the vessels in the working muscles dilate and let the extra
+              flow through — flow up, resistance down, pressure nearly steady. The lab above
+              lets you run that trade-off yourself.
+            </p>
+            <p>
+              <strong>Resistance</strong> lives in the arterioles, the smallest arteries, whose
+              smooth muscle can narrow or widen them on demand. The physics is unforgiving:{' '}
+              <strong>resistance is proportional to 1/r⁴</strong> (Poiseuille&rsquo;s law), so
+              halving a vessel&rsquo;s radius multiplies its resistance sixteen times. That
+              fourth power is why a small squeeze of the arterioles — by adrenaline, by cold,
+              by the sympathetic nervous system — raises pressure so fast, and why the drugs
+              that treat high blood pressure so often work by relaxing those same walls. The
+              big arteries, by contrast, are elastic reservoirs: the aorta stretches with each
+              heartbeat and recoils between beats, smoothing the pulses into a steadier flow
+              downstream. That recoil is the <strong>Windkessel effect</strong> — the aorta as
+              a rubber balloon in the circuit.
+            </p>
+            <p>
+              The two numbers on a blood pressure reading are the peaks and troughs of the
+              wave in the lab. <strong>Systolic</strong> pressure — the top number, around 120
+              mmHg at rest — is the peak as the left ventricle contracts and ejects blood.{' '}
+              <strong>Diastolic</strong> — the bottom number, around 80 mmHg — is the trough
+              between beats, held up by the elastic recoil of the arteries. The difference
+              between them is the <strong>pulse pressure</strong> (about 40 mmHg), and the{' '}
+              <strong>mean arterial pressure</strong> — the average pressure actually driving
+              blood into the tissues — is roughly diastolic plus a third of the pulse pressure:
+              about <strong>93 mmHg</strong> for a 120/80 reading. Organs care about the mean,
+              not the peak: below about 60 mmHg the brain and kidneys stop being perfused
+              properly, which is why a falling mean pressure is an emergency even when the
+              heart is still beating.
+            </p>
+            <p>
+              Measuring it is a piece of applied physics. A cuff squeezes the upper arm until
+              it stops the blood in the brachial artery, then slowly releases. The first
+              tapping sounds heard through the stethoscope — <strong>Korotkoff sounds</strong>{' '}
+              — mark the systolic pressure, when blood first forces its way through; the
+              moment the sounds disappear marks the diastolic, when flow becomes continuous
+              again. Modern automatic cuffs do the same job with a pressure sensor instead of
+              an ear, but the principle is unchanged since 1905.
+            </p>
+            <p>
+              When pressure stays high, it is usually the resistance side of the equation that
+              has gone wrong: arterioles chronically constricted, or the vessel walls stiffened
+              so they no longer stretch and recoil. That is <strong>hypertension</strong> —
+              usually defined as 140/90 mmHg or above on repeated readings — and it is
+              dangerous precisely because it is silent. The heart works against a higher load
+              every minute of every day, the artery walls take more stress, and the damage
+              accumulates in the heart, brain, kidneys, and eyes for years before any symptom
+              appears. The good news is written into the same equation: regular exercise,
+              less salt, and the right drugs each pull one of the two terms down — output, or
+              resistance — and the pressure follows.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Measure', 'Typical at rest', 'What sets it']}
+              rows={[
+                ['Systolic pressure', '≈ 120 mmHg', 'Stroke volume and how hard the ventricle contracts'],
+                ['Diastolic pressure', '≈ 80 mmHg', 'Arterial recoil and how fast blood runs off into the tissues'],
+                ['Pulse pressure', '≈ 40 mmHg', 'Stroke volume and arterial stiffness — widens with age'],
+                ['Mean arterial pressure', '≈ 93 mmHg', 'Cardiac output × total peripheral resistance'],
+                ['Cardiac output', '≈ 4.9 L/min', 'Heart rate × stroke volume'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Mean arterial pressure" latin="pressio arterialis media">
+              The average pressure in the arteries over one heartbeat — the pressure that
+              actually drives blood through the organs. Roughly diastolic pressure plus a
+              third of the pulse pressure (about 93 mmHg for a 120/80 reading). Below about
+              60 mmHg, the brain and kidneys are no longer perfused well enough to work.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <Callout kind="warning">
+              This lesson is concept education, not medical advice. Blood pressure numbers
+              are interpreted by clinicians in the context of the whole person — a single
+              reading, a home cuff, or a number from a website is never a diagnosis. If
+              your readings are repeatedly above 140/90 mmHg, or you feel unwell, talk to a
+              clinician.
+            </Callout>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-aorta-gray506.png"
+              alt="Gray's Anatomy plate 506: the arch of the aorta with its three great branches — brachiocephalic, left common carotid, left subclavian — and the descending aorta"
+              caption="Real anatomy reference — the arch of the aorta, the great elastic vessel that takes the full force of every heartbeat: it stretches as the ventricle ejects blood and recoils between beats, smoothing the pulses into the steady flow the tissues need. Its three branches feed the arms and the head; the descending aorta carries on down to the body. The lab above shows what happens downstream, where the arterioles turn that flow into pressure."
+              credit="Gray's Anatomy (1918), plate 506 · Public domain · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Mean arterial pressure', latin: 'pressio arterialis media', back: 'The average arterial pressure over one heartbeat — diastolic plus a third of the pulse pressure, about 93 mmHg for a 120/80 reading. It is the pressure that actually drives blood into the organs, and it equals cardiac output × total peripheral resistance.' },
+        { term: 'Systolic pressure', latin: 'pressio systolica', back: 'The peak arterial pressure, reached as the left ventricle contracts and ejects blood — the top number of a reading, about 120 mmHg at rest. It rises with stroke volume and with how hard the ventricle contracts.' },
+        { term: 'Diastolic pressure', latin: 'pressio diastolica', back: 'The lowest arterial pressure, between heartbeats — the bottom number, about 80 mmHg at rest. It is held up by the elastic recoil of the arteries after the ventricle has finished ejecting.' },
+        { term: 'Total peripheral resistance', latin: 'resistentia peripherica totalis', back: 'The combined resistance of all the arterioles — the main thing the body adjusts to control blood pressure. Resistance is proportional to 1/r⁴, so narrowing an arteriole by a little raises resistance (and pressure) a lot.' },
+      ]}
+      questions={[
+        {
+          q: 'If total peripheral resistance doubles while cardiac output stays the same, what happens to mean arterial pressure?',
+          options: [
+            'It stays the same — only the heart sets pressure',
+            'It halves',
+            'It doubles',
+            'It falls to zero',
+          ],
+          answer: 2,
+          why: 'MAP = cardiac output × total peripheral resistance. With output unchanged, doubling the resistance doubles the pressure — the same pump pushing the same flow through a tighter circuit.',
+        },
+        {
+          q: 'Why does systolic pressure rise much more than diastolic pressure during exercise?',
+          options: [
+            'The arterioles constrict in the muscles',
+            'Cardiac output rises a lot, but the muscle vessels dilate and let the extra flow through',
+            'The heart stops beating between contractions',
+            'Blood volume doubles during exercise',
+          ],
+          answer: 1,
+          why: 'In exercise the heart pumps up to three or four times more blood, which pushes the systolic peak up — but the vessels in the working muscles dilate, so resistance falls and the diastolic trough barely moves. Flow up, resistance down, pressure nearly steady.',
+        },
+        {
+          q: 'An arteriole narrows to half its radius. By roughly how much does its resistance rise?',
+          options: [
+            'Two times',
+            'Four times',
+            'Eight times',
+            'Sixteen times',
+          ],
+          answer: 3,
+          why: 'Poiseuille’s law: resistance is proportional to 1/r⁴. Halving the radius multiplies resistance by 2⁴ = 16 — which is why the arterioles, with their smooth muscle, are the body’s main pressure control.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          One equation runs the whole lesson: mean arterial pressure = cardiac output × total
+          peripheral resistance. The heart sets the flow, the arterioles set the resistance —
+          and because resistance depends on the radius to the fourth power, a small squeeze of
+          a vessel moves pressure a lot. That is why exercise raises output four-fold while
+          pressure climbs only a little, and why high blood pressure is usually a resistance
+          problem, not a heart problem.
         </Callout>
       }
     />
