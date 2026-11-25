@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Badge, Button } from '../components/primitives'
 import { AnatomyFigure, Callout, OxygenLegend, SpecTable } from '../components/wiki'
 import HeartLab from '../components/HeartLab'
-import { AirwayLessonBody, AppendectomyCaseBody, BrainLessonBody, CabgLessonBody, CardiacCycleLessonBody, CholecystectomyCaseBody, ConductionLessonBody, GiTractLessonBody, InstrumentsLessonBody, LiverLessonBody, LungsLessonBody, MusclesLessonBody, NeuronLessonBody, SkeletonLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
+import { AirwayLessonBody, AppendectomyCaseBody, BloodPressureLessonBody, BrainLessonBody, CabgLessonBody, CardiacCycleLessonBody, CholecystectomyCaseBody, ConductionLessonBody, EcgLessonBody, GiTractLessonBody, InstrumentsLessonBody, LiverLessonBody, LungsLessonBody, MusclesLessonBody, NeuronLessonBody, SkeletonLessonBody, VesselsLessonBody } from '../components/lesson-bodies'
 import { EkgDivider, FlashCards, Quiz } from '../components/study-tools'
 import { Breadcrumb, badgeFor } from '../components/syllabus'
 import { getLessonBySlug, lessonNeighbors, subjectSlug } from '../data/curriculum'
@@ -149,6 +149,10 @@ function lessonBodyFor(slug: string) {
       return <SkeletonLessonBody />
     case 'muscles-how-movement-is-made':
       return <MusclesLessonBody />
+    case 'blood-pressure-and-flow':
+      return <BloodPressureLessonBody />
+    case 'reading-an-ecg':
+      return <EcgLessonBody />
     default:
       return null
   }

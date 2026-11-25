@@ -84,8 +84,8 @@ export const CURRICULUM: Subject[] = [
         title: 'Cardiovascular Physiology',
         lessons: [
           L('The Cardiac Cycle: Systole and Diastole', 'Interactive lab + reading', 9, 'available', '/lesson/the-cardiac-cycle-systole-and-diastole'),
-          L('Blood Pressure and Flow', 'Reading', 9),
-          L('Reading an ECG', 'Interactive lab', 10),
+          L('Blood Pressure and Flow', 'Interactive lab + reading', 9, 'available', '/lesson/blood-pressure-and-flow'),
+          L('Reading an ECG', 'Interactive lab + reading', 10, 'available', '/lesson/reading-an-ecg'),
         ],
       },
       {

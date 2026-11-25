@@ -6,6 +6,7 @@ import { AppendectomyCaseLab, BloodVesselLab, BrainLab, CabgLab, CardiacCycleLab
 import AirwayLabCard from './AirwayLabCard'
 import BloodPressureLabCard from './BloodPressureLabCard'
 import BrainLabCard from './BrainLabCard'
+import EcgLabCard from './EcgLabCard'
 import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
 import MuscleLabCard from './MuscleLabCard'
@@ -2287,6 +2288,164 @@ export function BloodPressureLessonBody() {
           a vessel moves pressure a lot. That is why exercise raises output four-fold while
           pressure climbs only a little, and why high blood pressure is usually a resistance
           problem, not a heart problem.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- Reading an ECG ------------------------- */
+
+export function EcgLessonBody() {
+  return (
+    <BodyShell
+      lab={<EcgLabCard />}
+      chapterTitle="The Heart, Written in Electricity"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              An <strong>electrocardiogram</strong> — ECG, or EKG from the German{' '}
+              <em className="latin">Elektrokardiogramm</em> — is a recording of the heart&rsquo;s
+              electricity, picked up by electrodes stuck to the skin. Every heartbeat writes the
+              same three shapes onto the paper: a small rounded <strong>P wave</strong>, a tall
+              sharp <strong>QRS complex</strong>, and a broad rounded <strong>T wave</strong>. The
+              lab above is a Lead II trace — the classic teaching lead, which looks at the heart
+              from the right arm toward the left leg, roughly along the direction the impulse
+              travels. Willem Einthoven built the first practical ECG in 1903 and won the Nobel
+              Prize for it in 1924; the machine on the ward today is a direct descendant of his
+              string galvanometer.
+            </p>
+            <p>
+              The key idea is that the ECG records <strong>electricity, not squeezing</strong>.
+              Each wave is a chamber depolarizing or repolarizing — a wave of charge sweeping
+              through muscle — and the contraction follows a fraction of a second behind. The{' '}
+              <strong>P wave</strong> is the atria depolarizing (and then contracting); the{' '}
+              <strong>QRS complex</strong> is the ventricles depolarizing (and then contracting);
+              the <strong>T wave</strong> is the ventricles repolarizing, resetting their
+              electrical state so they can fire again. The atria repolarize too, but their
+              signal is small and hides inside the much bigger QRS, so you never see it. That is
+              why the order of the waves is also the order of the heartbeat — spark, spread,
+              pause, sprint, squeeze — the same sequence the Conduction System lesson traces
+              station by station.
+            </p>
+            <p>
+              Between the waves sit the <strong>segments</strong> and <strong>intervals</strong>,
+              and the distinction matters. A segment is the flat line between two waves; an
+              interval is a segment plus at least one wave. The <strong>PR interval</strong> — from
+              the start of the P wave to the start of the QRS — is normally 0.12–0.20 seconds, and
+              it measures the AV nodal delay, the pause that lets the ventricles finish filling.
+              The <strong>QRS duration</strong> is normally under 0.12 seconds; a wider QRS means
+              the ventricles are depolarizing slowly or out of step. The <strong>QT interval</strong>{' '}
+              — from the start of the QRS to the end of the T wave, roughly 0.36–0.44 seconds at
+              rest — covers the whole electrical systole, and it stretches as the heart rate
+              slows. The <strong>ST segment</strong> should sit on the baseline; a raised or
+              lowered ST is one of the classic warning signs in a chest-pain ECG.
+            </p>
+            <p>
+              Reading it starts with the grid. ECG paper runs at <strong>25 mm per second</strong>{' '}
+              and 10 mm per millivolt, so one small square (1 mm) is <strong>0.04 seconds</strong>{' '}
+              across and 0.1 millivolts tall. Heart rate falls straight out of the grid: count the
+              large squares between two R peaks and divide 300 by that number — 300, 150, 100, 75,
+              60, 50 for one through six large squares, the sequence every student memorizes. The
+              trace in the lab is drawn to a fixed width so the waves stay readable, but the
+              reference figure below is the real thing: a strip on true grid paper, then the same
+              beat enlarged and labelled.
+            </p>
+            <p>
+              What the ECG is good at, and what it is not, is worth saying plainly. It shows
+              rhythm and rate, conduction blocks, signs of ischaemia, and clues to chamber
+              enlargement — all from a painless, ten-second recording. What it does not show is how
+              strongly the heart squeezes; that is the echocardiogram&rsquo;s job. And a normal ECG
+              does not rule out heart disease. It is one instrument in the examination, and its
+              reading belongs to clinicians who see it alongside the patient.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Wave / interval', 'What it records', 'Normal timing']}
+              rows={[
+                ['P wave', 'Atria depolarizing, then contracting', '≈ 0.08 s, small and rounded'],
+                ['PR interval', 'P start to QRS start — the AV nodal delay', '0.12–0.20 s'],
+                ['QRS complex', 'Ventricles depolarizing, then contracting', 'Under 0.12 s, tall and sharp'],
+                ['ST segment', 'Ventricles fully depolarized, ejecting', 'Flat on the baseline'],
+                ['T wave', 'Ventricles repolarizing, resetting', '≈ 0.16 s, same direction as R'],
+                ['QT interval', 'QRS start to T end — whole electrical systole', '≈ 0.36–0.44 s at rest'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Electrocardiogram" latin="electrocardiogramma">
+              A recording of the heart&rsquo;s electrical activity from electrodes on the skin —
+              the summed depolarization and repolarization of the chambers, written as the P wave,
+              the QRS complex, and the T wave. It shows electricity, not the squeeze itself: the
+              contraction follows the wave by a fraction of a second.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <Callout kind="warning" title="Scope of this lesson">
+              This lesson teaches how to read the shapes of a normal ECG as concepts. A real ECG
+              — its intervals, blocks, and what to do about them — is read by clinicians, not by a
+              wiki, and never from a single strip alone.
+            </Callout>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-ecg-openstax.jpg"
+              alt="OpenStax electrocardiogram figure: a real ECG strip on grid paper above, and the same beat enlarged and labelled below — P wave, Q, R, S, T wave, PR interval, QT interval, P-R and S-T segments, QRS complex"
+              caption="Real anatomy reference — the OpenStax electrocardiogram: a real strip on grid paper (one small square is 0.04 seconds), then the same beat enlarged and labelled — P wave, QRS complex, T wave, and the PR and QT intervals. The lab above traces the same shapes, one beat at a time."
+              credit="OpenStax Anatomy & Physiology, fig. 2022 · CC BY 3.0 · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Electrocardiogram', latin: 'electrocardiogramma', back: 'A recording of the heart’s electrical activity from electrodes on the skin — the P wave, the QRS complex, and the T wave. It shows electricity, not the squeeze: the contraction follows each wave by a fraction of a second.' },
+        { term: 'P wave', latin: 'unda P', back: 'The small rounded wave of atrial depolarization — the spark from the SA node spreading across both atria, which then contract and top up the ventricles. Small because the atria are thin-walled.' },
+        { term: 'QRS complex', latin: 'complexus QRS', back: 'The tall, sharp spike of ventricular depolarization: Q the first small dip, R the tall peak, S the dip after. The ventricles begin to contract as the R wave peaks.' },
+        { term: 'PR interval', latin: 'intervallum PR', back: 'From the start of the P wave to the start of the QRS — normally 0.12–0.20 seconds. It measures the AV nodal delay: the pause that lets the ventricles finish filling before they contract.' },
+      ]}
+      questions={[
+        {
+          q: 'The P wave on an ECG records…',
+          options: [
+            'The atria depolarizing',
+            'The ventricles depolarizing',
+            'The ventricles repolarizing',
+            'The AV node firing on its own',
+          ],
+          answer: 0,
+          why: 'The P wave is the atria depolarizing as the spark spreads from the SA node — small and rounded, because the atrial walls are thin. The ventricles get the tall QRS.',
+        },
+        {
+          q: 'Why is the PR interval normally 0.12–0.20 seconds?',
+          options: [
+            'The signal travels slowly through the ventricles',
+            'The AV node deliberately delays the impulse so the ventricles finish filling',
+            'The SA node needs time to recharge',
+            'The paper runs slowly between the waves',
+          ],
+          answer: 1,
+          why: 'The AV node holds the impulse for about 0.12–0.20 seconds — the PR interval — so the atria finish their top-up before the ventricles contract. Without the pause, atria and ventricles would squeeze at once.',
+        },
+        {
+          q: 'On ECG paper running at 25 mm/s, one small square (1 mm) across represents…',
+          options: [
+            '0.04 seconds',
+            '0.4 seconds',
+            '1 second',
+            '10 millivolts',
+          ],
+          answer: 0,
+          why: 'At 25 mm per second, 1 mm is 1/25 of a second — 0.04 s. That is why heart rate is 300 divided by the number of large squares between two R peaks.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          An ECG is a recording of electricity, not of squeezing: P is the atria depolarizing,
+          QRS is the ventricles depolarizing, T is the ventricles resetting — and the intervals
+          between them are the timing of the whole heartbeat. Read the waves, and you are reading
+          the conduction system the previous lesson traced.
         </Callout>
       }
     />

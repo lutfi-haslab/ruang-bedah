@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Button } from './primitives'
 
@@ -2626,6 +2626,236 @@ export function LiverLab({ bare = false }: { bare?: boolean }) {
   )
 }
 
+/* ========================== Blood pressure =========================== */
+
+/*
+ * BloodPressureLab — pressure is the product of flow and resistance.
+ * An arteriole narrows or widens under its smooth muscle (radius slider),
+ * blood cells stream through it, a gauge reads mean arterial pressure, and
+ * a sweeping dot traces the arterial pressure wave. The numbers follow one
+ * equation, MAP = cardiac output × total peripheral resistance, with
+ * resistance ∝ 1/r⁴ — so a small change in radius moves pressure a lot.
+ * Rest: HR 70, stroke volume 70 mL → CO 4.9 L/min → MAP ≈ 93 mmHg (120/80).
+ * Exercise: HR 150, SV 110 mL → CO 16.5 L/min, but the muscle vessels
+ * dilate (radius 1.3×), so resistance falls and MAP rises only modestly —
+ * that is why systolic climbs in exercise while diastolic barely moves.
+ */
+
+const BP_WAVE =
+  'M400 445 C415 445 425 440 432 410 C438 385 445 362 455 360 C465 358 472 385 478 408 C482 420 488 412 494 416 C510 428 540 445 570 445 L640 445 C655 445 665 440 672 410 C678 385 685 362 695 360 C705 358 712 385 718 408 C722 420 728 412 734 416 C750 428 780 445 810 445 L940 445'
+
+export function BloodPressureLab({ bare = false }: { bare?: boolean }) {
+  const [playing, setPlaying] = useState(true)
+  const [activity, setActivity] = useState<'rest' | 'exercise'>('rest')
+  const [radius, setRadius] = useState(1)
+
+  const hr = activity === 'rest' ? 70 : 150
+  const sv = activity === 'rest' ? 70 : 110 // mL per beat
+  const co = (hr * sv) / 1000 // L/min
+  const tpr = Math.pow(1 / radius, 4) // relative resistance, 1.0 at rest radius
+  const map = Math.round(co * tpr * 19) // calibrated: rest → 93 mmHg
+  const pp = 40 * (sv / 70) // pulse pressure grows with stroke volume
+  const sbp = Math.round(map + (2 * pp) / 3)
+  const dbp = Math.round(map - pp / 3)
+  const beatDur = 60 / hr // seconds per heartbeat
+  const flowDur = Math.max(1.4, 5.5 * (4.9 / co)) // cells speed up with flow
+
+  const halfH = 72 * radius // vessel half-height in the diagram
+  const muscleT = Math.max(5, (1.45 - radius) * 26) // smooth-muscle band thickness
+  const needleAngle = -120 + (Math.min(map, 200) / 200) * 240
+  const status =
+    map < 70
+      ? { label: 'Too low — organs under-perfused', tone: 'closed' as const }
+      : map <= 100
+        ? { label: 'Normal mean pressure', tone: 'open' as const }
+        : map <= 120
+          ? { label: 'Elevated — watch this range', tone: 'sand' as const }
+          : { label: 'High — hypertensive range', tone: 'closed' as const }
+
+  const dot = (begin: number, r = 9) => (
+    <circle r={r} fill="#FFD9D3" stroke="#fff" strokeWidth={2}>
+      {playing && <animateMotion dur={`${flowDur}s`} begin={`${begin}s`} repeatCount="indefinite" path="M80 185 H920" />}
+    </circle>
+  )
+
+  const setActivityAndRadius = (a: 'rest' | 'exercise') => {
+    setActivity(a)
+    setRadius(a === 'rest' ? 1 : 1.3)
+  }
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <svg viewBox="0 0 1000 540" className="w-full" role="img" aria-label="Animated diagram of an arteriole: blood cells flow through a vessel whose radius changes, a gauge reads mean arterial pressure, and a dot traces the pressure wave">
+          <text x={500} y={40} textAnchor="middle" fontSize={24} fontWeight={800} fill="#16222E">
+            One arteriole, under pressure
+          </text>
+          <text x={500} y={66} textAnchor="middle" fontSize={15} fill="#6B7684">
+            the smooth muscle in its wall decides the radius — and the radius decides the pressure
+          </text>
+
+          {/* Smooth-muscle bands above and below the vessel */}
+          <rect x={60} y={185 - halfH - muscleT - 8} width={880} height={muscleT} rx={muscleT / 2} fill="#B45309" opacity={0.75} />
+          <rect x={60} y={185 + halfH + 8} width={880} height={muscleT} rx={muscleT / 2} fill="#B45309" opacity={0.75} />
+
+          {/* Vessel wall and lumen, radius follows the slider */}
+          <rect x={60} y={185 - halfH} width={880} height={halfH * 2} rx={halfH} fill="#8E2A25" />
+          <rect x={60} y={185 - halfH * 0.62} width={880} height={halfH * 1.24} rx={halfH * 0.62} fill="#D64545" />
+
+          {/* Blood cells streaming through */}
+          {dot(-0.2)}
+          {dot(-1.4)}
+          {dot(-2.6)}
+          {dot(-3.8)}
+          {dot(-5.0, 8)}
+          {dot(-0.8, 8)}
+
+          <text x={500} y={185 + halfH + muscleT + 34} textAnchor="middle" fontSize={16} fill="#6B7684">
+            resistance ∝ 1 / r⁴ — now {tpr.toFixed(2)}× its resting value · flow {co.toFixed(1)} L/min
+          </text>
+
+          {/* MAP gauge */}
+          <g>
+            <circle cx={200} cy={430} r={88} fill="#FFFFFF" stroke="#E0D9C6" strokeWidth={2} />
+            <path d="M128 480 A88 88 0 0 1 272 480" fill="none" stroke="#E0D9C6" strokeWidth={10} strokeLinecap="round" />
+            <path d="M146 398 A88 88 0 0 1 254 398" fill="none" stroke="#2F9E6E" strokeWidth={10} strokeLinecap="round" />
+            {[0, 50, 100, 150, 200].map((v) => {
+              const a = ((-120 + (v / 200) * 240) * Math.PI) / 180
+              const x1 = 200 + 74 * Math.sin(a)
+              const y1 = 430 - 74 * Math.cos(a)
+              const x2 = 200 + 84 * Math.sin(a)
+              const y2 = 430 - 84 * Math.cos(a)
+              return <line key={v} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#16222E" strokeWidth={2} />
+            })}
+            <g transform={`rotate(${needleAngle} 200 430)`}>
+              <line x1={200} y1={430} x2={200} y2={362} stroke="#B93327" strokeWidth={4} strokeLinecap="round" />
+            </g>
+            <circle cx={200} cy={430} r={7} fill="#16222E" />
+            <text x={200} y={478} textAnchor="middle" fontSize={26} fontWeight={800} fill="#16222E">
+              {map}
+            </text>
+            <text x={200} y={500} textAnchor="middle" fontSize={13} fill="#6B7684">
+              MAP · mmHg
+            </text>
+          </g>
+
+          {/* Arterial pressure wave */}
+          <text x={670} y={330} textAnchor="middle" fontSize={16} fontWeight={700} fill="#16222E">
+            The pressure wave of each heartbeat
+          </text>
+          <text x={670} y={352} textAnchor="middle" fontSize={14} fill="#6B7684">
+            steep rise = systole · dip = dicrotic notch · trough = diastole
+          </text>
+          <path d={BP_WAVE} fill="none" stroke="#D64545" strokeWidth={3.5} strokeLinecap="round" />
+          <circle r={8} fill="#B93327" stroke="#fff" strokeWidth={2}>
+            {playing && <animateMotion dur={`${(beatDur * 2).toFixed(2)}s`} repeatCount="indefinite" path={BP_WAVE} />}
+          </circle>
+        </svg>
+      }
+      panel={
+        <div>
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-sand p-1" role="tablist" aria-label="Activity level">
+            {(
+              [
+                ['rest', 'Resting'],
+                ['exercise', 'Exercising'],
+              ] as const
+            ).map(([a, label]) => (
+              <button
+                key={a}
+                onClick={() => setActivityAndRadius(a)}
+                aria-pressed={activity === a}
+                className={`rounded-full px-2 py-2 font-display text-[0.9rem] font-bold transition-colors ${
+                  activity === a ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-700 hover:text-ink-950'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6">
+            <div className="flex items-baseline justify-between font-mono text-xs text-ink-500">
+              <span>Arteriole radius (smooth muscle)</span>
+              <span className="font-bold text-ink-950">{Math.round(radius * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min={70}
+              max={140}
+              step={5}
+              value={Math.round(radius * 100)}
+              onChange={(e) => setRadius(Number(e.target.value) / 100)}
+              className="mt-2 w-full accent-primary-600"
+              aria-label="Arteriole radius as a percentage of resting radius"
+            />
+            <div className="flex justify-between font-mono text-[0.68rem] text-ink-400">
+              <span>70% · constricted</span>
+              <span>140% · dilated</span>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <p className="text-center font-mono text-[0.68rem] uppercase tracking-[0.14em] text-ink-400">
+              Blood pressure
+            </p>
+            <p className="mt-1 text-center font-display text-4xl font-extrabold tracking-tight text-ink-950">
+              {sbp}
+              <span className="text-2xl text-ink-400"> / </span>
+              {dbp}
+              <span className="ml-2 text-base font-bold text-ink-500">mmHg</span>
+            </p>
+            <p className="mt-1 text-center text-sm text-ink-700">
+              systolic / diastolic · mean arterial pressure {map} mmHg
+            </p>
+            <div className="mt-3 flex justify-center">
+              <Chip tone={status.tone}>{status.label}</Chip>
+            </div>
+          </div>
+
+          <dl className="mt-5 space-y-2.5 text-sm">
+            {[
+              ['Heart rate', `${hr} beats/min`],
+              ['Stroke volume', `${sv} mL per beat`],
+              ['Cardiac output', `${co.toFixed(1)} L/min`],
+              ['Resistance (TPR)', `${tpr.toFixed(2)}× resting`],
+            ].map(([k, v]) => (
+              <div key={k} className="flex gap-3">
+                <dt className="w-36 shrink-0 font-display font-bold text-ink-950">{k}</dt>
+                <dd className="font-mono text-ink-700">{v}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label="Mean arterial pressure" value={Math.round((Math.min(map, 200) / 200) * 100)} tone="bg-arterial-500" />
+            <Meter label="Blood flow (cardiac output)" value={Math.round((co / 17) * 100)} />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause pulse' : '▶ Play pulse'}
+              </Button>
+            </div>
+            <p className="mt-3 font-mono text-sm leading-relaxed text-ink-800">
+              MAP = CO × TPR = {co.toFixed(1)} × {tpr.toFixed(2)} × 19 ≈ {map} mmHg
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-700">
+              The orange bands are the smooth muscle in the arteriole wall — when it contracts,
+              the lumen narrows. Narrow the vessel by a third and resistance rises five-fold —
+              that is why the arterioles, not the heart, are the body&rsquo;s main pressure
+              control. Exercise raises output four-fold, yet pressure climbs only a little: the
+              muscle vessels dilate and let the extra flow through.
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
 /* ===================== Muscles: how movement is made ===================== */
 
 type MuscleStepId = 0 | 1 | 2 | 3
@@ -4669,6 +4899,340 @@ export function SkeletonLab({ bare = false }: { bare?: boolean }) {
           </div>
         </div>
       }
+    />
+  )
+}
+
+/* ============================ Reading an ECG ============================ */
+
+/*
+ * EcgLab — a live ECG monitor. A glowing dot travels a schematic Lead II
+ * trace on pink grid paper, drawing the trace as it goes; the wave under
+ * the dot is named and explained in the panel, and the wave stepper lets
+ * you jump straight to any part of the beat. The rate control changes how
+ * fast the sweep travels — on real ECG paper (25 mm/s) the beats would
+ * squeeze together instead, which the note under the controls says.
+ */
+
+const ECG_BASE_Y = 180
+const ECG_BEAT = 400
+const ECG_START_X = 50
+const ECG_END_X = 950
+
+type EcgWaveId = 'P' | 'PR' | 'QRS' | 'ST' | 'T' | 'rest'
+
+const ECG_WAVES: Record<
+  EcgWaveId,
+  { name: string; short: string; mid: number; dur: string; doing: string; text: string }
+> = {
+  P: {
+    name: 'P wave',
+    short: 'P wave',
+    mid: 0.215,
+    dur: '≈ 0.08 s',
+    doing: 'Atria contracting',
+    text: 'The atria depolarize: the spark from the SA node spreads across both atria and they contract, topping up the ventricles. The wave is small and rounded because the atrial walls are thin — a little muscle makes a little signal.',
+  },
+  PR: {
+    name: 'PR segment',
+    short: 'PR segment',
+    mid: 0.34,
+    dur: 'PR interval 0.12–0.20 s',
+    doing: 'Ventricles filling',
+    text: 'A flat line — the impulse is being held at the AV node. The PR interval, from the start of P to the start of QRS, is normally 0.12–0.20 seconds: the deliberate pause that lets the ventricles finish filling before they contract.',
+  },
+  QRS: {
+    name: 'QRS complex',
+    short: 'QRS complex',
+    mid: 0.47,
+    dur: '< 0.12 s',
+    doing: 'Ventricles contracting',
+    text: 'The ventricles depolarize — the tall, sharp spike. Q is the first small dip down, R the tall peak, S the dip after it. The ventricles begin to contract as the R wave peaks. It is tall because the ventricles are the thickest muscle in the heart.',
+  },
+  ST: {
+    name: 'ST segment',
+    short: 'ST segment',
+    mid: 0.5825,
+    dur: 'flat on the baseline',
+    doing: 'Ventricles ejecting',
+    text: 'Another flat line — the ventricles are fully depolarized and squeezing blood out. It should sit on the baseline: a raised or lowered ST segment is one of the classic warning signs clinicians look for.',
+  },
+  T: {
+    name: 'T wave',
+    short: 'T wave',
+    mid: 0.705,
+    dur: '≈ 0.16 s',
+    doing: 'Ventricles resetting',
+    text: 'The ventricles repolarize — resetting their electrical state so they can fire again. It is broad and rounded, and points the same way as the R wave. (The atria repolarize too, but their signal hides inside the much bigger QRS.)',
+  },
+  rest: {
+    name: 'Between beats',
+    short: 'Diastole',
+    mid: 0.9,
+    dur: 'the heart rests',
+    doing: 'Heart resting · refilling',
+    text: 'Diastole — the flat line between one T wave and the next P wave. The chambers are quiet and refilling, and the next spark is already building at the SA node.',
+  },
+}
+
+const ECG_WAVE_ORDER: EcgWaveId[] = ['P', 'PR', 'QRS', 'ST', 'T']
+
+function waveFor(local: number): EcgWaveId {
+  if (local < 0.15 || local >= 0.785) return 'rest'
+  if (local < 0.28) return 'P'
+  if (local < 0.4) return 'PR'
+  if (local < 0.54) return 'QRS'
+  if (local < 0.625) return 'ST'
+  return 'T'
+}
+
+/* One beat, drawn from x0 to x0 + 400. P and T are smooth bumps; the QRS
+ * is sharp corners — a small q dip, a tall R spike, a deep S dip. */
+function beatSeg(x0: number) {
+  return (
+    `L ${x0 + 60} ${ECG_BASE_Y} ` +
+    `C ${x0 + 70} ${ECG_BASE_Y} ${x0 + 74} 156 ${x0 + 86} 156 ` +
+    `C ${x0 + 98} 156 ${x0 + 102} ${ECG_BASE_Y} ${x0 + 112} ${ECG_BASE_Y} ` +
+    `L ${x0 + 160} ${ECG_BASE_Y} ` +
+    `L ${x0 + 168} 192 L ${x0 + 176} 192 ` +
+    `L ${x0 + 184} 62 L ${x0 + 192} 62 ` +
+    `L ${x0 + 200} 206 L ${x0 + 208} 206 ` +
+    `L ${x0 + 216} ${ECG_BASE_Y} ` +
+    `L ${x0 + 250} ${ECG_BASE_Y} ` +
+    `C ${x0 + 262} ${ECG_BASE_Y} ${x0 + 268} 148 ${x0 + 282} 148 ` +
+    `C ${x0 + 296} 148 ${x0 + 302} ${ECG_BASE_Y} ${x0 + 314} ${ECG_BASE_Y} ` +
+    `L ${x0 + 400} ${ECG_BASE_Y}`
+  )
+}
+
+function segD(x0: number, id: EcgWaveId) {
+  switch (id) {
+    case 'P':
+      return `M ${x0 + 60} ${ECG_BASE_Y} C ${x0 + 70} ${ECG_BASE_Y} ${x0 + 74} 156 ${x0 + 86} 156 C ${x0 + 98} 156 ${x0 + 102} ${ECG_BASE_Y} ${x0 + 112} ${ECG_BASE_Y}`
+    case 'PR':
+      return `M ${x0 + 112} ${ECG_BASE_Y} L ${x0 + 160} ${ECG_BASE_Y}`
+    case 'QRS':
+      return `M ${x0 + 160} ${ECG_BASE_Y} L ${x0 + 168} 192 L ${x0 + 176} 192 L ${x0 + 184} 62 L ${x0 + 192} 62 L ${x0 + 200} 206 L ${x0 + 208} 206 L ${x0 + 216} ${ECG_BASE_Y}`
+    case 'ST':
+      return `M ${x0 + 216} ${ECG_BASE_Y} L ${x0 + 250} ${ECG_BASE_Y}`
+    case 'T':
+      return `M ${x0 + 250} ${ECG_BASE_Y} C ${x0 + 262} ${ECG_BASE_Y} ${x0 + 268} 148 ${x0 + 282} 148 C ${x0 + 296} 148 ${x0 + 302} ${ECG_BASE_Y} ${x0 + 314} ${ECG_BASE_Y}`
+    default:
+      return ''
+  }
+}
+
+const ECG_TRACE_D = `M ${ECG_START_X} ${ECG_BASE_Y} ${beatSeg(ECG_START_X)} ${beatSeg(ECG_START_X + ECG_BEAT)} L ${ECG_END_X} ${ECG_BASE_Y}`
+
+export function EcgLab({ bare = false }: { bare?: boolean }) {
+  const [playing, setPlaying] = useState(
+    () =>
+      typeof window === 'undefined' ||
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+  const [bpm, setBpm] = useState(72)
+  const [wave, setWave] = useState<EcgWaveId>('rest')
+  const [beat, setBeat] = useState(0)
+  const traceRef = useRef<SVGPathElement>(null)
+  const sweepRef = useRef<SVGPathElement>(null)
+  const dotRef = useRef<SVGCircleElement>(null)
+  const glowRef = useRef<SVGCircleElement>(null)
+  const cursorRef = useRef<SVGLineElement>(null)
+  const t0Ref = useRef(0)
+  const totalLenRef = useRef(0)
+  const bpmRef = useRef(bpm)
+
+  const info = ECG_WAVES[wave]
+  const beatDur = 60 / bpm
+  const cycle = 2.25 * beatDur
+  const rr = 60 / bpm
+
+  /* Paint one frame of the sweep: dot + cursor on the trace, the trace
+   * drawn up to the dot, and the wave under the dot named. Positions are
+   * written straight to the DOM so the animation never re-renders React. */
+  const paint = (frac: number) => {
+    const path = traceRef.current
+    const sweep = sweepRef.current
+    const dot = dotRef.current
+    const glow = glowRef.current
+    const cursor = cursorRef.current
+    if (!path || !sweep || !dot || !glow || !cursor) return
+    const len = totalLenRef.current || (totalLenRef.current = path.getTotalLength())
+    const pt = path.getPointAtLength(frac * len)
+    dot.setAttribute('cx', String(pt.x))
+    dot.setAttribute('cy', String(pt.y))
+    glow.setAttribute('cx', String(pt.x))
+    glow.setAttribute('cy', String(pt.y))
+    cursor.setAttribute('x1', String(pt.x))
+    cursor.setAttribute('x2', String(pt.x))
+    sweep.style.strokeDashoffset = String(len * (1 - frac))
+    const local = (((pt.x - ECG_START_X) % ECG_BEAT) + ECG_BEAT) % ECG_BEAT / ECG_BEAT
+    setWave((prev) => {
+      const w = waveFor(local)
+      return prev === w ? prev : w
+    })
+    const b = Math.min(1, Math.floor((pt.x - ECG_START_X) / ECG_BEAT))
+    setBeat((prev) => (prev === b ? prev : b))
+  }
+
+  useEffect(() => {
+    bpmRef.current = bpm
+  }, [bpm])
+
+  useEffect(() => {
+    const path = traceRef.current
+    const sweep = sweepRef.current
+    if (!path || !sweep) return
+    const len = path.getTotalLength()
+    totalLenRef.current = len
+    sweep.style.strokeDasharray = String(len)
+    sweep.style.strokeDashoffset = String(len)
+    t0Ref.current = performance.now()
+    paint(0.07)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!playing) return
+    let raf = 0
+    const tick = (now: number) => {
+      const c = 2.25 * (60 / bpmRef.current)
+      const elapsed = (now - t0Ref.current) / 1000
+      paint((elapsed % c) / c)
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing])
+
+  const setRate = (v: number) => {
+    setBpm(v)
+    t0Ref.current = performance.now()
+  }
+
+  const jumpTo = (id: EcgWaveId) => {
+    const w = ECG_WAVES[id]
+    const targetX = ECG_START_X + w.mid * ECG_BEAT
+    const frac = (targetX - ECG_START_X) / (ECG_END_X - ECG_START_X)
+    t0Ref.current = performance.now() - frac * cycle * 1000
+    setPlaying(false)
+    paint(frac)
+  }
+
+  return (
+    <LabShell
+      diagram={
+        <div>
+          <svg viewBox="0 0 1000 300" className="w-full" role="img" aria-label="Animated ECG trace: a glowing dot travels the P wave, QRS complex and T wave of a heartbeat">
+            <defs>
+              <pattern id="ecgMinor" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M10 0H0V10" fill="none" stroke="#f2d8d3" strokeWidth="1" />
+              </pattern>
+              <pattern id="ecgMajor" width="50" height="50" patternUnits="userSpaceOnUse">
+                <path d="M50 0H0V50" fill="none" stroke="#eec4bb" strokeWidth="1.5" />
+              </pattern>
+            </defs>
+            <rect x="0" y="0" width="1000" height="300" fill="#fdf6f3" />
+            <rect x="0" y="0" width="1000" height="300" fill="url(#ecgMinor)" />
+            <rect x="0" y="0" width="1000" height="300" fill="url(#ecgMajor)" />
+
+            {/* Faint full trace, always visible */}
+            <path ref={traceRef} d={ECG_TRACE_D} fill="none" stroke="#16222E" strokeWidth={3} opacity={0.22} strokeLinecap="round" strokeLinejoin="round" />
+            {/* Bright sweep, drawn up to the dot */}
+            <path ref={sweepRef} d={ECG_TRACE_D} fill="none" stroke="#D64545" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" />
+            {/* The wave under the dot, highlighted */}
+            {wave !== 'rest' && (
+              <path d={segD(ECG_START_X + beat * ECG_BEAT, wave)} fill="none" stroke="#0E7C86" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+            )}
+            <line ref={cursorRef} x1={ECG_START_X} x2={ECG_START_X} y1={8} y2={292} stroke="#0E7C86" strokeWidth={1.5} opacity={0.35} />
+            <circle ref={glowRef} r={15} fill="#F2C14E" opacity={0.25} />
+            <circle ref={dotRef} r={7} fill="#F2C14E" stroke="#fff" strokeWidth={2.5} />
+
+            {/* Wave labels on the first beat */}
+            <text x={136} y={138} textAnchor="middle" fontSize={17} fontWeight={700} fill="#43536A">P</text>
+            <text x={218} y={212} textAnchor="middle" fontSize={17} fontWeight={700} fill="#43536A">Q</text>
+            <text x={234} y={48} textAnchor="middle" fontSize={17} fontWeight={700} fill="#43536A">R</text>
+            <text x={254} y={224} textAnchor="middle" fontSize={17} fontWeight={700} fill="#43536A">S</text>
+            <text x={332} y={130} textAnchor="middle" fontSize={17} fontWeight={700} fill="#43536A">T</text>
+            <text x={70} y={30} fontSize={15} fill="#6B7684">Lead II · schematic trace on ECG grid paper</text>
+          </svg>
+
+          {/* Wave stepper */}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {ECG_WAVE_ORDER.map((id) => (
+              <button
+                key={id}
+                onClick={() => jumpTo(id)}
+                aria-pressed={wave === id}
+                className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                  wave === id ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface hover:border-primary-600/40'
+                }`}
+              >
+                <span className="block font-mono text-[0.65rem] uppercase tracking-wide text-ink-400">{ECG_WAVES[id].dur}</span>
+                <span className="mt-0.5 block font-display text-[0.9rem] font-bold leading-tight text-ink-950">{ECG_WAVES[id].short}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+      panel={
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+            {wave === 'rest' ? 'Between beats · diastole' : `${info.short} · ${info.dur}`}
+          </p>
+          <h3 className="mt-1.5 font-display text-2xl font-extrabold leading-tight tracking-tight text-ink-950">{info.name}</h3>
+          <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-700">{info.text}</p>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip>{info.doing}</Chip>
+            <Chip>Lead II · the classic teaching lead</Chip>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            <Meter label={`Heart rate · ${bpm} beats/min`} value={Math.round((bpm / 160) * 100)} tone="bg-arterial-500" />
+            <Meter label={`R–R interval · ${rr.toFixed(2)} s between beats`} value={Math.min(100, Math.round((rr / 1.5) * 100))} />
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+                {playing ? '❚❚ Pause trace' : '▶ Play trace'}
+              </Button>
+              {(
+                [
+                  [60, 'Rest · 60'],
+                  [100, 'Brisk walk · 100'],
+                  [140, 'Running · 140'],
+                ] as const
+              ).map(([v, label]) => (
+                <Button key={v} size="sm" variant={bpm === v ? 'primary' : 'secondary'} onClick={() => setRate(v)}>
+                  {label}
+                </Button>
+              ))}
+            </div>
+            <label className="mt-4 block">
+              <span className="font-mono text-xs text-ink-500">Heart rate — {bpm} beats per minute</span>
+              <input
+                type="range"
+                min={40}
+                max={160}
+                step={1}
+                value={bpm}
+                onChange={(e) => setRate(Number(e.target.value))}
+                className="mt-1.5 w-full accent-[#0E7C86]"
+                aria-label="Heart rate in beats per minute"
+              />
+            </label>
+            <p className="mt-3 text-sm leading-relaxed text-ink-700">
+              The trace is drawn to a fixed width so the waves stay readable — changing the rate
+              changes how fast the sweep travels. On real ECG paper (25 mm/s) the beats would
+              squeeze together instead, and one small square would be 0.04 seconds.
+            </p>
+          </div>
+        </div>
+      }
+      bare={bare}
     />
   )
 }
