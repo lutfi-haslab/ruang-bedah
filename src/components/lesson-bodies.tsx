@@ -7,6 +7,7 @@ import AirwayLabCard from './AirwayLabCard'
 import BloodPressureLabCard from './BloodPressureLabCard'
 import BrainLabCard from './BrainLabCard'
 import EcgLabCard from './EcgLabCard'
+import GasExchangeLabCard from './GasExchangeLabCard'
 import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
 import MuscleLabCard from './MuscleLabCard'
@@ -2446,6 +2447,164 @@ export function EcgLessonBody() {
           QRS is the ventricles depolarizing, T is the ventricles resetting — and the intervals
           between them are the timing of the whole heartbeat. Read the waves, and you are reading
           the conduction system the previous lesson traced.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* --------------------- Breathing and gas exchange --------------------- */
+
+export function GasExchangeLessonBody() {
+  return (
+    <BodyShell
+      lab={<GasExchangeLabCard />}
+      chapterTitle="One Gradient, One Very Thin Wall"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Breathing moves air in and out of the lungs, but breathing itself does not put
+              oxygen into the blood. That last step — the one this lesson is about — happens
+              silently, in about <strong>300 million tiny sacs</strong> called{' '}
+              <strong>alveoli</strong>, each roughly 0.2 mm across. A red blood cell spends
+              about <strong>0.75 seconds</strong> in the capillary wrapped around one alveolus,
+              and in that three-quarter of a second it picks up a full load of oxygen and drops
+              off its carbon dioxide. No pump pushes the gases across, and no valve opens for
+              them. They cross because of a difference in pressure — and because the wall
+              between them is almost nothing.
+            </p>
+            <p>
+              The pressure that matters is the <strong>partial pressure</strong> of each gas:
+              the share of the total air pressure that one gas contributes. Air in an alveolus
+              holds oxygen at about <strong>104 mmHg</strong>; the venous blood arriving at the
+              capillary holds oxygen at only <strong>40 mmHg</strong>. Gases always diffuse from
+              high partial pressure to low, so oxygen flows across — and it keeps flowing until
+              the two sides match, which is why the arterial blood leaving the lung sits at
+              about <strong>100 mmHg</strong>, nearly equal to the air it came from. Carbon
+              dioxide runs the same rule in reverse: venous blood arrives at{' '}
+              <strong>46 mmHg</strong>, alveolar air sits at <strong>40 mmHg</strong>, so CO₂
+              leaves the blood and rides out on the next breath.
+            </p>
+            <p>
+              What makes the crossing fast enough is the <strong>blood–air barrier</strong>:
+              about <strong>0.3 µm</strong> thick, a sandwich of three layers fused into one —
+              the flat <strong>type I pneumocyte</strong> lining the alveolus, a shared{' '}
+              <strong>basal lamina</strong>, and the <strong>capillary endothelium</strong>. A
+              type I cell is so thin it is mostly nucleus and a wisp of cytoplasm, and these
+              cells cover about 95% of the alveolar surface. Diffusion across 0.3 µm takes
+              roughly a quarter of a second, which is why the blood is fully equilibrated long
+              before its 0.75-second transit ends — and why, even in hard exercise, when the
+              transit shortens to about 0.3 seconds, the blood still leaves loaded. The lab
+              above lets you run that race faster and watch the cells stay red.
+            </p>
+            <p>
+              Once inside the blood, oxygen does not float free. Almost all of it binds to{' '}
+              <strong>haemoglobin</strong> inside the red blood cells — about 270 million
+              haemoglobin molecules per cell, four oxygen molecules each — and arterial blood
+              leaves the lung about <strong>98% saturated</strong>. At the tissues the rule
+              reverses: working muscle pulls the local oxygen pressure down to 20–40 mmHg, the
+              gradient flips, and haemoglobin unloads. Carbon dioxide travels the other way in
+              three forms: most of it — about 70% — as <strong>bicarbonate ions</strong> in the
+              plasma (CO₂ + water ⇌ carbonic acid ⇌ bicarbonate + hydrogen ion, sped up by the
+              enzyme carbonic anhydrase inside red cells), about 20% bound to haemoglobin as{' '}
+              <strong>carbaminohaemoglobin</strong>, and the rest dissolved in the plasma. At
+              the lung the reactions run backwards, CO₂ is rebuilt as a gas, and it diffuses
+              out — about twenty times faster than oxygen, because it dissolves so much more
+              readily.
+            </p>
+            <p>
+              Two details keep the whole system from collapsing. The first is{' '}
+              <strong>surfactant</strong>, a soapy film made by the{' '}
+              <strong>type II pneumocytes</strong> — the plump neighbours of the flat type I
+              cells, which also divide to replace them when they are damaged. Surfactant lowers
+              surface tension inside the alveolus; without it, the smallest sacs would collapse
+              shut under their own surface tension (Laplace&rsquo;s law: the smaller the bubble,
+              the higher the pressure needed to keep it open). Premature babies, born before
+              surfactant production starts, and adults with acute respiratory distress syndrome
+              both suffer the same failure — alveoli that will not stay open. The second is
+              matching: each alveolus must be both <strong>ventilated</strong> (reached by air)
+              and <strong>perfused</strong> (reached by blood). The lung keeps ventilation and
+              perfusion roughly matched — a V/Q ratio near 0.8 — and when they fall out of step,
+              as in pneumonia or a pulmonary embolism, blood passes through without being loaded
+              and arterial oxygen falls.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Gas', 'Alveolar air', 'Blood — arriving → leaving']}
+              rows={[
+                ['Oxygen (PO₂)', '104 mmHg', '40 mmHg in → ~100 mmHg out'],
+                ['Carbon dioxide (PCO₂)', '40 mmHg', '46 mmHg in → 40 mmHg out'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Partial pressure" latin="pressio partialis">
+              The pressure one gas contributes to a mixture, in proportion to its share of the
+              molecules. Oxygen is about 21% of air, so at sea level (760 mmHg) its partial
+              pressure is about 160 mmHg in dry air — and 104 mmHg inside the alveolus, where
+              water vapour and carbon dioxide take their share. Gases diffuse from high to low
+              partial pressure, never the other way.
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-gas-exchange-cross.png"
+              alt="Labelled cross-section of an alveolus with capillaries: oxygen diffusing from alveolar air through the blood–air barrier into an oxygenated red blood cell, carbon dioxide diffusing out, with type I and type II pneumocytes, surfactant, basal lamina and an alveolar macrophage"
+              caption="Real anatomy reference — a labelled cross-section of one alveolus and its capillaries: oxygen crossing the blood–air barrier (type I pneumocyte + basal lamina + capillary endothelium) into an oxygenated red blood cell, carbon dioxide crossing back out, with a surfactant-making type II pneumocyte and an alveolar macrophage on patrol. The lab above animates the same crossing, one molecule at a time."
+              credit="Delmalani18 · CC BY-SA 4.0 · via Wikimedia Commons — rasterised to PNG for the lesson page"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Alveolus', latin: 'alveolus pulmonis', back: 'One air sac, about 0.2 mm across. Roughly 300 million of them give the lungs about 70 m² of exchange surface — the whole gas trade happens here, not in the big airways.' },
+        { term: 'Blood–air barrier', latin: 'membrana alveolocapillaris', back: 'The ~0.3 µm sandwich oxygen and carbon dioxide diffuse across: a flat type I pneumocyte, a shared basal lamina, and the capillary endothelium, fused into one wall.' },
+        { term: 'Haemoglobin', latin: 'haemoglobinum', back: 'The protein inside red blood cells that carries oxygen: about 270 million molecules per cell, four O₂ each. Arterial blood leaves the lung ~98% saturated; at the tissues the gradient flips and it unloads.' },
+        { term: 'Surfactant', latin: 'surfactans', back: 'A soapy film made by type II pneumocytes that lowers surface tension inside the alveolus and keeps the smallest sacs from collapsing shut. Missing in premature babies and in ARDS.' },
+      ]}
+      questions={[
+        {
+          q: 'What pushes oxygen from the alveolus into the blood?',
+          options: [
+            'The diaphragm squeezes it across',
+            'The partial-pressure gradient: 104 mmHg in the air, 40 mmHg in the blood',
+            'Haemoglobin pulls it through the wall',
+            'The capillary valves open one way',
+          ],
+          answer: 1,
+          why: 'Diffusion follows the partial-pressure gradient. Oxygen at 104 mmHg in alveolar air flows toward 40 mmHg in venous blood until the two sides nearly match — blood leaves at about 100 mmHg.',
+        },
+        {
+          q: 'How thick is the blood–air barrier?',
+          options: [
+            'About 0.3 µm — three cell layers fused into one',
+            'About 3 µm',
+            'About 30 µm',
+            'About 300 µm, like a sheet of paper',
+          ],
+          answer: 0,
+          why: 'About 0.3 µm: a type I pneumocyte, a basal lamina, and the capillary endothelium. Diffusion across it takes roughly a quarter of a second — faster than the blood’s 0.75-second transit.',
+        },
+        {
+          q: 'Most of the carbon dioxide in the blood travels as…',
+          options: [
+            'Gas bubbles in the plasma',
+            'Carbaminohaemoglobin alone',
+            'Bicarbonate ions (HCO₃⁻) in the plasma',
+            'Dissolved in the red cells’ nuclei',
+          ],
+          answer: 2,
+          why: 'About 70% of CO₂ travels as bicarbonate ions in the plasma, made inside red cells by carbonic anhydrase. At the lung the reaction runs backwards, CO₂ is rebuilt as a gas, and it diffuses out.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The whole exchange is one gradient and one very thin wall: 104 mmHg of oxygen on the
+          air side, 40 on the blood side, and 0.3 µm of tissue between them. That is why a red
+          blood cell can be fully loaded in a quarter of a second — and why anything that
+          thickens the wall, or floods the alveolus, starves the blood of oxygen.
         </Callout>
       }
     />

@@ -53,6 +53,15 @@ Reuse (2026-11-25): the Reading an ECG lesson's 3D explorer (`EcgModel3D.tsx`)
 reuses this same mesh with ECG-mapped labels (SA node, atria → P wave,
 ventricles → QRS) — no new model file, no new SOURCES entry needed.
 
+Reuse (2026-11-26): the Breathing and Gas Exchange lesson's 3D explorer
+(`GasExchangeModel3D.tsx`) reuses the lungs mesh with gas-exchange-mapped
+labels (alveoli, capillary mesh, hilum) — no new model file. No alveolus
+STL exists on Wikimedia Commons (searched `filetype:stl alveolus/alveoli/
+bronchial tree/lung/respiratory/pulmonary` — 0 hits each, verified
+2026-11-26), and an alveolus is ~0.2 mm, so no standalone alveolus mesh
+could be labelled usefully at this scale anyway; the caption says so, and
+the 2D lab zooms into a single alveolus instead.
+
 Like the reference images, this binary is deployed to Cloudflare Pages but
 is not part of the GitHub snapshot push (text only).
 

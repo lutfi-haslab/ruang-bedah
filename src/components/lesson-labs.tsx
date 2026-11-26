@@ -5236,3 +5236,261 @@ export function EcgLab({ bare = false }: { bare?: boolean }) {
     />
   )
 }
+
+/* ====================== Breathing & gas exchange ====================== */
+
+type GasStructureId = 'alveolus' | 'barrier' | 'capillary' | 'rbc' | 'surfactant'
+
+const GAS_STRUCTURES: Record<
+  GasStructureId,
+  { name: string; latin: string; blurb: string; dot: { x: number; y: number } }
+> = {
+  alveolus: {
+    name: 'Alveolus',
+    latin: 'alveolus pulmonis',
+    blurb:
+      'One air sac, about 0.2 mm across. You have roughly 300 million of them, and together they offer about 70 m² of surface for gas to cross — the whole trade happens here, not in the big airways.',
+    dot: { x: 215, y: 380 },
+  },
+  barrier: {
+    name: 'Blood–air barrier',
+    latin: 'membrana alveolocapillaris',
+    blurb:
+      'The thinnest wall in the body — about 0.3 µm. Three layers fused into one: the flat type I pneumocyte, a shared basal lamina, and the capillary endothelium. Oxygen and carbon dioxide cross it by diffusion alone.',
+    dot: { x: 508, y: 250 },
+  },
+  capillary: {
+    name: 'Pulmonary capillary',
+    latin: 'vas capillare pulmonale',
+    blurb:
+      'A tube barely wider than a red blood cell, wrapped around the alveolus like a net. Blood spends about 0.75 seconds inside it at rest — and that is already three times longer than diffusion needs.',
+    dot: { x: 640, y: 120 },
+  },
+  rbc: {
+    name: 'Red blood cell',
+    latin: 'erythrocytus',
+    blurb:
+      'Each cell carries about 270 million haemoglobin molecules, and each haemoglobin binds four oxygen molecules. Watch the cells change colour as they pass the alveolus: blue in, red out — oxygen loaded, carbon dioxide dropped off.',
+    dot: { x: 655, y: 445 },
+  },
+  surfactant: {
+    name: 'Surfactant',
+    latin: 'surfactans',
+    blurb:
+      'A soapy film made by type II pneumocytes that lines the inside of the alveolus and lowers surface tension. Without it the smallest sacs would collapse shut — the problem behind respiratory distress in premature babies.',
+    dot: { x: 235, y: 165 },
+  },
+}
+
+const GAS_ORDER: GasStructureId[] = ['alveolus', 'barrier', 'capillary', 'rbc', 'surfactant']
+
+/* The capillary hugs the right side of the alveolus: blood enters blue at
+ * the top, leaves red at the bottom. The two halves are separate paths so
+ * the cells can change colour at the midpoint, where the oxygen loads. */
+const CAP_ENTRY = 'M 720 30 C 600 110, 545 190, 545 280'
+const CAP_EXIT = 'M 545 280 C 545 370, 600 450, 720 530'
+
+/* Oxygen crosses from air to blood; carbon dioxide crosses back. */
+const O2_PATHS = [
+  'M 400 195 C 470 205, 512 225, 546 242',
+  'M 412 280 C 480 280, 516 280, 548 280',
+  'M 400 362 C 470 352, 512 332, 546 316',
+]
+const CO2_PATHS = [
+  'M 546 232 C 500 218, 458 204, 398 188',
+  'M 548 292 C 490 302, 448 312, 400 322',
+  'M 546 338 C 500 352, 458 364, 408 376',
+]
+
+const BREATH_IN = 'M 205 78 C 235 120, 255 165, 268 210'
+const BREATH_OUT = 'M 268 210 C 255 165, 235 120, 205 78'
+
+export function GasExchangeLab({ bare = false }: { bare?: boolean }) {
+  const [playing, setPlaying] = useState(true)
+  const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale')
+  const [rate, setRate] = useState(12)
+  const [selected, setSelected] = useState<GasStructureId>('barrier')
+  const info = GAS_STRUCTURES[selected]
+  const halfCycleMs = 30000 / rate
+  /* Blood rushes faster when you breathe faster: one pass through the
+   * capillary takes ~7.5 s at rest, ~3 s while running. Diffusion is
+   * quicker still — about 2 s and 1 s on the same scale — so the blood
+   * always leaves fully loaded. */
+  const flowDur = 90 / rate
+  const diffuseDur = flowDur / 3.2
+  const transit = (0.75 * 12) / rate
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setInterval(() => setPhase((p) => (p === 'inhale' ? 'exhale' : 'inhale')), halfCycleMs)
+    return () => clearInterval(t)
+  }, [playing, halfCycleMs])
+
+  const gasDot = (path: string, begin: number, fill: string, dur: number) => (
+    <circle r={7} fill={fill} stroke="#fff" strokeWidth={2} opacity={0.95}>
+      {playing && (
+        <animateMotion dur={`${dur}s`} begin={`${begin}s`} repeatCount="indefinite" path={path} />
+      )}
+    </circle>
+  )
+  const rbc = (path: string, begin: number, fill: string) => (
+    <ellipse rx={19} ry={12} fill={fill} stroke="#fff" strokeWidth={2} opacity={0.95}>
+      {playing && (
+        <animateMotion dur={`${flowDur}s`} begin={`${begin}s`} repeatCount="indefinite" path={path} rotate="auto" />
+      )}
+    </ellipse>
+  )
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of gas exchange: oxygen diffuses from an alveolus into a capillary while carbon dioxide diffuses out">
+          {/* Bronchiole stub feeding the alveolus */}
+          <path d="M150 30 C170 55, 190 75, 205 78 L 268 210" fill="none" stroke="#B9D6D8" strokeWidth={34} strokeLinecap="round" />
+          <path d="M150 30 C170 55, 190 75, 205 78 L 268 210" fill="none" stroke="#0E7C86" strokeWidth={3} opacity={0.45} />
+
+          {/* The alveolus — a cluster of sacs that swells with each breath */}
+          <g className="svg-transition" style={{ transform: phase === 'inhale' ? 'scale(1.03)' : 'scale(0.985)', transformOrigin: '300px 290px' }}>
+            <circle cx={150} cy={185} r={72} fill="#F6D9CF" stroke="#B6544A" strokeWidth={3} />
+            <circle cx={185} cy={405} r={76} fill="#F6D9CF" stroke="#B6544A" strokeWidth={3} />
+            <circle cx={425} cy={150} r={62} fill="#F6D9CF" stroke="#B6544A" strokeWidth={3} />
+            <ellipse cx={300} cy={290} rx={210} ry={185} fill="#FBE7DF" stroke="#B6544A" strokeWidth={4} />
+            {/* Surfactant film shimmering on the inner wall */}
+            <ellipse cx={300} cy={290} rx={196} ry={171} fill="none" stroke="#0E7C86" strokeWidth={2} strokeDasharray="3 14" strokeLinecap="round" opacity={0.55} />
+          </g>
+
+          {/* The blood–air barrier: the thin line the gases must cross */}
+          <path d="M 505 108 C 540 170, 552 225, 552 290 C 552 355, 540 415, 505 472" fill="none" stroke="#43536A" strokeWidth={3} strokeDasharray="10 6" opacity={0.8} />
+
+          {/* The capillary, wrapped around the alveolus */}
+          <path d={`${CAP_ENTRY} ${CAP_EXIT}`} fill="none" stroke="#C98A7E" strokeWidth={80} strokeLinecap="round" />
+          <path d={`${CAP_ENTRY} ${CAP_EXIT}`} fill="none" stroke="#F2C9C0" strokeWidth={70} strokeLinecap="round" />
+
+          {/* Air moving in and out of the bronchiole */}
+          {gasDot(phase === 'inhale' ? BREATH_IN : BREATH_OUT, -0.2, '#0E7C86', halfCycleMs / 1000)}
+          {gasDot(phase === 'inhale' ? BREATH_IN : BREATH_OUT, -1.4, '#0E7C86', halfCycleMs / 1000)}
+
+          {/* Oxygen crossing into the blood */}
+          {O2_PATHS.map((p, i) => gasDot(p, -i * 0.7, '#D64545', diffuseDur))}
+          {O2_PATHS.map((p, i) => gasDot(p, -i * 0.7 - 1.1, '#D64545', diffuseDur))}
+          {/* Carbon dioxide crossing back into the air */}
+          {CO2_PATHS.map((p, i) => gasDot(p, -i * 0.8, '#5F83C2', diffuseDur))}
+          {CO2_PATHS.map((p, i) => gasDot(p, -i * 0.8 - 1.2, '#5F83C2', diffuseDur))}
+
+          {/* Red blood cells: blue in, red out */}
+          {rbc(CAP_ENTRY, -0.5, '#5F83C2')}
+          {rbc(CAP_ENTRY, -2.6, '#5F83C2')}
+          {rbc(CAP_ENTRY, -4.7, '#5F83C2')}
+          {rbc(CAP_EXIT, -0.5, '#D64545')}
+          {rbc(CAP_EXIT, -2.6, '#D64545')}
+          {rbc(CAP_EXIT, -4.7, '#D64545')}
+
+          {/* Labels */}
+          <text x={300} y={285} textAnchor="middle" fontSize={19} fontWeight={700} fill="#7A4A40">Alveolar air</text>
+          <text x={300} y={308} textAnchor="middle" fontSize={15} fill="#7A4A40">PO₂ 104 · PCO₂ 40 mmHg</text>
+          <text x={845} y={52} textAnchor="middle" fontSize={15} fontWeight={700} fill="#43536A">Blood in · PO₂ 40</text>
+          <text x={845} y={525} textAnchor="middle" fontSize={15} fontWeight={700} fill="#8C2B23">Blood out · PO₂ ~100</text>
+          <text x={572} y={200} textAnchor="middle" fontSize={15} fontWeight={700} fill="#D64545" style={{ paintOrder: 'stroke', stroke: '#F7F4EE', strokeWidth: 5 }}>O₂ →</text>
+          <text x={572} y={380} textAnchor="middle" fontSize={15} fontWeight={700} fill="#5F83C2" style={{ paintOrder: 'stroke', stroke: '#F7F4EE', strokeWidth: 5 }}>← CO₂</text>
+
+          {/* Structure hotspots */}
+          {GAS_ORDER.map((id) => {
+            const s = GAS_STRUCTURES[id]
+            const isActive = selected === id
+            return (
+              <g key={id} onClick={() => setSelected(id)} className="cursor-pointer">
+                {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={13} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+              </g>
+            )
+          })}
+        </svg>
+      }
+      panel={
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+                {playing ? 'Exchanging' : 'Paused'}
+              </p>
+              <h3 className="mt-1 font-display text-3xl font-extrabold capitalize tracking-tight text-ink-950">{phase}</h3>
+            </div>
+            <span className={`font-display text-lg font-extrabold ${phase === 'inhale' ? 'text-primary-700' : 'text-venous-600'}`}>
+              {phase === 'inhale' ? '▼ fresh air in' : '▲ CO₂ out'}
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-4">
+            <Meter label="O₂ in alveolar air · 104 mmHg" value={65} tone="bg-arterial-500" />
+            <Meter label="O₂ in blood leaving · ~100 mmHg" value={62} tone="bg-arterial-500" />
+            <Meter label="O₂ saturation · 98% of haemoglobin loaded" value={98} />
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip tone="open">PO₂ gradient 104 → 40 mmHg</Chip>
+            <Chip>Wall only 0.3 µm thick</Chip>
+            <Chip>Transit {transit.toFixed(2)} s · equilibrates in ~0.25 s</Chip>
+          </div>
+
+          <div className="mt-5">
+            <label htmlFor="gas-rate" className="flex items-baseline justify-between font-mono text-xs text-ink-500">
+              <span>Breathing rate</span>
+              <span>{rate} breaths / min</span>
+            </label>
+            <input
+              id="gas-rate"
+              type="range"
+              min={8}
+              max={32}
+              step={1}
+              value={rate}
+              onChange={(e) => setRate(e.currentTarget.valueAsNumber)}
+              className="mt-2 w-full accent-[#0E7C86]"
+            />
+            <p className="mt-1.5 text-sm text-ink-500">
+              At rest you move about 6 litres of air a minute; running, ten times that. Drag the
+              slider up and watch the blood rush faster — the cells still leave fully loaded.
+            </p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+              {playing ? '❚❚ Pause exchange' : '▶ Play exchange'}
+            </Button>
+            {(
+              [
+                [12, 'Rest · 12'],
+                [20, 'Brisk walk · 20'],
+                [30, 'Running · 30'],
+              ] as const
+            ).map(([v, label]) => (
+              <Button key={v} size="sm" variant={rate === v ? 'primary' : 'secondary'} onClick={() => setRate(v)}>
+                {label}
+              </Button>
+            ))}
+          </div>
+
+          <div className="mt-6 border-t border-line pt-5">
+            <div className="flex flex-wrap gap-1.5">
+              {GAS_ORDER.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => setSelected(id)}
+                  aria-pressed={selected === id}
+                  className={`rounded-full px-3 py-1.5 font-display text-[0.8rem] font-bold ring-1 ring-inset transition-colors ${
+                    selected === id ? 'bg-primary-600 text-white ring-primary-600' : 'bg-surface text-ink-700 ring-line hover:text-ink-950'
+                  }`}
+                >
+                  {GAS_STRUCTURES[id].name}
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 font-serif text-sm italic text-ink-500">{info.latin}</p>
+            <p className="mt-1 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}

@@ -90,7 +90,7 @@ export const CURRICULUM: Subject[] = [
       },
       {
         title: 'Respiratory Physiology',
-        lessons: [L('Breathing and Gas Exchange', 'Reading + motion graphic', 9)],
+        lessons: [L('Breathing and Gas Exchange', 'Interactive lab + reading', 9, 'available', '/lesson/breathing-and-gas-exchange')],
       },
       {
         title: 'Renal Physiology',
