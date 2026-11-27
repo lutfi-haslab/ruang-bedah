@@ -94,7 +94,7 @@ export const CURRICULUM: Subject[] = [
       },
       {
         title: 'Renal Physiology',
-        lessons: [L('The Nephron: Filtering the Blood', 'Reading + diagram', 9)],
+        lessons: [L('The Nephron: Filtering the Blood', 'Interactive lab + reading', 9, 'available', '/lesson/the-nephron-filtering-the-blood')],
       },
     ],
   },

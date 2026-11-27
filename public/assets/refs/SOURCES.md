@@ -37,3 +37,4 @@ the body).
 
 Note: like `heart-anterior.png`, these binary files are deployed to
 Cloudflare Pages but are not part of the GitHub snapshot push (text only).
+| ref-nephron-openstax.jpg | A nephron with secretion and reabsorption marked — glomerulus and Bowman's capsule, proximal tubule, loop of Henle, distal tubule, collecting duct | OpenStax College, Anatomy & Physiology — File:2618 Nephron Secretion Reabsorption.jpg (1138×2171, downscaled to 1000 px wide) | CC BY 3.0 |

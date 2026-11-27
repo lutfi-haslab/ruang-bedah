@@ -5494,3 +5494,339 @@ export function GasExchangeLab({ bare = false }: { bare?: boolean }) {
     />
   )
 }
+
+/* ============================ The nephron ============================ */
+
+type NephronStructureId =
+  | 'glomerulus'
+  | 'bowman'
+  | 'pct'
+  | 'loop'
+  | 'dct'
+  | 'collecting'
+  | 'capillary'
+
+const NEPHRON_STRUCTURES: Record<
+  NephronStructureId,
+  { name: string; latin: string; blurb: string; dot: { x: number; y: number } }
+> = {
+  glomerulus: {
+    name: 'Glomerulus',
+    latin: 'glomerulus renalis',
+    blurb:
+      'A tuft of fenestrated capillaries where filtration happens. Blood arrives at high pressure through the afferent arteriole; water and small solutes are pushed through the filtration membrane, while cells and plasma proteins stay in the blood.',
+    dot: { x: 185, y: 115 },
+  },
+  bowman: {
+    name: "Bowman's capsule",
+    latin: 'capsula glomeruli',
+    blurb:
+      'The double-walled cup that catches the filtrate. Its inner layer is made of podocytes — cells with interlocking foot processes whose slit diaphragms are the final sieve before fluid enters the tubule.',
+    dot: { x: 235, y: 80 },
+  },
+  pct: {
+    name: 'Proximal convoluted tubule',
+    latin: 'tubulus contortus proximalis',
+    blurb:
+      'The workhorse: about 65% of the filtrate is reabsorbed here, including all of the glucose and amino acids, most of the salt and water, and half the urea. Its cells are packed with mitochondria and a dense microvilli brush border.',
+    dot: { x: 360, y: 155 },
+  },
+  loop: {
+    name: 'Loop of Henle',
+    latin: 'ansa nephroni',
+    blurb:
+      'The hairpin that builds the kidney’s salt gradient. The descending limb lets water out; the ascending limb pumps salt out but is waterproof. The result is a medulla up to four times saltier than blood — the gradient that lets you make concentrated urine.',
+    dot: { x: 480, y: 420 },
+  },
+  dct: {
+    name: 'Distal convoluted tubule',
+    latin: 'tubulus contortus distalis',
+    blurb:
+      'Fine-tuning: sodium and calcium are adjusted here under hormonal control (aldosterone, parathyroid hormone), and potassium and hydrogen ions are secreted into the tubule for excretion.',
+    dot: { x: 640, y: 205 },
+  },
+  collecting: {
+    name: 'Collecting duct',
+    latin: 'ductus colligens',
+    blurb:
+      'The final say on water. Antidiuretic hormone (ADH) inserts aquaporin channels into its walls: with ADH high, water pours back into the blood and urine comes out small and concentrated; with ADH low, water stays in the duct and urine comes out large and dilute.',
+    dot: { x: 715, y: 380 },
+  },
+  capillary: {
+    name: 'Peritubular capillaries',
+    latin: 'vasa recta et capillaria peritubularia',
+    blurb:
+      'The low-pressure vessels that hug the tubule and collect everything reabsorbed — water, glucose, salts — carrying it back into the bloodstream. Around the loop of Henle they are called the vasa recta, and they preserve the salt gradient instead of washing it away.',
+    dot: { x: 565, y: 320 },
+  },
+}
+
+const NEPHRON_ORDER: NephronStructureId[] = [
+  'glomerulus',
+  'bowman',
+  'pct',
+  'loop',
+  'dct',
+  'collecting',
+  'capillary',
+]
+
+type NephronStage = 'filtration' | 'reabsorption' | 'secretion' | 'excretion'
+
+const NEPHRON_STAGES: Record<
+  NephronStage,
+  { name: string; blurb: string; highlight: string }
+> = {
+  filtration: {
+    name: '1 · Filtration',
+    blurb:
+      'Blood pressure in the glomerulus (~55 mmHg) pushes plasma through the filtration membrane into Bowman’s capsule. About 180 litres of filtrate form every day — cells and proteins stay behind. Watch the amber filtrate dots leave the capsule.',
+    highlight: 'M 123 115 a 62 62 0 1 0 124 0 a 62 62 0 1 0 -124 0',
+  },
+  reabsorption: {
+    name: '2 · Reabsorption',
+    blurb:
+      'As filtrate winds through the tubule, the peritubular capillaries take back what the body wants to keep: all the glucose, most of the salt and water, and about 99% of the filtrate’s volume. The teal arrows show water and solutes leaving the tubule.',
+    highlight:
+      'M 239 115 C 300 95, 320 160, 360 150 C 400 140, 390 205, 430 200 C 470 230, 455 300, 470 350 C 480 400, 470 440, 480 470',
+  },
+  secretion: {
+    name: '3 · Secretion',
+    blurb:
+      'The tubule is not only a drain — it is also an exit. In the distal tubule, potassium, hydrogen ions, and drugs such as creatinine are actively pumped from the blood into the filtrate. The purple arrows point the other way: into the tubule.',
+    highlight: 'M 545 205 C 590 180, 600 235, 640 215 C 675 200, 680 160, 715 155',
+  },
+  excretion: {
+    name: '4 · Excretion',
+    blurb:
+      'What is left — about 1–2 litres a day — runs down the collecting duct, past the medulla’s salt gradient, and out as urine. ADH decides how much water is reclaimed on the way down: drag the slider and watch the urine output change.',
+    highlight: 'M 715 155 L 715 520',
+  },
+}
+
+const NEPHRON_STAGES_ORDER: NephronStage[] = [
+  'filtration',
+  'reabsorption',
+  'secretion',
+  'excretion',
+]
+
+/* One continuous path for the filtrate: capsule → PCT → loop of Henle →
+ * DCT → collecting duct. The same path is drawn as the tubule itself. */
+const FILTRATE_PATH =
+  'M 239 115 C 300 95, 320 160, 360 150 C 400 140, 390 205, 430 200 C 470 230, 455 300, 470 350 C 480 400, 470 440, 480 470 C 520 460, 510 400, 525 350 C 535 300, 520 240, 545 205 C 590 180, 600 235, 640 215 C 675 200, 680 160, 715 155 L 715 520'
+
+/* The peritubular capillary, hugging the tubule from the efferent
+ * arteriole down around the loop and back up to a venule. */
+const CAPILLARY_PATH =
+  'M 245 62 C 320 40, 380 90, 400 150 C 415 200, 395 260, 410 310 C 425 370, 445 420, 470 445 C 510 470, 560 440, 575 380 C 590 320, 570 250, 600 210 C 640 160, 700 120, 760 105'
+
+export function NephronLab({ bare = false }: { bare?: boolean }) {
+  const [playing, setPlaying] = useState(true)
+  const [stage, setStage] = useState<NephronStage>('filtration')
+  const [adh, setAdh] = useState(50)
+  const [selected, setSelected] = useState<NephronStructureId>('glomerulus')
+  const info = NEPHRON_STRUCTURES[selected]
+  const stageInfo = NEPHRON_STAGES[stage]
+
+  /* Urine output falls as ADH rises: ~2.6 L/day with no ADH, ~0.6 L/day
+   * with ADH high. Concentration runs the other way, 100 → 1200 mOsm/kg. */
+  const urineLitres = 2.6 - (2.0 * adh) / 100
+  const urineOsm = Math.round(100 + (1100 * adh) / 100)
+  const urineColour = adh >= 60 ? '#B45309' : adh >= 30 ? '#D97706' : '#E8B84B'
+
+  const filtrateDot = (begin: number, key: number) => (
+    <circle key={key} r={8} fill={urineColour} stroke="#fff" strokeWidth={2} opacity={0.95}>
+      {playing && (
+        <animateMotion dur="11s" begin={`${begin}s`} repeatCount="indefinite" path={FILTRATE_PATH} />
+      )}
+    </circle>
+  )
+  const bloodDot = (begin: number, key: number) => (
+    <circle key={key} r={6.5} fill="#D64545" stroke="#fff" strokeWidth={1.5} opacity={0.95}>
+      {playing && (
+        <animateMotion dur="7s" begin={`${begin}s`} repeatCount="indefinite" path={CAPILLARY_PATH} />
+      )}
+    </circle>
+  )
+
+  return (
+    <LabShell
+      bare={bare}
+      diagram={
+        <svg viewBox="0 0 1000 560" className="w-full" role="img" aria-label="Animated diagram of a nephron: blood is filtered in the glomerulus, filtrate flows through the tubule and loop of Henle, and urine leaves through the collecting duct">
+          {/* Cortex / medulla zones */}
+          <rect x={20} y={20} width={960} height={310} rx={18} fill="#EFE9DC" opacity={0.55} />
+          <rect x={20} y={330} width={960} height={210} rx={18} fill="#E5DCC8" opacity={0.6} />
+          <line x1={20} y1={330} x2={980} y2={330} stroke="#C9BFA6" strokeWidth={1.5} strokeDasharray="8 6" />
+          <text x={40} y={48} fontSize={15} fontWeight={700} fill="#7A6A4E" letterSpacing={2}>CORTEX</text>
+          <text x={40} y={525} fontSize={15} fontWeight={700} fill="#7A6A4E" letterSpacing={2}>MEDULLA</text>
+          <text x={40} y={360} fontSize={13} fill="#7A6A4E">salt gradient → 1200 mOsm/kg at the tip</text>
+
+          {/* Afferent arteriole in, efferent arteriole out */}
+          <path d="M 30 115 L 130 115" fill="none" stroke="#D64545" strokeWidth={14} strokeLinecap="round" />
+          <path d="M 245 62 C 270 45, 300 40, 330 45" fill="none" stroke="#D64545" strokeWidth={10} strokeLinecap="round" />
+          <text x={30} y={92} fontSize={14} fontWeight={700} fill="#8C2B23">Blood in →</text>
+          <text x={340} y={28} fontSize={14} fontWeight={700} fill="#8C2B23">Efferent arteriole →</text>
+
+          {/* Peritubular capillary (behind the tubule) */}
+          <path d={CAPILLARY_PATH} fill="none" stroke="#5F83C2" strokeWidth={12} strokeLinecap="round" opacity={0.55} />
+          <path d={CAPILLARY_PATH} fill="none" stroke="#9DB6DE" strokeWidth={5} strokeLinecap="round" opacity={0.8} />
+          <text x={760} y={92} fontSize={14} fontWeight={700} fill="#4D6EA3">→ venule: back to blood</text>
+
+          {/* The tubule itself */}
+          <path d={FILTRATE_PATH} fill="none" stroke="#B45309" strokeWidth={30} strokeLinecap="round" strokeLinejoin="round" opacity={0.28} />
+          <path d={FILTRATE_PATH} fill="none" stroke="#F3D98B" strokeWidth={22} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={FILTRATE_PATH} fill="none" stroke="#D97706" strokeWidth={2} strokeDasharray="2 14" strokeLinecap="round" opacity={0.5} />
+
+          {/* Glomerulus: the capillary knot inside Bowman's capsule */}
+          <circle cx={185} cy={115} r={62} fill="#FBF3E4" stroke="#B45309" strokeWidth={3} />
+          <g stroke="#D64545" strokeWidth={9} fill="none" strokeLinecap="round" className="svg-transition" style={{ transform: playing ? 'scale(1)' : 'scale(0.94)', transformOrigin: '185px 115px' }}>
+            <path d="M 150 95 C 165 80, 190 82, 200 98 C 210 112, 195 128, 178 124" />
+            <path d="M 158 128 C 172 140, 195 142, 208 130" />
+            <path d="M 168 88 C 180 100, 175 118, 188 126" />
+          </g>
+          <circle cx={185} cy={115} r={62} fill="none" stroke="#B45309" strokeWidth={3} />
+
+          {/* Stage highlight: a glow tracing the segment this stage is about */}
+          <path d={stageInfo.highlight} fill="none" stroke="#0E7C86" strokeWidth={stage === 'filtration' ? 6 : 8} strokeLinecap="round" strokeDasharray="12 8" opacity={0.9}>
+            <animate attributeName="stroke-dashoffset" from="40" to="0" dur="1.2s" repeatCount="indefinite" />
+          </path>
+
+          {/* Reabsorption arrows: tubule → capillary (stages 2 and 4) */}
+          {(stage === 'reabsorption' || stage === 'excretion') && (
+            <g stroke="#0E7C86" strokeWidth={3} fill="#0E7C86">
+              <path d="M 400 190 L 415 155" strokeLinecap="round" />
+              <path d="M 415 155 L 407 158 L 416 168 Z" stroke="none" />
+              <path d="M 500 420 L 535 400" strokeLinecap="round" />
+              <path d="M 535 400 L 524 402 L 530 412 Z" stroke="none" />
+              <path d="M 700 300 L 700 340" strokeLinecap="round" />
+              <path d="M 700 340 L 692 330 L 708 330 Z" stroke="none" />
+            </g>
+          )}
+          {/* Secretion arrows: capillary → tubule */}
+          {stage === 'secretion' && (
+            <g stroke="#7C3AED" strokeWidth={3} fill="#7C3AED">
+              <path d="M 615 185 L 600 205" strokeLinecap="round" />
+              <path d="M 600 205 L 606 194 L 594 196 Z" stroke="none" />
+              <path d="M 690 175 L 675 165" strokeLinecap="round" />
+              <path d="M 675 165 L 683 172 L 672 176 Z" stroke="none" />
+            </g>
+          )}
+
+          {/* Filtrate dots flowing through the tubule */}
+          {[-0.2, -2.4, -4.6, -6.8, -9.0].map((b, i) => filtrateDot(b, i))}
+          {/* Blood dots in the peritubular capillary */}
+          {[-0.5, -2.8, -5.1].map((b, i) => bloodDot(b, i))}
+
+          {/* Urine stream leaving the collecting duct */}
+          <path d="M 715 520 L 715 545" stroke={urineColour} strokeWidth={10} strokeLinecap="round" opacity={playing ? 0.9 : 0.4} />
+          <text x={730} y={542} fontSize={14} fontWeight={700} fill="#7A4A40">Urine → bladder</text>
+
+          {/* Labels */}
+          <text x={185} y={205} textAnchor="middle" fontSize={15} fontWeight={700} fill="#7A4A40">Glomerulus +</text>
+          <text x={185} y={224} textAnchor="middle" fontSize={15} fontWeight={700} fill="#7A4A40">Bowman&rsquo;s capsule</text>
+          <text x={360} y={118} textAnchor="middle" fontSize={14} fontWeight={700} fill="#7A4A40">Proximal tubule</text>
+          <text x={480} y={505} textAnchor="middle" fontSize={14} fontWeight={700} fill="#7A4A40">Loop of Henle</text>
+          <text x={640} y={252} textAnchor="middle" fontSize={14} fontWeight={700} fill="#7A4A40">Distal tubule</text>
+          <text x={800} y={340} textAnchor="middle" fontSize={14} fontWeight={700} fill="#7A4A40">Collecting duct</text>
+
+          {/* Structure hotspots */}
+          {NEPHRON_ORDER.map((id) => {
+            const s = NEPHRON_STRUCTURES[id]
+            const isActive = selected === id
+            return (
+              <g key={id} onClick={() => setSelected(id)} className="cursor-pointer">
+                {isActive && <circle cx={s.dot.x} cy={s.dot.y} r={13} fill="none" stroke="#0E7C86" strokeWidth={2.5} className="ping-ring" />}
+                <circle cx={s.dot.x} cy={s.dot.y} r={isActive ? 11 : 8} fill={isActive ? '#0E7C86' : '#16222E'} stroke="#fff" strokeWidth={2.5} />
+              </g>
+            )
+          })}
+        </svg>
+      }
+      panel={
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary-700">
+                {playing ? 'Filtering' : 'Paused'}
+              </p>
+              <h3 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-ink-950">{stageInfo.name}</h3>
+            </div>
+            <span className="font-display text-lg font-extrabold text-primary-700">
+              {urineLitres.toFixed(1)} L urine / day
+            </span>
+          </div>
+
+          <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-700">{stageInfo.blurb}</p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {NEPHRON_STAGES_ORDER.map((s) => (
+              <Button key={s} size="sm" variant={stage === s ? 'primary' : 'secondary'} onClick={() => setStage(s)}>
+                {NEPHRON_STAGES[s].name}
+              </Button>
+            ))}
+            <Button size="sm" onClick={() => setPlaying((p) => !p)}>
+              {playing ? '❚❚ Pause flow' : '▶ Play flow'}
+            </Button>
+          </div>
+
+          <div className="mt-5 grid gap-4">
+            <Meter label="Filtrate formed · 180 L / day" value={100} tone="bg-amber-500" />
+            <Meter label="Reabsorbed back into blood · ~99%" value={99} tone="bg-primary-600" />
+            <Meter label={`Urine leaving · ${urineLitres.toFixed(1)} L / day`} value={Math.round((urineLitres / 2.6) * 100)} tone="bg-arterial-500" />
+            <Meter label={`Urine concentration · ${urineOsm} mOsm / kg`} value={Math.round((urineOsm / 1200) * 100)} tone="bg-venous-500" />
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Chip tone="open">GFR ≈ 125 mL / min</Chip>
+            <Chip>≈ 1 million nephrons per kidney</Chip>
+            <Chip>Medulla up to 1200 mOsm / kg</Chip>
+          </div>
+
+          <div className="mt-5">
+            <label htmlFor="nephron-adh" className="flex items-baseline justify-between font-mono text-xs text-ink-500">
+              <span>Antidiuretic hormone (ADH)</span>
+              <span>{adh}% · {adh >= 60 ? 'dehydrated' : adh >= 30 ? 'normal' : 'well hydrated'}</span>
+            </label>
+            <input
+              id="nephron-adh"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={adh}
+              onChange={(e) => setAdh(e.currentTarget.valueAsNumber)}
+              className="mt-2 w-full accent-[#0E7C86]"
+            />
+            <p className="mt-1.5 text-sm text-ink-500">
+              ADH inserts aquaporin channels into the collecting duct. Drag it up and watch the
+              urine shrink and darken as water is reclaimed; drag it down and the kidney lets
+              the water go. This is why dehydration makes dark, scanty urine — and why alcohol,
+              which suppresses ADH, sends you to the bathroom.
+            </p>
+          </div>
+
+          <div className="mt-6 border-t border-line pt-5">
+            <div className="flex flex-wrap gap-1.5">
+              {NEPHRON_ORDER.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => setSelected(id)}
+                  aria-pressed={selected === id}
+                  className={`rounded-full px-3 py-1.5 font-display text-[0.8rem] font-bold ring-1 ring-inset transition-colors ${
+                    selected === id ? 'bg-primary-600 text-white ring-primary-600' : 'bg-surface text-ink-700 ring-line hover:text-ink-950'
+                  }`}
+                >
+                  {NEPHRON_STRUCTURES[id].name}
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 font-serif text-sm italic text-ink-500">{info.latin}</p>
+            <p className="mt-1 text-[0.95rem] leading-relaxed text-ink-700">{info.blurb}</p>
+          </div>
+        </div>
+      }
+    />
+  )
+}

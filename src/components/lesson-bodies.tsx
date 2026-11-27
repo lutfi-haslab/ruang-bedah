@@ -11,6 +11,7 @@ import GasExchangeLabCard from './GasExchangeLabCard'
 import LiverLabCard from './LiverLabCard'
 import LungsLabCard from './LungsLabCard'
 import MuscleLabCard from './MuscleLabCard'
+import NephronLabCard from './NephronLabCard'
 import NeuronLabCard from './NeuronLabCard'
 import SkeletonLabCard from './SkeletonLabCard'
 
@@ -2605,6 +2606,162 @@ export function GasExchangeLessonBody() {
           air side, 40 on the blood side, and 0.3 µm of tissue between them. That is why a red
           blood cell can be fully loaded in a quarter of a second — and why anything that
           thickens the wall, or floods the alveolus, starves the blood of oxygen.
+        </Callout>
+      }
+    />
+  )
+}
+
+/* ------------------------- The nephron ------------------------- */
+
+export function NephronLessonBody() {
+  return (
+    <BodyShell
+      lab={<NephronLabCard />}
+      chapterTitle="180 Litres In, 1.5 Litres Out"
+      chapter={
+        <>
+          <div className="prose-wiki mt-4 max-w-3xl">
+            <p>
+              Your kidneys filter your entire blood volume about <strong>40 times a day</strong>.
+              Each kidney holds roughly <strong>one million nephrons</strong> — microscopic
+              filtration units, each about a millimetre long — and together they form about{' '}
+              <strong>180 litres of filtrate every day</strong>. That is more than three bathtubs
+              of fluid squeezed out of the blood. Almost all of it is taken straight back: what
+              finally leaves as urine is only <strong>1 to 2 litres</strong>. The nephron is not
+              really a filter that throws things away. It is a filter that throws almost
+              everything away and then carefully takes back what matters.
+            </p>
+            <p>
+              It starts in the <strong>glomerulus</strong>, a tuft of capillaries held at unusually
+              high pressure — about <strong>55 mmHg</strong>, against roughly 15 in most other
+              capillaries — because the arteriole leaving it is narrower than the one entering.
+              That pressure pushes plasma through the <strong>filtration membrane</strong>, three
+              layers that work as one sieve: the fenestrated endothelium of the capillary, a
+              basement membrane, and the slit diaphragms between the foot processes of{' '}
+              <strong>podocytes</strong> wrapped around the outside. Water, salts, glucose, amino
+              acids and urea pass through. Blood cells and plasma proteins are too big, and stay
+              in the blood. The net driving pressure is small — about 10 mmHg once the blood&rsquo;s
+              osmotic pull (~30 mmHg) and the pressure inside the capsule (~15 mmHg) push back —
+              but across a million glomeruli it adds up to a{' '}
+              <strong>glomerular filtration rate (GFR) of about 125 mL per minute</strong>.
+            </p>
+            <p>
+              The filtrate then travels the tubule, and the tubule gives most of it back. The{' '}
+              <strong>proximal convoluted tubule</strong> does the heavy lifting: about{' '}
+              <strong>65% of the filtrate</strong>, including <em className="latin">all</em> of the
+              glucose and amino acids, most of the sodium and water, and half the urea. Its cells
+              are lined with a dense brush border of microvilli and packed with mitochondria —
+              reabsorption is active work, and it costs energy. Glucose is reclaimed by
+              transporters with a hard limit: when blood glucose rises past about 180 mg/dL, as in
+              uncontrolled diabetes, the transporters saturate and glucose spills into the urine.
+              That is why sweet-smelling urine was once a diagnostic sign.
+            </p>
+            <p>
+              The <strong>loop of Henle</strong> is the kidney&rsquo;s cleverest trick. It dives
+              down into the medulla and comes back up, and its two limbs do opposite jobs: the
+              descending limb lets water out, the ascending limb pumps salt out but is waterproof.
+              The arrangement — the <strong>countercurrent multiplier</strong> — builds a salt
+              gradient in the medulla that grows steadily deeper, reaching about{' '}
+              <strong>1200 mOsm/kg at the tip of the papilla</strong>, four times saltier than
+              blood. Nothing is filtered or excreted by the loop itself; it exists to build the
+              gradient that the collecting duct will use. The <strong>distal convoluted
+              tubule</strong> then fine-tunes: sodium and calcium adjusted under hormonal control,
+              and potassium and hydrogen ions <strong>secreted</strong> into the tubule — the
+              nephron adding things to the waste, not just removing them.
+            </p>
+            <p>
+              The last word belongs to the <strong>collecting duct</strong>, and to{' '}
+              <strong>antidiuretic hormone (ADH, vasopressin)</strong>. ADH inserts aquaporin
+              water channels into the duct&rsquo;s walls: when ADH is high — dehydration, blood
+              loss — water pours back into the salty medulla and urine comes out small, dark and
+              concentrated; when ADH is low, the channels are withdrawn, water stays in the duct,
+              and urine comes out large and dilute. Alcohol suppresses ADH, which is why a night
+              of drinking sends you to the bathroom and leaves you dehydrated. Aldosterone acts
+              here too, trading sodium reabsorption for potassium secretion. When the kidneys
+              fail, none of this regulation happens: waste accumulates, fluid and potassium rise,
+              and the only substitutes are dialysis or a transplant — a machine or a donor doing
+              the work of two million nephrons.
+            </p>
+          </div>
+          <div className="mt-6">
+            <SpecTable
+              head={['Segment', 'What happens', 'How much']}
+              rows={[
+                ['Glomerulus', 'Filtration — plasma forced through the membrane into Bowman’s capsule', '~180 L / day of filtrate; cells & proteins stay in blood'],
+                ['Proximal tubule', 'Reabsorption — glucose, amino acids, salts, water taken back', '~65% of filtrate; all glucose (up to the transport maximum)'],
+                ['Loop of Henle', 'Countercurrent multiplier — builds the medullary salt gradient', 'Medulla up to ~1200 mOsm / kg at the papilla'],
+                ['Distal tubule', 'Fine-tuning + secretion — Na⁺/Ca²⁺ adjusted; K⁺, H⁺, drugs secreted', 'Small volumes, large control'],
+                ['Collecting duct', 'ADH-controlled water reabsorption — the final decision on urine volume', 'Urine out: ~0.6 L / day (ADH high) to ~2.6 L / day (ADH low)'],
+              ]}
+            />
+          </div>
+          <div className="mt-6">
+            <DefinitionBox term="Glomerular filtration rate (GFR)" latin="filtratio glomerularis">
+              The volume of filtrate the glomeruli form per minute — about 125 mL/min in a healthy
+              adult, or roughly 180 litres a day. GFR is the single most used number in kidney
+              medicine: it is estimated from blood creatinine (eGFR) and staged to grade chronic
+              kidney disease, from stage 1 (≥90 mL/min) down to stage 5 (&lt;15 mL/min, kidney
+              failure).
+            </DefinitionBox>
+          </div>
+          <div className="mt-6">
+            <AnatomyFigure
+              src="/assets/refs/ref-nephron-openstax.jpg"
+              alt="OpenStax diagram of a nephron showing the glomerulus, proximal tubule, loop of Henle, distal tubule and collecting duct, with arrows for secretion and reabsorption"
+              caption="Real anatomy reference — the nephron drawn as a textbook diagram: glomerulus and Bowman’s capsule at the top, the proximal tubule, the hairpin loop of Henle diving into the medulla, the distal tubule, and the collecting duct, with reabsorption and secretion marked along the way. The lab above animates the same journey, one filtrate dot at a time."
+              credit="OpenStax College, Anatomy & Physiology — File:2618 Nephron Secretion Reabsorption.jpg · CC BY 3.0 · via Wikimedia Commons"
+            />
+          </div>
+        </>
+      }
+      cards={[
+        { term: 'Nephron', latin: 'nephron', back: 'The kidney’s functional unit: one glomerulus plus its tubule (proximal tubule, loop of Henle, distal tubule, collecting duct). About one million per kidney; each filters, reabsorbs, secretes — and together they decide what leaves as urine.' },
+        { term: 'Glomerulus', latin: 'glomerulus renalis', back: 'A tuft of high-pressure capillaries where filtration happens. Blood enters through a wide afferent arteriole and leaves through a narrower efferent one, so pressure inside stays near 55 mmHg — high enough to push ~180 L of filtrate a day through the membrane.' },
+        { term: 'Glomerular filtration rate', latin: 'filtratio glomerularis', back: 'The volume filtered per minute — about 125 mL/min in a healthy adult. Estimated from blood creatinine as eGFR, it is the number kidney disease is staged by: below 15 mL/min is kidney failure.' },
+        { term: 'Antidiuretic hormone (ADH)', latin: 'vasopressinum', back: 'The hormone that decides how much water the collecting duct reclaims, by inserting aquaporin channels into its walls. High ADH: small, concentrated urine. Low ADH: large, dilute urine. Alcohol suppresses it — hence the bathroom trips.' },
+      ]}
+      questions={[
+        {
+          q: 'How much filtrate do healthy kidneys form in a day — and how much leaves as urine?',
+          options: [
+            'About 1.5 L of filtrate, all of it leaves as urine',
+            'About 18 L of filtrate, about 1.5 L leaves as urine',
+            'About 180 L of filtrate, about 1–2 L leaves as urine',
+            'About 1800 L of filtrate, about 18 L leaves as urine',
+          ],
+          answer: 2,
+          why: 'GFR is about 125 mL/min, which is roughly 180 litres a day. About 99% is reabsorbed along the tubule, so only 1–2 litres leave as urine.',
+        },
+        {
+          q: 'Where is all of the glucose in the filtrate reabsorbed — and what happens when blood sugar is very high?',
+          options: [
+            'In the collecting duct; it is always reabsorbed no matter how high blood sugar is',
+            'In the proximal tubule; above ~180 mg/dL the transporters saturate and glucose spills into the urine',
+            'In the loop of Henle; it is converted to urea there',
+            'In the glomerulus; glucose never enters the filtrate at all',
+          ],
+          answer: 1,
+          why: 'The proximal tubule reclaims all the glucose — about 65% of the filtrate goes back here. Its transporters have a maximum rate, so in uncontrolled diabetes glucose exceeds it and appears in the urine.',
+        },
+        {
+          q: 'You are dehydrated, so ADH is high. What does your kidney do?',
+          options: [
+            'It filters more blood to flush the system out',
+            'It inserts aquaporins into the collecting duct, reclaims water, and makes small, concentrated urine',
+            'It shuts the glomeruli down until you drink',
+            'It secretes extra water into the distal tubule',
+          ],
+          answer: 1,
+          why: 'ADH inserts aquaporin water channels into the collecting duct, so water is reabsorbed into the salty medulla and urine comes out small and concentrated — about 0.6 L a day at full ADH.',
+        },
+      ]}
+      closing={
+        <Callout kind="key">
+          The kidney filters 180 litres a day and keeps 99% of it. Filtration is the easy part —
+          pressure does it for free. The real work is the taking back: glucose and salts in the
+          proximal tubule, a salt gradient built by the loop of Henle, and one hormone, ADH,
+          deciding at the collecting duct how much water you can afford to lose.
         </Callout>
       }
     />
